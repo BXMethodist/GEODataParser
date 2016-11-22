@@ -157,7 +157,6 @@ def SOFTQuickParser(cwd=None):
 
 
 
-aa
 
         sample.treatment = treatment
         sample.disease = disease
