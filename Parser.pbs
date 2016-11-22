@@ -1,0 +1,14 @@
+#!/bin/bash
+#PBS -r n
+#PBS -N GSESoftParser
+#PBS -o testjob.out
+#PBS -e testjob.err
+#PBS -m e
+#PBS -M bxia@houstonmethodist.org
+#PBS -l walltime=100:00:00
+#PBS -l nodes=1:ppn=1
+cd /home/tmhbxx3/scratch/XMLhttp
+
+module load python/2.7.11
+
+python ./GSEQuickSoft.py
