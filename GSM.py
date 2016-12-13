@@ -14,6 +14,7 @@ class GSM:
         self.features = None
         self.title = None
         self.InstrumentID = None
+        self.organism = None
 
     # potential attributes
         self.antibody = {}

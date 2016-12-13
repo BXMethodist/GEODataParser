@@ -2,7 +2,7 @@ import os
 import re
 
 GSMs = {}
-with open("./uniqueGSM.txt", "r") as file:
+with open("./uniqueGSM_GEOsearch.txt", "r") as file:
     n = 0
     for line in file.readlines():
         line = line.rstrip()

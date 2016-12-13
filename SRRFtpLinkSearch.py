@@ -7,7 +7,7 @@ def getConnection(ftpAddress='ftp-trace.ncbi.nlm.nih.gov', user='anonymous', pas
     return ftp
 
 
-def getDownloadLinks(ftp, HttplinksFile):
+def getDownloadLinks(ftp, HttplinksFile, output):
     ftplinks = []
 
     Httplinks = []
@@ -18,33 +18,34 @@ def getDownloadLinks(ftp, HttplinksFile):
         for line in file.readlines():
             Httplinks.append(line.strip())
 
-    Httplinks = ["https://www.ncbi.nlm.nih.gov/sra?term=SRX532969"]
+   # Httplinks = ["https://www.ncbi.nlm.nih.gov/sra?term=SRX532969"]
 
     for link in Httplinks:
-        # try:
-        SRX = link[link.find("SRX"):].strip()
-        SRXfolder = SRX[:6]
+        try:
+            SRX = link[(link.find("=")+1):].strip()
+            SRXfolder = SRX[:6]
 
-        subfolderAddress = "/sra/sra-instant/reads/ByExp/sra/SRX/"+SRXfolder+'/'+SRX+'/'
+            subfolderAddress = "/sra/sra-instant/reads/ByExp/sra/SRX/"+SRXfolder+'/'+SRX+'/'
 
-        ftp.cwd(subfolderAddress)
+            ftp.cwd(subfolderAddress)
 
-        SRRfolderList = ftp.nlst()
+            SRRfolderList = ftp.nlst()
 
-        for SRRfolder in SRRfolderList:
-            SRRfolderAddress = subfolderAddress + SRRfolder + '/'
-            ftp.cwd(SRRfolderAddress)
+            for SRRfolder in SRRfolderList:
+                SRRfolderAddress = subfolderAddress + SRRfolder + '/'
+                ftp.cwd(SRRfolderAddress)
 
-            SRRfiles = ftp.nlst()
-            for SRRfile in SRRfiles:
-                downloadFTP = ftp.host  + SRRfolderAddress + SRRfile
-                ftplinks.append(downloadFTP)
-        # except:
-        #     failed.append(SRX)
+                SRRfiles = ftp.nlst()
+                for SRRfile in SRRfiles:
+                    downloadFTP = ftp.host  + SRRfolderAddress + SRRfile
+                    ftplinks.append(downloadFTP)
+        except:
+            failed.append(SRX)
 
-    with open("HumanWithH3K4me3Links.txt", "w") as file:
+
+    with open(output, "w") as file:
         for link in ftplinks:
-            file.write("%s\n" %link)
+            file.write("wget %s\n" %link)
 
     with open("failedSRX.txt", "w") as file:
         for srx in failed:
@@ -54,4 +55,4 @@ def getDownloadLinks(ftp, HttplinksFile):
 
 ftp = getConnection()
 
-getDownloadLinks(ftp, "HumanWithH3K4me3Download.txt")
+getDownloadLinks(ftp, "requestedFeature.csv", "SREBPdownloadlinks.txt")

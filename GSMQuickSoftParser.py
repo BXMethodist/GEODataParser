@@ -6,37 +6,42 @@ import json
 from collections import defaultdict
 import csv
 
-def SOFTQuickParser(cwd=None):
+def SOFTQuickParser(cwd=None, geo=True):
     if cwd == None:
         return
 
     # print len(map)
-    # samples = {}
+    samples = {}
+
     Human_Samples = {}
-    # totalOrganismsName = defaultdict(int)
+
+    totalOrganismsName = defaultdict(int)
     # totalCharacteristicsName = defaultdict(int)
     # featureMeasage = defaultdict(list)
 
-    # notFeature = {}
-
-    # AllUniqueGSEs = set()
-    #
-    # HumanWithH3K4me3Download = set()
-
-    # n = 0
-    relatedSamples = {}
+    notFeature = {}
 
 
-    relatedGSMs = set()
-    file =  open("allUniqueGSMsHumanWithH3K4me3.txt", "r")
+    geoGSMs = set()
+    file =  open("uniqueGSM_GEOsearch.txt", "r")
     for line in file.readlines():
-        relatedGSMs.add(line.strip())
+        geoGSMs.add(line.strip())
     file.close()
 
     for filename in os.listdir(cwd):
         if not filename.startswith("GSM"):
             continue
 
+        if geo and filename[:-4] not in geoGSMs:
+            continue
+
+        sampleName = filename[:-4]
+        sampleTitle = ""
+        sampleType = ""
+        sampleLibraryStrategy=''
+        sampleOrganism=''
+        samplePlatForm=''
+        sampleInstrumentID=''
 
         file = open(cwd+'/'+filename, "r")
         characteristics = defaultdict(str)
@@ -56,11 +61,9 @@ def SOFTQuickParser(cwd=None):
         ab_found = False
 
         for line in file.readlines():
-            if line.startswith("^SAMPLE"):
-                sampleName = line[line.find("=")+1:].strip()
             if line.startswith("!Sample_title"):
                 sampleTitle = line[line.find("=")+1:].strip()
-                if re.search("h3k4me3", sampleTitle, flags=re.IGNORECASE):
+                if re.search("h3k4me3", sampleTitle, flags=re.IGNORECASE) or re.search("k4me3", sampleTitle, flags=re.IGNORECASE):
                     feature["Title"] = sampleTitle
                     title_found = True
             if line.startswith("!Sample_type"):
@@ -74,7 +77,7 @@ def SOFTQuickParser(cwd=None):
                     characteristics[key] += ", " + value
                 else:
                     characteristics[key] = value
-                if re.search("h3k4me3", value, flags=re.IGNORECASE):
+                if re.search("h3k4me3", value, flags=re.IGNORECASE) or re.search("k4me3", value, flags=re.IGNORECASE):
                     feature[key] = value
             if line.startswith("!Sample_platform_id "):
                 samplePlatForm = line[line.find("=")+1:].strip()
@@ -171,21 +174,18 @@ def SOFTQuickParser(cwd=None):
         if sample.organism == "Homo sapiens" and (sample.SRA != None and sample.SRA.strip() != "") and \
                 sample.InstrumentID.startswith('Illu') and sample.libraryStrategy.lower() == "chip-seq":
             if sample.title_ab == True:
-                # AllUniqueGSEs = AllUniqueGSEs.union(sample.series)
                 Human_Samples[sample.id] = sample
-                # HumanWithH3K4me3Download.add(sample.SRA)
-            elif sample.id in relatedGSMs:
-                relatedSamples[sample.id] = sample
-
         file.close()
 
         # for char in characteristics.keys():
         #     totalCharacteristicsName[char]+=1
-        # if len(feature) != 0:
-        #     samples[sampleName] = sample
-        #     totalOrganismsName[sampleOrganism]+=1
-        # else:
-        #     notFeature[sampleName] = sample
+        if len(feature) != 0:
+            samples[sampleName] = sample
+            totalOrganismsName[sampleOrganism]+=1
+        else:
+            notFeature[sampleName] = sample
+
+    # print totalOrganismsName
 
     # with open("./GEOSearchXMLs/geoSoftParserResult", "w") as file:
     #     for value in samples.values():
@@ -194,36 +194,38 @@ def SOFTQuickParser(cwd=None):
     #     for value in notFeature.values():
     #         json.dump(value.__dict__, file)
     # #
-    # with open("./GEOSearchXMLs/geoorganimsWithH3K4me3.csv", "wb") as csv_file:
-    #     writer = csv.writer(csv_file)
-    #     for key, value in totalOrganismsName.items():
-    #         writer.writerow([key, value])
-    # #
-    # with open("./GEOSearchXMLs/geocharacteristics.csv", "wb") as csv_file:
-    #     writer = csv.writer(csv_file)
-    #     for key, value in totalCharacteristicsName.items():
-    #         writer.writerow([key, value])
-    #
-    # with open("./GEOSearchXMLs/geocontainingMessageWithH3K4me3.csv", "wb") as csv_file:
-    #     writer = csv.writer(csv_file)
-    #     for key, value in featureMeasage.items():
-    #         writer.writerow([key, value])
-    #         writer.writerow(["     "])
+    if geo:
+        outputOrganism = "./"+"GEOsearch"+"organimsWithH3K4me3.csv"
+        outputHuman = "./"+"GEOsearch"+"humanWithH3K4me3.csv"
+        outputSample = "./"+"GEOsearch"+"sampleWithH3K4me3.csv"
+        outputNoFeature = "./"+"GEOsearch"+"noWithH3K4me3.csv"
 
-    # with open("./GEOSearchXMLs/geoH3K4me3GSMList.csv", "wb") as csv_file:
-    #     writer = csv.writer(csv_file)
-    #     writer.writerow(
-    #         ['Sample_ID', "Title", "Organism", "Series_ID", "GPL_ID", "Instrument Model", "SRA_ID", "Library Strategy",
-    #          "H3K4me3_description", "Tissue", "Cell Line", "Cell Type", "Disease", "Treatment", "Genotype", "Antibody", "Feature in Title", "Feature in Ab",
-    #          "Feature in Title or Ab"])
-    #     for sample in samples.values():
-    #         writer.writerow(
-    #             [sample.id, sample.title, sample.organism, sample.series, sample.platForm, sample.InstrumentID,
-    #              sample.SRA, sample.libraryStrategy, sample.features, sample.tissue, sample.cellLine, sample.cellType,
-    #              sample.disease, sample.treatment, sample.genotype, sample.antibody, sample.title_found, sample.ab_found,
-    #              sample.title_ab])
+    else:
+        outputOrganism = "./" + "organimsWithH3K4me3.csv"
+        outputHuman = "./" + "humanWithH3K4me3.csv"
+        outputSample = "./" + "sampleWithH3K4me3.csv"
+        outputNoFeature = "./" + "noWithH3K4me3.csv"
 
-    csv_file = open("./HumanH3K4me3GSMList.csv", "wb")
+
+    with open(outputOrganism, "wb") as csv_file:
+        writer = csv.writer(csv_file)
+        for key, value in totalOrganismsName.items():
+            writer.writerow([key, value])
+
+    with open(outputSample, "wb") as csv_file:
+        writer = csv.writer(csv_file)
+        writer.writerow(
+            ['Sample_ID', "Title", "Organism", "Series_ID", "GPL_ID", "Instrument Model", "SRA_ID", "Library Strategy",
+             "H3K4me3_description", "Tissue", "Cell Line", "Cell Type", "Disease", "Treatment", "Genotype", "Antibody", "Feature in Title", "Feature in Ab",
+             "Feature in Title or Ab"])
+        for sample in samples.values():
+            writer.writerow(
+                [sample.id, sample.title, sample.organism, sample.series, sample.platForm, sample.InstrumentID,
+                 sample.SRA, sample.libraryStrategy, sample.features, sample.tissue, sample.cellLine, sample.cellType,
+                 sample.disease, sample.treatment, sample.genotype, sample.antibody, sample.title_found, sample.ab_found,
+                 sample.title_ab])
+
+    csv_file = open(outputHuman, "wb")
     writer = csv.writer(csv_file)
     writer.writerow(
         ['Sample_ID', "Title", "Organism", "Series_ID", "GPL_ID", "Instrument Model", "SRA_ID", "Library Strategy",
@@ -238,33 +240,33 @@ def SOFTQuickParser(cwd=None):
     csv_file.close()
 
 
-    csv_file =  open("./HumanH3K4me3RelatedSamples.csv", "wb")
-    writer = csv.writer(csv_file)
-    writer.writerow(
-        ['Sample_ID', "Title", "Organism", "Series_ID", "GPL_ID", "Instrument Model", "SRA_ID",
-         "Library Strategy",
-         "H3K4me3_description", "Tissue", "Cell Line", "Cell Type", "Disease", "Treatment", "Genotype",
-         "Antibody", "Feature in Title",
-         "Feature in Ab", "Feature in Title or Ab"])
-    for sample in relatedSamples.values():
-        writer.writerow(
-            [sample.id, sample.title, sample.organism, sample.series, sample.platForm, sample.InstrumentID,
-             sample.SRA, sample.libraryStrategy, sample.features, sample.tissue, sample.cellLine,
-             sample.cellType,
-             sample.disease, sample.treatment, sample.genotype, sample.antibody, sample.title_found,
-             sample.ab_found,
-             sample.title_ab])
-    csv_file.close()
+    # csv_file =  open("./HumanH3K4me3RelatedSamples.csv", "wb")
+    # writer = csv.writer(csv_file)
+    # writer.writerow(
+    #     ['Sample_ID', "Title", "Organism", "Series_ID", "GPL_ID", "Instrument Model", "SRA_ID",
+    #      "Library Strategy",
+    #      "H3K4me3_description", "Tissue", "Cell Line", "Cell Type", "Disease", "Treatment", "Genotype",
+    #      "Antibody", "Feature in Title",
+    #      "Feature in Ab", "Feature in Title or Ab"])
+    # for sample in relatedSamples.values():
+    #     writer.writerow(
+    #         [sample.id, sample.title, sample.organism, sample.series, sample.platForm, sample.InstrumentID,
+    #          sample.SRA, sample.libraryStrategy, sample.features, sample.tissue, sample.cellLine,
+    #          sample.cellType,
+    #          sample.disease, sample.treatment, sample.genotype, sample.antibody, sample.title_found,
+    #          sample.ab_found,
+    #          sample.title_ab])
+    # csv_file.close()
 
-    # with open("./GEOSearchXMLs/notFeature.csv", "w") as csv_file:
-    #     writer = csv.writer(csv_file)
-    #     writer.writerow(['Sample_ID', "Title", "Organism", "Series_ID", "GPL_ID", "Instrument Model", "SRA_ID", "Library Strategy",
-    #          "H3K4me3_description", "Tissue", "Cell Line", "Disease", "Treatment", "Genotype", "Antibody", "Feature in Title", "Feature in Ab"])
-    #     for sample in notFeature.values():
-    #         writer.writerow(
-    #             [sample.id, sample.title, sample.organism, sample.series, sample.platForm, sample.InstrumentID,
-    #              sample.SRA, sample.libraryStrategy, sample.features, sample.tissue, sample.cellLine,
-    #              sample.disease, sample.treatment, sample.genotype, sample.antibody, sample.title_found, sample.ab_found])
+    with open(outputNoFeature, "wb") as csv_file:
+        writer = csv.writer(csv_file)
+        writer.writerow(['Sample_ID', "Title", "Organism", "Series_ID", "GPL_ID", "Instrument Model", "SRA_ID", "Library Strategy",
+             "H3K4me3_description", "Tissue", "Cell Line", "Disease", "Treatment", "Genotype", "Antibody", "Feature in Title", "Feature in Ab"])
+        for sample in notFeature.values():
+            writer.writerow(
+                [sample.id, sample.title, sample.organism, sample.series, sample.platForm, sample.InstrumentID,
+                 sample.SRA, sample.libraryStrategy, sample.features, sample.tissue, sample.cellLine,
+                 sample.disease, sample.treatment, sample.genotype, sample.antibody, sample.title_found, sample.ab_found])
 
     # with open("./allUniqueGSEsHumanWithH3K4me3.txt", "w") as file:
     #     for value in AllUniqueGSEs:
@@ -290,4 +292,4 @@ def SOFTQuickParser(cwd=None):
 # print "Has ", len(organismsName), " different Characteristics"
 # print characteristicsName
 
-SOFTQuickParser("./QuickXMLs")
+SOFTQuickParser("/home/tmhbxx3/scratch/XMLhttp/QuickXMLs", geo=True)

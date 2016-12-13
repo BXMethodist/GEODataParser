@@ -5,20 +5,20 @@ def GEOSearchResultParser(path=None):
     if path == None:
         return "No path input!"
 
-    uniqueGSM = set()
+    uniqueGSM = []
     with open(path, 'r') as file:
         for line in file.readlines():
-            GSEs = re.findall('Accession: GSM[0-9]+', line, flags=0)
-            for GSE in GSEs:
-                uniqueGSM.add(GSE[11:])
+            GSMs = re.findall('Accession: GSM[0-9]+', line, flags=0)
+            for GSM in GSMs:
+                uniqueGSM.append(GSM[11:])
 
-    with open("uniqueGSM.txt", 'w') as file:
+    with open("uniqueGSM_GEOsearch.txt", 'w') as file:
         for GSE in uniqueGSM:
             file.write(GSE+'\n')
     return uniqueGSM
 
 
-list = GEOSearchResultParser("gds_result.txt")
+list = GEOSearchResultParser("gds_result_12_12_for_database_sync.txt")
 
 print len(list)
 print list
