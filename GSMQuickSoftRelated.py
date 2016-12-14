@@ -1,47 +1,68 @@
 from GSM import GSM
 import os
 import re
-import json
 from collections import defaultdict
 import csv
 from difflib import SequenceMatcher
+import sqlite3
 
 def similar(a, b):
     return SequenceMatcher(None, a, b).ratio()
 
-def SOFTQuickRelated(cwd=None):
+def SOFTQuickRelated(cwd=None, geo=True):
     if cwd == None:
         return
 
-    # print len(map)
-    # samples = {}
-
     Human_Samples = {}
 
-    # totalOrganismsName = defaultdict(int)
-    # totalCharacteristicsName = defaultdict(int)
-    # featureMeasage = defaultdict(list)
-
-    # notFeature = {}
-
-    # AllUniqueGSEs = set()
-    #
-    # HumanWithH3K4me3Download = set()
-
-    # n = 0
     relatedSamples = {}
 
     groupByGSE = defaultdict(set)
 
+    featureGSMs = set()
 
-    relatedGSMs = set()
-    file =  open("related_GSM_IDs.csv", "r")
+    if geo:
+        file = open("./GEOsearchhumanWithH3K4me3.csv", "r")
+    else:
+        file = open("./humanWithH3K4me3.csv", "r")
+
     for line in file.readlines():
-        relatedGSMs.add(line.strip()+".xml")
+        gsmid = line.split(",")[0]
+        if gsmid.startswith("GSM"):
+            featureGSMs.add(gsmid)
     file.close()
 
+    db = sqlite3.connect('/home/tmhbxx3/archive/GEO_MetaDatabase/geoMetaData.db')
+    db.text_factory = str
+
+    relatedGSEs = set()
+
+    for gsmid in featureGSMs:
+        query = db.execute('select GSE_ID from GSEtoGSM where GSM_ID = "'+gsmid+'"').fetchall()
+        for gseid in query:
+            relatedGSEs.add(gseid[0])
+
+    encodeGSE = set()
+    allGSEs = db.execute("select distinct GSE_ID, organization from GSE").fetchall()
+    for gse in allGSEs:
+        gseid, organization = gse
+        if organization.find("ENCODE") != -1:
+            encodeGSE.add(gseid)
+
+    allrelatedGSEs = encodeGSE.union(relatedGSEs)
+
+    allrelatedGSMs = set()
+
+    for gseid in allrelatedGSEs:
+        query = db.execute('select GSM_ID from GSEtoGSM where GSE_ID = "'+gseid+'"').fetchall()
+        for gsmid in query:
+            allrelatedGSMs.add(gsmid[0])
+    db.close()
+
+    print len(allrelatedGSMs)
+
     for filename in os.listdir(cwd):
-        if not filename.startswith("GSM") or filename not in relatedGSMs:
+        if not filename.startswith("GSM") or filename not in allrelatedGSMs:
             continue
 
 
@@ -67,7 +88,9 @@ def SOFTQuickRelated(cwd=None):
                 sampleName = line[line.find("=")+1:].strip()
             if line.startswith("!Sample_title"):
                 sampleTitle = line[line.find("=")+1:].strip()
-                if re.search("h3k4me3", sampleTitle, flags=re.IGNORECASE):
+                if sampleTitle.find(";"):
+                    sampleTitle = sampleTitle[:sampleTitle.find(";")]
+                if re.search("h3k4me3", sampleTitle, flags=re.IGNORECASE) or re.search("k4me3", sampleTitle, flags=re.IGNORECASE):
                     feature["Title"] = sampleTitle
                     title_found = True
             if line.startswith("!Sample_type"):
@@ -81,7 +104,7 @@ def SOFTQuickRelated(cwd=None):
                     characteristics[key] += ", " + value
                 else:
                     characteristics[key] = value
-                if re.search("h3k4me3", value, flags=re.IGNORECASE):
+                if re.search("h3k4me3", value, flags=re.IGNORECASE) or re.search("k4me3", value, flags=re.IGNORECASE):
                     feature[key] = value
             if line.startswith("!Sample_platform_id "):
                 samplePlatForm = line[line.find("=")+1:].strip()
@@ -161,9 +184,6 @@ def SOFTQuickRelated(cwd=None):
             if re.search("h3k4me3", value, flags=re.IGNORECASE):
                 ab_found = True
                 break
-
-
-
 
         sample.treatment = treatment
         sample.disease = disease
@@ -302,7 +322,7 @@ def SOFTQuickRelated(cwd=None):
     # with open("./HumanWithH3K4me3Download.txt", "w") as file:
     #     for value in HumanWithH3K4me3Download:
     #         file.write(value+"\n")
-    return groupByGSE, Human_Samples, relatedSamples
+    return groupByGSE, Human_Samples, relatedSamples, encodeGSE
 
 
 def spliterFinder(title, keyword):
@@ -319,7 +339,7 @@ def spliterFinder(title, keyword):
         else:
             spliter = "_"
     if spliter is None:
-        if title.find(keyword.lower()):
+        if title.find(keyword.lower()) != -1:
             return None, 0
         else:
             return None, None
@@ -341,7 +361,7 @@ def Similarity(title1, keyword1, title2, keyword2):
 
 
 if __name__ == "__main__":
-    groupbyGSE, HumanSamples, relatedSamples = SOFTQuickRelated("./QuickXMLs")
+    groupbyGSE, HumanSamples, relatedSamples, encodeGSE = SOFTQuickRelated("./QuickXMLs", False)
 
     # initiate the map of sample to input
     SampleToInput = defaultdict(set)
@@ -358,9 +378,20 @@ if __name__ == "__main__":
 
         sample_spliter, keyword_index = spliterFinder(sample.title, "H3K4me3")
 
+        encode = False
         for gse in sample.series:
-            bestSimilarity = float("-inf")
-            bestMatchID = None
+            if gse in encodeGSE:
+                encode = True
+                break
+        if encode:
+            targetGSEs = encodeGSE.union(set(sample.series))
+        else:
+            targetGSEs = set(sample.series)
+
+        candidate = None
+        bestMatchID = None
+        bestSimilarity = float("-inf")
+        for gse in targetGSEs:
             for relatedSample in groupbyGSE[gse]:
                 input_spliter, input_index = spliterFinder(relatedSamples[relatedSample].title, "input")
                 igg_spliter, igg_index = spliterFinder(relatedSamples[relatedSample].title, "IgG")
@@ -381,27 +412,73 @@ if __name__ == "__main__":
                 elif hasInput[3] is True:
                     related_keyword = "control"
 
-                #
-                # if sample_spliter is None and keyword_index == 0:
-                #     if relatedSamples[relatedSample].title.lower().find("input") != -1:
-                #         SampleToInput[sample.id].add(relatedSamples[relatedSample].id)
-                if sample_spliter != None and (keyword_index != None or keyword_index == 0):
+                if sample_spliter != None and keyword_index != None:
                     if any(hasInput):
                         score = Similarity(sample.title, "H3K4me3", relatedSamples[relatedSample].title, related_keyword)
                         if score > bestSimilarity:
                             bestSimilarity = score
                             bestMatchID = relatedSamples[relatedSample].id
+                elif keyword_index == 0:
+                    if relatedSamples[relatedSample].title.find("input") != -1:
+                        SampleToInput[sample.id].add(relatedSamples[relatedSample].id)
+
+                    elif relatedSamples[relatedSample].title.lower().find("wce") != -1:
+                        SampleToInput[sample.id].add(relatedSamples[relatedSample].id)
+
+                    elif relatedSamples[relatedSample].title.find("IgG") != -1:
+                        SampleToInput[sample.id].add(relatedSamples[relatedSample].id)
+
+                    elif relatedSamples[relatedSample].title.find("control") != -1:
+                        SampleToInput[sample.id].add(relatedSamples[relatedSample].id)
+
+                    # else:
+                    #     for value in relatedSamples[relatedSample].characteristics.values():
+                    #         if value.find("input"):
+                    #             candidate = relatedSamples[relatedSample].id
+                    #             break
+                    #         elif value.lower().find(" wce "):
+                    #             candidate = relatedSamples[relatedSample].id
+                    #             break
+                    #         elif value.lower().find("whole cell extract"):
+                    #             candidate = relatedSamples[relatedSample].id
+                    #             break
+
+
         if bestMatchID:
             SampleToInput[sample.id].add(bestMatchID)
 	    scoreBoard[sample.id] = bestSimilarity
+
             #print bestSimilarity
 	else:
 	    not_found += 1
 
+    for key, value in HumanSamples.items():
+        if value.title_found != True:
+            sample = value
+            targetGSEs = set(sample.series)
+            for gse in targetGSEs:
+                for relatedSample in groupbyGSE[gse]:
+                    for v in relatedSamples[relatedSample].characteristics.values():
+                        if v.find("input"):
+                            SampleToInput[sample.id].add(relatedSamples[relatedSample].id)
+                            break
+                        elif value.lower().find(" wce "):
+                            SampleToInput[sample.id].add(relatedSamples[relatedSample].id)
+                            break
+                        elif value.lower().find("whole cell extract"):
+                            SampleToInput[sample.id].add(relatedSamples[relatedSample].id)
+                            break
+                    if len(SampleToInput[sample.id]) > 0:
+                        break
+                if len(SampleToInput[sample.id]) > 0:
+                    break
+            print -1
+            if len(SampleToInput[sample.id]) == 0:
+                not_found+=1
     print not_found
 
 
-    output = open("./H3K4me3_Sample_To_Input.csv", "w")
+    output = open("./H3K4me3_Sample_To_Input_BX_search.csv", "w")
     for key, value in SampleToInput.items():
         writer = csv.writer(output)
         row = [key]+[HumanSamples[key].title]+[scoreBoard[key]]
