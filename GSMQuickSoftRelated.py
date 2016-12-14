@@ -235,9 +235,9 @@ def Similarity(title1, keyword1, title2, keyword2):
 
 
 if __name__ == "__main__":
-    groupbyGSE, HumanSamples, relatedSamples, encodeGSE = SOFTQuickRelated("/home/tmhbxx3/scratch/XMLhttp/QuickXMLs", True)
+    groupbyGSE, HumanSamples, relatedSamples, encodeGSE = SOFTQuickRelated("/home/tmhbxx3/scratch/XMLhttp/QuickXMLs", False)
 
-    geo = True
+    geo = False
 
     print "parser done!"
     print "groupbyGSE size is ", len(groupbyGSE)
@@ -352,12 +352,12 @@ if __name__ == "__main__":
                             and relatedSamples[relatedSample].title.lower().find("h3k") == -1:
                         ThirdSampleToInput[sample.id].add(relatedSamples[relatedSample].id)
                         break
-                if len(ThirdSampleToInput[sample.id]) > 0:
+                if sample.id in ThirdSampleToInput:
                     break
-            if len(ThirdSampleToInput[sample.id]) > 0:
+            if sample.id in ThirdSampleToInput:
                 break
 
-        if len(ThirdSampleToInput[sample.id]) == 0:
+        if not sample.id in ThirdSampleToInput:
             not_found+=1
 
     print not_found
