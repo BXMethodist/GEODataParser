@@ -37,33 +37,58 @@ def SOFTQuickRelated(cwd=None, geo=True):
 
     relatedGSEs = set()
 
-    for gsmid in featureGSMs:
-        query = db.execute('select GSE_ID from GSEtoGSM where GSM_ID = "'+gsmid+'"').fetchall()
+    featureGSMs = list(featureGSMs)
+    m = 0
+    keep = True
+    while keep:
+        m += 998
+        if m < len(featureGSMs):
+            block = featureGSMs[m-998: m]
+        else:
+            block = featureGSMs[m-998: -1]
+            keep = False
+        query = db.execute("SELECT distinct GSE_ID FROM GSEtoGSM WHERE GSM_ID IN (" + ",".join("?" * len(block)) + ")",
+                           block).fetchall()
+
         for gseid in query:
             relatedGSEs.add(gseid[0])
 
+    print len(relatedGSEs)
+
     encodeGSE = set()
-    allGSEs = db.execute("select distinct GSE_ID, organization from GSE").fetchall()
+    allGSEs = db.execute('select distinct GSE_ID from GSE where organization = "ENCODE DCC"').fetchall()
     for gse in allGSEs:
-        gseid, organization = gse
-        if organization.find("ENCODE") != -1:
-            encodeGSE.add(gseid)
+        encodeGSE.add(gse[0])
+
+    print len(encodeGSE)
 
     allrelatedGSEs = encodeGSE.union(relatedGSEs)
+    allrelatedGSEs = list(allrelatedGSEs)
 
     allrelatedGSMs = set()
 
-    for gseid in allrelatedGSEs:
-        query = db.execute('select GSM_ID from GSEtoGSM where GSE_ID = "'+gseid+'"').fetchall()
+    n = 0
+    keep = True
+    while keep:
+        n += 998
+        if n < len(allrelatedGSEs):
+            block = allrelatedGSEs[n-998: n]
+        else:
+            block = allrelatedGSEs[n-998: -1]
+            keep = False
+        query = db.execute("SELECT distinct GSM_ID FROM GSEtoGSM WHERE GSE_ID IN (" + ",".join("?" * len(block)) + ")", block).fetchall()
+
         for gsmid in query:
             allrelatedGSMs.add(gsmid[0])
+
     db.close()
 
     print len(allrelatedGSMs)
 
-    for filename in os.listdir(cwd):
-        if not filename.startswith("GSM") or filename not in allrelatedGSMs:
-            continue
+    allrelatedGSMs = list(allrelatedGSMs)
+
+    for filegsm in allrelatedGSMs:
+        filename = filegsm+".xml"
 
 
         file = open(cwd+'/'+filename, "r")
@@ -74,12 +99,6 @@ def SOFTQuickRelated(cwd=None, geo=True):
         feature = {}
 
         antibody = {}
-        treatment = {}
-        tissue = None
-        disease = None
-        cellLine = ""
-        cellType = ""
-        genoType = {}
         title_found = False
         ab_found = False
 
@@ -155,29 +174,6 @@ def SOFTQuickRelated(cwd=None, geo=True):
                     antibody[key] += ", " + value
                 else:
                     antibody[key] = value
-            if key.lower() in ["treatment", "condition", "activation stimuli", "cell condition", "cell treatment",
-                               "cell-treatment", "drug treatment", "stress", "overexpression", "treatment drug",
-                               "treatment group"] \
-                    or re.search("(?:dsrna|infect|rnai|shrna|sirna|transduc|transfec|agent[#]*[0-9]*|activat)", key, flags=re.IGNORECASE):
-                treatment[key] = value
-
-            if key.lower() in ["tissue", "body part", "body site"]:
-                tissue = value
-
-            if key.lower() in ["cancer type", "tumor type", "tumor region", "disease", "disease state", "disease status"]:
-                disease = value
-
-            if key.lower() in ["background strain", "strain", "strain number", "mouse strain", "strain background",
-                               "cell line background", "genetic background", "genotype", "genotype/variation",
-                               "strain/background", "variation"]:
-                genoType[key] = value
-
-            if key.lower() in ["cell line",  "cell", "cells pointed by barcodes",
-                           "chicken line", "line"]:
-                cellLine += value
-
-            if key.lower() in ["cell_type", "cell-type", "cell type", "cell lineage"]:
-                cellType += value
 
         sample.antibody = antibody
         for value in sample.antibody.values():
@@ -185,143 +181,21 @@ def SOFTQuickRelated(cwd=None, geo=True):
                 ab_found = True
                 break
 
-        sample.treatment = treatment
-        sample.disease = disease
-        sample.cellLine = cellLine
-        sample.genotype = genoType
-        sample.tissue = tissue
         sample.title_found = title_found
         sample.ab_found = ab_found
         if title_found or ab_found:
             sample.title_ab = True
 
-        if sample.organism == "Homo sapiens" and (sample.SRA != None and sample.SRA.strip() != "") and \
+        if sample.organism == "Homo sapiens" and (sample.SRA != None or sample.SRA.strip() != "") and \
                 sample.InstrumentID.startswith('Illu') and sample.libraryStrategy.lower() == "chip-seq":
             if sample.title_ab == True:
-                # AllUniqueGSEs = AllUniqueGSEs.union(sample.series)
                 Human_Samples[sample.id] = sample
-                # HumanWithH3K4me3Download.add(sample.SRA)
+
             relatedSamples[sample.id] = sample
             for gse in sample.series:
                 groupByGSE[gse].add(sample.id)
         file.close()
 
-        # for char in characteristics.keys():
-        #     totalCharacteristicsName[char]+=1
-        # if len(feature) != 0:
-        #     samples[sampleName] = sample
-        #     totalOrganismsName[sampleOrganism]+=1
-        # else:
-        #     notFeature[sampleName] = sample
-
-    # with open("./GEOSearchXMLs/geoSoftParserResult", "w") as file:
-    #     for value in samples.values():
-    #         json.dump(value.__dict__, file)
-    # with open("./GEOSearchXMLs/geoSoftParserNoFeatureResult", "w") as file:
-    #     for value in notFeature.values():
-    #         json.dump(value.__dict__, file)
-    # #
-    # with open("./GEOSearchXMLs/geoorganimsWithH3K4me3.csv", "wb") as csv_file:
-    #     writer = csv.writer(csv_file)
-    #     for key, value in totalOrganismsName.items():
-    #         writer.writerow([key, value])
-    # #
-    # with open("./GEOSearchXMLs/geocharacteristics.csv", "wb") as csv_file:
-    #     writer = csv.writer(csv_file)
-    #     for key, value in totalCharacteristicsName.items():
-    #         writer.writerow([key, value])
-    #
-    # with open("./GEOSearchXMLs/geocontainingMessageWithH3K4me3.csv", "wb") as csv_file:
-    #     writer = csv.writer(csv_file)
-    #     for key, value in featureMeasage.items():
-    #         writer.writerow([key, value])
-    #         writer.writerow(["     "])
-
-    # with open("./GEOSearchXMLs/geoH3K4me3GSMList.csv", "wb") as csv_file:
-    #     writer = csv.writer(csv_file)
-    #     writer.writerow(
-    #         ['Sample_ID', "Title", "Organism", "Series_ID", "GPL_ID", "Instrument Model", "SRA_ID", "Library Strategy",
-    #          "H3K4me3_description", "Tissue", "Cell Line", "Cell Type", "Disease", "Treatment", "Genotype", "Antibody", "Feature in Title", "Feature in Ab",
-    #          "Feature in Title or Ab"])
-    #     for sample in samples.values():
-    #         writer.writerow(
-    #             [sample.id, sample.title, sample.organism, sample.series, sample.platForm, sample.InstrumentID,
-    #              sample.SRA, sample.libraryStrategy, sample.features, sample.tissue, sample.cellLine, sample.cellType,
-    #              sample.disease, sample.treatment, sample.genotype, sample.antibody, sample.title_found, sample.ab_found,
-    #              sample.title_ab])
-
-    csv_file = open("./HumanH3K4me3GSMList.csv", "wb")
-    writer = csv.writer(csv_file)
-    writer.writerow(
-        ['Sample_ID', "Title", "Organism", "Series_ID", "GPL_ID", "Instrument Model", "SRA_ID", "Library Strategy",
-         "H3K4me3_description", "Tissue", "Cell Line", "Cell Type", "Disease", "Treatment", "Genotype", "Antibody", "Feature in Title",
-         "Feature in Ab", "Feature in Title or Ab"])
-    for sample in Human_Samples.values():
-        writer.writerow(
-            [sample.id, sample.title, sample.organism, sample.series, sample.platForm, sample.InstrumentID,
-             sample.SRA, sample.libraryStrategy, sample.features, sample.tissue, sample.cellLine, sample.cellType,
-             sample.disease, sample.treatment, sample.genotype, sample.antibody, sample.title_found, sample.ab_found,
-             sample.title_ab])
-    csv_file.close()
-
-
-    csv_file =  open("./HumanH3K4me3RelatedSamples.csv", "wb")
-    writer = csv.writer(csv_file)
-    writer.writerow(
-        ['Sample_ID', "Title", "Organism", "Series_ID", "GPL_ID", "Instrument Model", "SRA_ID",
-         "Library Strategy",
-         "H3K4me3_description", "Tissue", "Cell Line", "Cell Type", "Disease", "Treatment", "Genotype",
-         "Antibody", "Feature in Title",
-         "Feature in Ab", "Feature in Title or Ab"])
-    for sample in relatedSamples.values():
-        writer.writerow(
-            [sample.id, sample.title, sample.organism, sample.series, sample.platForm, sample.InstrumentID,
-             sample.SRA, sample.libraryStrategy, sample.features, sample.tissue, sample.cellLine,
-             sample.cellType,
-             sample.disease, sample.treatment, sample.genotype, sample.antibody, sample.title_found,
-             sample.ab_found,
-             sample.title_ab])
-    csv_file.close()
-
-    csv_file = open("./allHumanH3K4Samples.csv", "wb")
-    writer = csv.writer(csv_file)
-    writer.writerow(
-        ['Sample_ID', "Title", "Organism", "Series_ID", "GPL_ID", "Instrument Model", "SRA_ID", "Library Strategy",
-         "H3K4me3_description", "Tissue", "Cell Line", "Cell Type", "Disease", "Treatment", "Genotype", "Antibody", "Feature in Title",
-         "Feature in Ab", "Feature in Title or Ab"])
-    for sample in Human_Samples.values():
-        writer.writerow(
-            [sample.id, sample.title, sample.organism, sample.series, sample.platForm, sample.InstrumentID,
-             sample.SRA, sample.libraryStrategy, sample.features, sample.tissue, sample.cellLine, sample.cellType,
-             sample.disease, sample.treatment, sample.genotype, sample.antibody, sample.title_found, sample.ab_found,
-             sample.title_ab])
-    for sample in relatedSamples.values():
-        writer.writerow(
-            [sample.id, sample.title, sample.organism, sample.series, sample.platForm, sample.InstrumentID,
-             sample.SRA, sample.libraryStrategy, sample.features, sample.tissue, sample.cellLine,
-             sample.cellType,
-             sample.disease, sample.treatment, sample.genotype, sample.antibody, sample.title_found,
-             sample.ab_found,
-             sample.title_ab])
-    csv_file.close()
-
-    # with open("./GEOSearchXMLs/notFeature.csv", "w") as csv_file:
-    #     writer = csv.writer(csv_file)
-    #     writer.writerow(['Sample_ID', "Title", "Organism", "Series_ID", "GPL_ID", "Instrument Model", "SRA_ID", "Library Strategy",
-    #          "H3K4me3_description", "Tissue", "Cell Line", "Disease", "Treatment", "Genotype", "Antibody", "Feature in Title", "Feature in Ab"])
-    #     for sample in notFeature.values():
-    #         writer.writerow(
-    #             [sample.id, sample.title, sample.organism, sample.series, sample.platForm, sample.InstrumentID,
-    #              sample.SRA, sample.libraryStrategy, sample.features, sample.tissue, sample.cellLine,
-    #              sample.disease, sample.treatment, sample.genotype, sample.antibody, sample.title_found, sample.ab_found])
-
-    # with open("./allUniqueGSEsHumanWithH3K4me3.txt", "w") as file:
-    #     for value in AllUniqueGSEs:
-    #         file.write(value+"\n")
-    #
-    # with open("./HumanWithH3K4me3Download.txt", "w") as file:
-    #     for value in HumanWithH3K4me3Download:
-    #         file.write(value+"\n")
     return groupByGSE, Human_Samples, relatedSamples, encodeGSE
 
 
@@ -340,7 +214,7 @@ def spliterFinder(title, keyword):
             spliter = "_"
     if spliter is None:
         if title.find(keyword.lower()) != -1:
-            return None, 0
+            return None, -1
         else:
             return None, None
     elements = title.split(spliter)
@@ -361,16 +235,33 @@ def Similarity(title1, keyword1, title2, keyword2):
 
 
 if __name__ == "__main__":
-    groupbyGSE, HumanSamples, relatedSamples, encodeGSE = SOFTQuickRelated("./QuickXMLs", False)
+    groupbyGSE, HumanSamples, relatedSamples, encodeGSE = SOFTQuickRelated("/home/tmhbxx3/scratch/XMLhttp/QuickXMLs", True)
+
+    geo = True
+
+    print "parser done!"
+    print "groupbyGSE size is ", len(groupbyGSE)
+    print "HumanSamples size is ", len(HumanSamples)
+    print "relatedSamples size is ", len(relatedSamples)
 
     # initiate the map of sample to input
-    SampleToInput = defaultdict(set)
-    scoreBoard = {}
+    FirstSampleToInput = defaultdict(set)
+
+    SecondSampleToInput = defaultdict(set)
+
+    ThirdSampleToInput = defaultdict(set)
+
     #get all the sample with key word in title
     titleCandidates = set()
+
+    noneTitle = set()
     for key, value in HumanSamples.items():
         if value.title_found == True:
             titleCandidates.add(key)
+        else:
+            noneTitle.add(key)
+
+    print "title and none title", len(titleCandidates), len(noneTitle)
     not_found = 0
     # get their related samples
     for candidate in titleCandidates:
@@ -393,102 +284,123 @@ if __name__ == "__main__":
         bestSimilarity = float("-inf")
         for gse in targetGSEs:
             for relatedSample in groupbyGSE[gse]:
-                input_spliter, input_index = spliterFinder(relatedSamples[relatedSample].title, "input")
-                igg_spliter, igg_index = spliterFinder(relatedSamples[relatedSample].title, "IgG")
-                wce_spliter, wce_index = spliterFinder(relatedSamples[relatedSample].title, "wce")
-                control_spliter, control_index = spliterFinder(relatedSamples[relatedSample].title, "control")
-
-                hasInput = [True if x == sample_spliter and y == keyword_index else False for x, y in
-                            [(input_spliter, input_index),
-                             (igg_spliter, igg_index),
-                             (wce_spliter, wce_index),
-                             (control_spliter, control_index)]]
-                if hasInput[0] is True:
-                    related_keyword = "input"
-                elif hasInput[1] is True:
-                    related_keyword = "IgG"
-                elif hasInput[2] is True:
-                    related_keyword = "WCE"
-                elif hasInput[3] is True:
-                    related_keyword = "control"
-
                 if sample_spliter != None and keyword_index != None:
+                    input_spliter, input_index = spliterFinder(relatedSamples[relatedSample].title, "input")
+                    igg_spliter, igg_index = spliterFinder(relatedSamples[relatedSample].title, "IgG")
+                    wce_spliter, wce_index = spliterFinder(relatedSamples[relatedSample].title, "wce")
+                    control_spliter, control_index = spliterFinder(relatedSamples[relatedSample].title, "control")
+
+                    hasInput = [True if x == sample_spliter and y == keyword_index else False for x, y in
+                                [(input_spliter, input_index),
+                                 (igg_spliter, igg_index),
+                                 (wce_spliter, wce_index),
+                                 (control_spliter, control_index)]]
+                    if hasInput[0] is True:
+                        related_keyword = "input"
+                    elif hasInput[1] is True:
+                        related_keyword = "IgG"
+                    elif hasInput[2] is True:
+                        related_keyword = "WCE"
+                    elif hasInput[3] is True:
+                        related_keyword = "control"
+
                     if any(hasInput):
                         score = Similarity(sample.title, "H3K4me3", relatedSamples[relatedSample].title, related_keyword)
                         if score > bestSimilarity:
                             bestSimilarity = score
                             bestMatchID = relatedSamples[relatedSample].id
-                elif keyword_index == 0:
+                elif keyword_index == -1:
                     if relatedSamples[relatedSample].title.find("input") != -1:
-                        SampleToInput[sample.id].add(relatedSamples[relatedSample].id)
+                        score = Similarity(sample.title, "H3K4me3", relatedSamples[relatedSample].title,
+                                           "input")
 
                     elif relatedSamples[relatedSample].title.lower().find("wce") != -1:
-                        SampleToInput[sample.id].add(relatedSamples[relatedSample].id)
+                        score = Similarity(sample.title, "H3K4me3", relatedSamples[relatedSample].title,
+                                           "wce")
 
                     elif relatedSamples[relatedSample].title.find("IgG") != -1:
-                        SampleToInput[sample.id].add(relatedSamples[relatedSample].id)
-
-                    elif relatedSamples[relatedSample].title.find("control") != -1:
-                        SampleToInput[sample.id].add(relatedSamples[relatedSample].id)
-
-                    # else:
-                    #     for value in relatedSamples[relatedSample].characteristics.values():
-                    #         if value.find("input"):
-                    #             candidate = relatedSamples[relatedSample].id
-                    #             break
-                    #         elif value.lower().find(" wce "):
-                    #             candidate = relatedSamples[relatedSample].id
-                    #             break
-                    #         elif value.lower().find("whole cell extract"):
-                    #             candidate = relatedSamples[relatedSample].id
-                    #             break
+                        score = Similarity(sample.title, "H3K4me3", relatedSamples[relatedSample].title,
+                                           "IgG")
+                    if score > bestSimilarity:
+                        bestSimilarity = score
+                        bestMatchID = relatedSamples[relatedSample].id
 
 
-        if bestMatchID:
-            SampleToInput[sample.id].add(bestMatchID)
-	    scoreBoard[sample.id] = bestSimilarity
+        if bestMatchID and keyword_index != -1:
+            FirstSampleToInput[sample.id].add(bestMatchID)
+        elif bestMatchID and keyword_index == -1:
+            SecondSampleToInput[sample.id].add(bestMatchID)
+        else:
+            not_found+=1
 
-            #print bestSimilarity
-	else:
-	    not_found += 1
 
-    for key, value in HumanSamples.items():
-        if value.title_found != True:
-            sample = value
-            targetGSEs = set(sample.series)
-            for gse in targetGSEs:
-                for relatedSample in groupbyGSE[gse]:
-                    for v in relatedSamples[relatedSample].characteristics.values():
-                        if v.find("input"):
-                            SampleToInput[sample.id].add(relatedSamples[relatedSample].id)
-                            break
-                        elif value.lower().find(" wce "):
-                            SampleToInput[sample.id].add(relatedSamples[relatedSample].id)
-                            break
-                        elif value.lower().find("whole cell extract"):
-                            SampleToInput[sample.id].add(relatedSamples[relatedSample].id)
-                            break
-                    if len(SampleToInput[sample.id]) > 0:
+    for key in noneTitle:
+        sample = HumanSamples[key]
+        targetGSEs = set(sample.series)
+        for gse in targetGSEs:
+            for relatedSample in groupbyGSE[gse]:
+                for v in relatedSamples[relatedSample].characteristics.values():
+                    if v.find("input") and sample.id != relatedSamples[relatedSample].id\
+                            and relatedSamples[relatedSample].title.lower().find("h3k") == -1:
+                        ThirdSampleToInput[sample.id].add(relatedSamples[relatedSample].id)
                         break
-                if len(SampleToInput[sample.id]) > 0:
+                    elif v.lower().find(" wce ") and sample.id != relatedSamples[relatedSample].id \
+                            and relatedSamples[relatedSample].title.lower().find("h3k") == -1:
+                        ThirdSampleToInput[sample.id].add(relatedSamples[relatedSample].id)
+                        break
+                    elif v.lower().find("whole cell extract") and sample.id != relatedSamples[relatedSample].id \
+                            and relatedSamples[relatedSample].title.lower().find("h3k") == -1:
+                        ThirdSampleToInput[sample.id].add(relatedSamples[relatedSample].id)
+                        break
+                if len(ThirdSampleToInput[sample.id]) > 0:
                     break
-            print -1
-            if len(SampleToInput[sample.id]) == 0:
-                not_found+=1
+            if len(ThirdSampleToInput[sample.id]) > 0:
+                break
+
+        if len(ThirdSampleToInput[sample.id]) == 0:
+            not_found+=1
+
     print not_found
 
 
-    output = open("./H3K4me3_Sample_To_Input_BX_search.csv", "w")
-    for key, value in SampleToInput.items():
+    if geo:
+        output1 = "./First_H3K4me3_Sample_To_Input.csv"
+        output2 = "./Second_H3K4me3_Sample_To_Input.csv"
+        output3 = "./Third_H3K4me3_Sample_To_Input.csv"
+    else:
+        output1 = "./First_H3K4me3_Sample_To_Input_my_search.csv"
+        output2 = "./Second_H3K4me3_Sample_To_Input_my_search.csv"
+        output3 = "./Third_H3K4me3_Sample_To_Input_my_search.csv"
+
+    output = open(output1, "w")
+    for key, value in FirstSampleToInput.items():
         writer = csv.writer(output)
-        row = [key]+[HumanSamples[key].title]+[scoreBoard[key]]
+        row = [key]+[HumanSamples[key].title]
         # print value
         for id in value:
             row += [id]+[relatedSamples[id].title]
         writer.writerow(row)
     output.close()
 
+    output = open(output2, "w")
+    for key, value in SecondSampleToInput.items():
+        writer = csv.writer(output)
+        row = [key]+[HumanSamples[key].title]
+        # print value
+        for id in value:
+            row += [id]+[relatedSamples[id].title]
+        writer.writerow(row)
+    output.close()
 
+    output = open(output3, "w")
+    for key, value in ThirdSampleToInput.items():
+        writer = csv.writer(output)
+        row = [key] + [HumanSamples[key].title]
+        # print value
+        for id in value:
+            row += [id] + [relatedSamples[id].title]
+        writer.writerow(row)
+    output.close()
 
 
 
