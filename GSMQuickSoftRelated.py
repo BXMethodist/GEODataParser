@@ -1,3 +1,6 @@
+#### TO DO, create new database version
+
+
 from GSM import GSM
 import os
 import re
@@ -9,7 +12,8 @@ import sqlite3
 def similar(a, b):
     return SequenceMatcher(None, a, b).ratio()
 
-def SOFTQuickRelated(cwd=None, geo=True):
+def SOFTQuickRelated(feature_key_word, cwd=None, geo=True):
+    feature_key_word = feature_key_word.lower()
     if cwd == None:
         return
 
@@ -22,9 +26,9 @@ def SOFTQuickRelated(cwd=None, geo=True):
     featureGSMs = set()
 
     if geo:
-        file = open("./GEOsearchhumanWithH3K4me3.csv", "r")
+        file = open("./GEOsearchhumanWith" + feature_key_word + ".csv", "r")
     else:
-        file = open("./humanWithH3K4me3.csv", "r")
+        file = open("./humanWith" + feature_key_word + ".csv", "r")
 
     for line in file.readlines():
         gsmid = line.split(",")[0]
@@ -109,7 +113,7 @@ def SOFTQuickRelated(cwd=None, geo=True):
                 sampleTitle = line[line.find("=")+1:].strip()
                 if sampleTitle.find(";"):
                     sampleTitle = sampleTitle[:sampleTitle.find(";")]
-                if re.search("h3k4me3", sampleTitle, flags=re.IGNORECASE) or re.search("k4me3", sampleTitle, flags=re.IGNORECASE):
+                if re.search(feature_key_word, sampleTitle, flags=re.IGNORECASE) or re.search("k4me3", sampleTitle, flags=re.IGNORECASE):
                     feature["Title"] = sampleTitle
                     title_found = True
             if line.startswith("!Sample_type"):
@@ -123,7 +127,7 @@ def SOFTQuickRelated(cwd=None, geo=True):
                     characteristics[key] += ", " + value
                 else:
                     characteristics[key] = value
-                if re.search("h3k4me3", value, flags=re.IGNORECASE) or re.search("k4me3", value, flags=re.IGNORECASE):
+                if re.search(feature_key_word, value, flags=re.IGNORECASE) or re.search("k4me3", value, flags=re.IGNORECASE):
                     feature[key] = value
             if line.startswith("!Sample_platform_id "):
                 samplePlatForm = line[line.find("=")+1:].strip()
@@ -177,7 +181,7 @@ def SOFTQuickRelated(cwd=None, geo=True):
 
         sample.antibody = antibody
         for value in sample.antibody.values():
-            if re.search("h3k4me3", value, flags=re.IGNORECASE):
+            if re.search(feature_key_word, value, flags=re.IGNORECASE):
                 ab_found = True
                 break
 
@@ -235,7 +239,9 @@ def Similarity(title1, keyword1, title2, keyword2):
 
 
 if __name__ == "__main__":
-    groupbyGSE, HumanSamples, relatedSamples, encodeGSE = SOFTQuickRelated("/home/tmhbxx3/scratch/XMLhttp/QuickXMLs", False)
+    feature_key_word = "H3K27me3"
+
+    groupbyGSE, HumanSamples, relatedSamples, encodeGSE = SOFTQuickRelated(feature_key_word,"/home/tmhbxx3/scratch/XMLhttp/QuickXMLs", False)
 
     geo = False
 
@@ -267,7 +273,7 @@ if __name__ == "__main__":
     for candidate in titleCandidates:
         sample = HumanSamples[candidate]
 
-        sample_spliter, keyword_index = spliterFinder(sample.title, "H3K4me3")
+        sample_spliter, keyword_index = spliterFinder(sample.title, feature_key_word)
 
         encode = False
         for gse in sample.series:
@@ -305,21 +311,21 @@ if __name__ == "__main__":
                         related_keyword = "control"
 
                     if any(hasInput):
-                        score = Similarity(sample.title, "H3K4me3", relatedSamples[relatedSample].title, related_keyword)
+                        score = Similarity(sample.title, feature_key_word, relatedSamples[relatedSample].title, related_keyword)
                         if score > bestSimilarity:
                             bestSimilarity = score
                             bestMatchID = relatedSamples[relatedSample].id
                 elif keyword_index == -1:
                     if relatedSamples[relatedSample].title.find("input") != -1:
-                        score = Similarity(sample.title, "H3K4me3", relatedSamples[relatedSample].title,
+                        score = Similarity(sample.title, feature_key_word, relatedSamples[relatedSample].title,
                                            "input")
 
                     elif relatedSamples[relatedSample].title.lower().find("wce") != -1:
-                        score = Similarity(sample.title, "H3K4me3", relatedSamples[relatedSample].title,
+                        score = Similarity(sample.title, feature_key_word, relatedSamples[relatedSample].title,
                                            "wce")
 
                     elif relatedSamples[relatedSample].title.find("IgG") != -1:
-                        score = Similarity(sample.title, "H3K4me3", relatedSamples[relatedSample].title,
+                        score = Similarity(sample.title, feature_key_word, relatedSamples[relatedSample].title,
                                            "IgG")
                     if score > bestSimilarity:
                         bestSimilarity = score
@@ -364,13 +370,13 @@ if __name__ == "__main__":
 
 
     if geo:
-        output1 = "./First_H3K4me3_Sample_To_Input.csv"
-        output2 = "./Second_H3K4me3_Sample_To_Input.csv"
-        output3 = "./Third_H3K4me3_Sample_To_Input.csv"
+        output1 = "./First_" + feature_key_word + "_Sample_To_Input.csv"
+        output2 = "./Second_" + feature_key_word + "_Sample_To_Input.csv"
+        output3 = "./Third_" + feature_key_word + "_Sample_To_Input.csv"
     else:
-        output1 = "./First_H3K4me3_Sample_To_Input_my_search.csv"
-        output2 = "./Second_H3K4me3_Sample_To_Input_my_search.csv"
-        output3 = "./Third_H3K4me3_Sample_To_Input_my_search.csv"
+        output1 = "./First_" + feature_key_word + "_Sample_To_Input.csv"
+        output2 = "./Second_" + feature_key_word + "_Sample_To_Input.csv"
+        output3 = "./Third_" + feature_key_word + "_Sample_To_Input.csv"
 
     output = open(output1, "w")
     for key, value in FirstSampleToInput.items():
