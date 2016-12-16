@@ -113,7 +113,7 @@ def SOFTQuickRelated(feature_key_word, cwd=None, geo=True):
                 sampleTitle = line[line.find("=")+1:].strip()
                 if sampleTitle.find(";"):
                     sampleTitle = sampleTitle[:sampleTitle.find(";")]
-                if re.search(feature_key_word, sampleTitle, flags=re.IGNORECASE) or re.search("k4me3", sampleTitle, flags=re.IGNORECASE):
+                if re.search(feature_key_word, sampleTitle, flags=re.IGNORECASE) or re.search(feature_key_word[3:], sampleTitle, flags=re.IGNORECASE):
                     feature["Title"] = sampleTitle
                     title_found = True
             if line.startswith("!Sample_type"):
@@ -127,7 +127,7 @@ def SOFTQuickRelated(feature_key_word, cwd=None, geo=True):
                     characteristics[key] += ", " + value
                 else:
                     characteristics[key] = value
-                if re.search(feature_key_word, value, flags=re.IGNORECASE) or re.search("k4me3", value, flags=re.IGNORECASE):
+                if re.search(feature_key_word, value, flags=re.IGNORECASE) or re.search(feature_key_word[3:], value, flags=re.IGNORECASE):
                     feature[key] = value
             if line.startswith("!Sample_platform_id "):
                 samplePlatForm = line[line.find("=")+1:].strip()

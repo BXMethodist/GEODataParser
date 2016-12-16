@@ -65,7 +65,7 @@ def SOFTQuickParser(feature_key_word, cwd=None, geo=True):
         for line in file.readlines():
             if line.startswith("!Sample_title"):
                 sampleTitle = line[line.find("=")+1:].strip()
-                if re.search(feature_key_word, sampleTitle, flags=re.IGNORECASE) or re.search("k4me3", sampleTitle, flags=re.IGNORECASE):
+                if re.search(feature_key_word, sampleTitle, flags=re.IGNORECASE) or re.search(feature_key_word[3:], sampleTitle, flags=re.IGNORECASE):
                     feature["Title"] = sampleTitle
                     title_found = True
             if line.startswith("!Sample_type"):
@@ -79,7 +79,7 @@ def SOFTQuickParser(feature_key_word, cwd=None, geo=True):
                     characteristics[key] += ", " + value
                 else:
                     characteristics[key] = value
-                if re.search(feature_key_word, value, flags=re.IGNORECASE) or re.search("k4me3", value, flags=re.IGNORECASE):
+                if re.search(feature_key_word, value, flags=re.IGNORECASE) or re.search(feature_key_word[3:], value, flags=re.IGNORECASE):
                     feature[key] = value
             if line.startswith("!Sample_platform_id "):
                 samplePlatForm = line[line.find("=")+1:].strip()
@@ -187,15 +187,6 @@ def SOFTQuickParser(feature_key_word, cwd=None, geo=True):
         else:
             notFeature[sampleName] = sample
 
-    # print totalOrganismsName
-
-    # with open("./GEOSearchXMLs/geoSoftParserResult", "w") as file:
-    #     for value in samples.values():
-    #         json.dump(value.__dict__, file)
-    # with open("./GEOSearchXMLs/geoSoftParserNoFeatureResult", "w") as file:
-    #     for value in notFeature.values():
-    #         json.dump(value.__dict__, file)
-    # #
     if geo:
         outputOrganism = "./"+"GEOsearch"+"organimsWith" + feature_key_word +".csv"
         outputHuman = "./"+"GEOsearch"+"humanWith" + feature_key_word + ".csv"
@@ -251,28 +242,7 @@ def SOFTQuickParser(feature_key_word, cwd=None, geo=True):
                  sample.SRA, sample.libraryStrategy, sample.features, sample.tissue, sample.cellLine,
                  sample.disease, sample.treatment, sample.genotype, sample.antibody, sample.title_found, sample.ab_found])
 
-    # with open("./allUniqueGSEsHumanWithH3K4me3.txt", "w") as file:
-    #     for value in AllUniqueGSEs:
-    #         file.write(value+"\n")
-    #
-    # with open("./HumanWithH3K4me3Download.txt", "w") as file:
-    #     for value in HumanWithH3K4me3Download:
-    #         file.write(value+"\n")
+
     return
 
-# for key, value in MinimlXMLParser().iteritems():
-#     print value.title
-# SOFTQuickParser("./GEOSearchXMLs")
-# values.sort(key=lambda x:x.title)
-
-
-
-
-# print "There are total ", len(samples), " samples"
-
-# print "There are total", len(noFeature), " samples don't have features"
-# print organismsName
-# print "Has ", len(organismsName), " different Characteristics"
-# print characteristicsName
-
-SOFTQuickParser("H3K27me3","/home/tmhbxx3/scratch/XMLhttp/QuickXMLs", geo=False)
+SOFTQuickParser("H3K27me3",cwd="/home/tmhbxx3/scratch/XMLhttp/QuickXMLs", geo=False)
