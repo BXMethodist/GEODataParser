@@ -2,6 +2,7 @@
 
 
 from GSM import GSM
+from GSMQuickSoftParser import has_features, SOFTQuickParser
 import os
 import re
 from collections import defaultdict
@@ -12,8 +13,7 @@ import sqlite3
 def similar(a, b):
     return SequenceMatcher(None, a, b).ratio()
 
-def SOFTQuickRelated(feature_key_word, cwd=None, geo=True):
-    feature_key_word = feature_key_word.lower()
+def SOFTQuickRelated(output_surffix, cwd=None, geo=True, *features):
     if cwd == None:
         return
 
@@ -26,9 +26,9 @@ def SOFTQuickRelated(feature_key_word, cwd=None, geo=True):
     featureGSMs = set()
 
     if geo:
-        file = open("./GEOsearchhumanWith" + feature_key_word + ".csv", "r")
+        file = open("./GEOsearchhumanWith" + output_surffix + ".csv", "r")
     else:
-        file = open("./humanWith" + feature_key_word + ".csv", "r")
+        file = open("./humanWith" + output_surffix + ".csv", "r")
 
     for line in file.readlines():
         gsmid = line.split(",")[0]
@@ -113,7 +113,7 @@ def SOFTQuickRelated(feature_key_word, cwd=None, geo=True):
                 sampleTitle = line[line.find("=")+1:].strip()
                 if sampleTitle.find(";"):
                     sampleTitle = sampleTitle[:sampleTitle.find(";")]
-                if re.search(feature_key_word, sampleTitle, flags=re.IGNORECASE) or re.search(feature_key_word[3:], sampleTitle, flags=re.IGNORECASE):
+                if has_features(sampleTitle, features):
                     feature["Title"] = sampleTitle
                     title_found = True
             if line.startswith("!Sample_type"):
@@ -127,7 +127,7 @@ def SOFTQuickRelated(feature_key_word, cwd=None, geo=True):
                     characteristics[key] += ", " + value
                 else:
                     characteristics[key] = value
-                if re.search(feature_key_word, value, flags=re.IGNORECASE) or re.search(feature_key_word[3:], value, flags=re.IGNORECASE):
+                if has_features(value, features):
                     feature[key] = value
             if line.startswith("!Sample_platform_id "):
                 samplePlatForm = line[line.find("=")+1:].strip()
@@ -181,7 +181,7 @@ def SOFTQuickRelated(feature_key_word, cwd=None, geo=True):
 
         sample.antibody = antibody
         for value in sample.antibody.values():
-            if re.search(feature_key_word, value, flags=re.IGNORECASE):
+            if has_features(value, features):
                 ab_found = True
                 break
 
@@ -211,11 +211,18 @@ def spliterFinder(title, keyword):
 
     space = title.count(" ")
     underscore = title.count("_")
-    if space > 0 or underscore >0:
-        if space > underscore:
-            spliter = " "
-        else:
-            spliter = "_"
+    hyphen = title.count("-")
+    choices = [" ", "_", "-"]
+    counts = [space, underscore, hyphen]
+    if space > 0 or underscore >0 or hyphen >0:
+        max_count = 0
+        choice = None
+        for i in range(len(choices)):
+            if counts[i] > max_count:
+                max_count = counts[i]
+                choice = i
+        spliter = choices[choice]
+
     if spliter is None:
         if title.find(keyword.lower()) != -1:
             return None, -1
@@ -235,13 +242,21 @@ def Similarity(title1, keyword1, title2, keyword2):
 
     return SequenceMatcher(None, title1, title2).ratio()
 
-
+def keyword(message, *features):
+    for feature in features:
+        feature = feature.lower()
+        if re.search(feature, message, flags=re.IGNORECASE):
+            return feature
 
 
 if __name__ == "__main__":
-    feature_key_word = "H3K27me3"
 
-    groupbyGSE, HumanSamples, relatedSamples, encodeGSE = SOFTQuickRelated(feature_key_word,"/home/tmhbxx3/scratch/XMLhttp/QuickXMLs", False)
+    output_surffix = "h3k27me3"
+
+    # SOFTQuickParser("H3K27me3", "/home/tmhbxx3/scratch/XMLhttp/QuickXMLs", False, "H3K27me3", "K27me3")
+
+    groupbyGSE, HumanSamples, relatedSamples, encodeGSE = \
+        SOFTQuickRelated("h3k27me3","/home/tmhbxx3/scratch/XMLhttp/QuickXMLs", False, "H3K27me3", "K27me3")
 
     geo = False
 
@@ -273,6 +288,8 @@ if __name__ == "__main__":
     for candidate in titleCandidates:
         sample = HumanSamples[candidate]
 
+        feature_key_word = keyword(sample.title, "h3k27me3", "k27me3")
+
         sample_spliter, keyword_index = spliterFinder(sample.title, feature_key_word)
 
         encode = False
@@ -296,7 +313,7 @@ if __name__ == "__main__":
                     wce_spliter, wce_index = spliterFinder(relatedSamples[relatedSample].title, "wce")
                     control_spliter, control_index = spliterFinder(relatedSamples[relatedSample].title, "control")
 
-                    hasInput = [True if x == sample_spliter and y == keyword_index else False for x, y in
+                    hasInput = [True if y is not None else False for x, y in
                                 [(input_spliter, input_index),
                                  (igg_spliter, igg_index),
                                  (wce_spliter, wce_index),
@@ -370,13 +387,13 @@ if __name__ == "__main__":
 
 
     if geo:
-        output1 = "./First_" + feature_key_word + "_Sample_To_Input.csv"
-        output2 = "./Second_" + feature_key_word + "_Sample_To_Input.csv"
-        output3 = "./Third_" + feature_key_word + "_Sample_To_Input.csv"
+        output1 = "./First_" + output_surffix + "_Sample_To_Input.csv"
+        output2 = "./Second_" + output_surffix + "_Sample_To_Input.csv"
+        output3 = "./Third_" + output_surffix + "_Sample_To_Input.csv"
     else:
-        output1 = "./First_" + feature_key_word + "_Sample_To_Input.csv"
-        output2 = "./Second_" + feature_key_word + "_Sample_To_Input.csv"
-        output3 = "./Third_" + feature_key_word + "_Sample_To_Input.csv"
+        output1 = "./First_" + output_surffix + "_Sample_To_Input.csv"
+        output2 = "./Second_" + output_surffix + "_Sample_To_Input.csv"
+        output3 = "./Third_" + output_surffix + "_Sample_To_Input.csv"
 
     output = open(output1, "w")
     for key, value in FirstSampleToInput.items():
