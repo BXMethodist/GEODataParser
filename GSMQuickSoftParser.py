@@ -243,4 +243,7 @@ def SOFTQuickParser(output_surfix, cwd=None, geo=True, *features):
                      sample.disease, sample.treatment, sample.genotype, sample.antibody, sample.title_found, sample.ab_found])
     return
 
-SOFTQuickParser("H3K27me3", "/home/tmhbxx3/scratch/XMLhttp/QuickXMLs", False, "H3K27me3", "K27me3")
+
+if __name__ == "__main__":
+    SOFTQuickParser("H3K27me3", "/home/tmhbxx3/scratch/XMLhttp/QuickXMLs", False, "H3K27me3", "K27me3")
+#

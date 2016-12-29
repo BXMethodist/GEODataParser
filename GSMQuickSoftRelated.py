@@ -17,6 +17,8 @@ def SOFTQuickRelated(output_surffix, cwd=None, geo=True, *features):
     if cwd == None:
         return
 
+    print cwd
+
     Human_Samples = {}
 
     relatedSamples = {}
@@ -36,6 +38,8 @@ def SOFTQuickRelated(output_surffix, cwd=None, geo=True, *features):
             featureGSMs.add(gsmid)
     file.close()
 
+    print "conncet to database!"
+
     db = sqlite3.connect('/home/tmhbxx3/archive/GEO_MetaDatabase/geoMetaData.db')
     db.text_factory = str
 
@@ -46,6 +50,7 @@ def SOFTQuickRelated(output_surffix, cwd=None, geo=True, *features):
     keep = True
     while keep:
         m += 998
+        print m
         if m < len(featureGSMs):
             block = featureGSMs[m-998: m]
         else:
@@ -74,6 +79,7 @@ def SOFTQuickRelated(output_surffix, cwd=None, geo=True, *features):
     n = 0
     keep = True
     while keep:
+        print n
         n += 998
         if n < len(allrelatedGSEs):
             block = allrelatedGSEs[n-998: n]
@@ -268,8 +274,6 @@ if __name__ == "__main__":
     # initiate the map of sample to input
     FirstSampleToInput = defaultdict(set)
 
-    SecondSampleToInput = defaultdict(set)
-
     ThirdSampleToInput = defaultdict(set)
 
     #get all the sample with key word in title
@@ -305,54 +309,71 @@ if __name__ == "__main__":
         candidate = None
         bestMatchID = None
         bestSimilarity = float("-inf")
+
+        related_keyword = None
+
         for gse in targetGSEs:
             for relatedSample in groupbyGSE[gse]:
-                if sample_spliter != None and keyword_index != None:
-                    input_spliter, input_index = spliterFinder(relatedSamples[relatedSample].title, "input")
-                    igg_spliter, igg_index = spliterFinder(relatedSamples[relatedSample].title, "IgG")
-                    wce_spliter, wce_index = spliterFinder(relatedSamples[relatedSample].title, "wce")
-                    control_spliter, control_index = spliterFinder(relatedSamples[relatedSample].title, "control")
-
-                    hasInput = [True if y is not None else False for x, y in
-                                [(input_spliter, input_index),
-                                 (igg_spliter, igg_index),
-                                 (wce_spliter, wce_index),
-                                 (control_spliter, control_index)]]
-                    if hasInput[0] is True:
-                        related_keyword = "input"
-                    elif hasInput[1] is True:
-                        related_keyword = "IgG"
-                    elif hasInput[2] is True:
-                        related_keyword = "WCE"
-                    elif hasInput[3] is True:
-                        related_keyword = "control"
-
-                    if any(hasInput):
-                        score = Similarity(sample.title, feature_key_word, relatedSamples[relatedSample].title, related_keyword)
-                        if score > bestSimilarity:
-                            bestSimilarity = score
-                            bestMatchID = relatedSamples[relatedSample].id
-                elif keyword_index == -1:
-                    if relatedSamples[relatedSample].title.find("input") != -1:
+                score = None
+                if keyword_index != None:
+                    if relatedSamples[relatedSample].title.lower().find("input") != -1:
                         score = Similarity(sample.title, feature_key_word, relatedSamples[relatedSample].title,
                                            "input")
+                        if related_keyword == None or related_keyword == "input":
+                            related_keyword = "input"
+                            if score > bestSimilarity:
+                                bestSimilarity = score
+                                bestMatchID = relatedSamples[relatedSample].id
+                        elif related_keyword == "wce":
+                            if score > bestSimilarity:
+                                bestSimilarity = score
+                                bestMatchID = relatedSamples[relatedSample].id
+                                related_keyword = "input"
+                        else:
+                            related_keyword = "input"
+                            bestSimilarity = score
+                            bestMatchID = relatedSamples[relatedSample].id
 
                     elif relatedSamples[relatedSample].title.lower().find("wce") != -1:
                         score = Similarity(sample.title, feature_key_word, relatedSamples[relatedSample].title,
                                            "wce")
-
-                    elif relatedSamples[relatedSample].title.find("IgG") != -1:
+                        if related_keyword == None or related_keyword == "wce":
+                            related_keyword = "wce"
+                            if score > bestSimilarity:
+                                bestSimilarity = score
+                                bestMatchID = relatedSamples[relatedSample].id
+                        elif related_keyword == "input":
+                            if score > bestSimilarity:
+                                bestSimilarity = score
+                                bestMatchID = relatedSamples[relatedSample].id
+                                related_keyword = "wce"
+                        elif related_keyword == "IgG" or related_keyword == "control":
+                            related_keyword = "wce"
+                            bestSimilarity = score
+                            bestMatchID = relatedSamples[relatedSample].id
+                    elif relatedSamples[relatedSample].title.lower().find("IgG") != -1:
                         score = Similarity(sample.title, feature_key_word, relatedSamples[relatedSample].title,
                                            "IgG")
-                    if score > bestSimilarity:
-                        bestSimilarity = score
-                        bestMatchID = relatedSamples[relatedSample].id
+                        if related_keyword == None or related_keyword == "IgG":
+                            related_keyword = "IgG"
+                            if score > bestSimilarity:
+                                bestSimilarity = score
+                                bestMatchID = relatedSamples[relatedSample].id
+                        elif related_keyword == "control":
+                            related_keyword = "IgG"
+                            bestSimilarity = score
+                            bestMatchID = relatedSamples[relatedSample].id
+                    elif relatedSamples[relatedSample].title.lower().find("control") != -1:
+                        score = Similarity(sample.title, feature_key_word, relatedSamples[relatedSample].title,
+                                           "control")
+                        if related_keyword == None or related_keyword == "control":
+                            related_keyword = "control"
+                            if score > bestSimilarity:
+                                bestSimilarity = score
+                                bestMatchID = relatedSamples[relatedSample].id
 
-
-        if bestMatchID and keyword_index != -1:
+        if bestMatchID:
             FirstSampleToInput[sample.id].add(bestMatchID)
-        elif bestMatchID and keyword_index == -1:
-            SecondSampleToInput[sample.id].add(bestMatchID)
         else:
             not_found+=1
 
@@ -388,25 +409,13 @@ if __name__ == "__main__":
 
     if geo:
         output1 = "./First_" + output_surffix + "_Sample_To_Input.csv"
-        output2 = "./Second_" + output_surffix + "_Sample_To_Input.csv"
         output3 = "./Third_" + output_surffix + "_Sample_To_Input.csv"
     else:
         output1 = "./First_" + output_surffix + "_Sample_To_Input.csv"
-        output2 = "./Second_" + output_surffix + "_Sample_To_Input.csv"
         output3 = "./Third_" + output_surffix + "_Sample_To_Input.csv"
 
     output = open(output1, "w")
     for key, value in FirstSampleToInput.items():
-        writer = csv.writer(output)
-        row = [key]+[HumanSamples[key].title]
-        # print value
-        for id in value:
-            row += [id]+[relatedSamples[id].title]
-        writer.writerow(row)
-    output.close()
-
-    output = open(output2, "w")
-    for key, value in SecondSampleToInput.items():
         writer = csv.writer(output)
         row = [key]+[HumanSamples[key].title]
         # print value
@@ -424,11 +433,3 @@ if __name__ == "__main__":
             row += [id] + [relatedSamples[id].title]
         writer.writerow(row)
     output.close()
-
-
-
-
-
-
-
-
