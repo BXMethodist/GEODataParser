@@ -2,21 +2,17 @@ from xml.dom import minidom
 from GSM import GSM
 import os
 import re
-import json
 from collections import defaultdict
 import csv
+from input_search_utils import SOFTQuickRelated, input_finder, has_features
 
-def has_features(message, features):
-    for feature in features:
-        feature = feature.lower()
-        if re.search(feature, message, flags=re.IGNORECASE):
-            return True
-    return False
 
-def SOFTQuickParser(output_surfix, cwd=None, geo=True, *features):
+def SOFTQuickParser(output_surfix, features, features_begin,
+                    type_seq=None, cwd=None, ignorecase=True, geo=False, geofile=None, output_type="Human"):
     if cwd == None:
         return
 
+    type_seq = type_seq.lower()
     # print len(map)
     samples = {}
 
@@ -26,11 +22,12 @@ def SOFTQuickParser(output_surfix, cwd=None, geo=True, *features):
 
     notFeature = {}
 
-    geoGSMs = set()
-    file =  open("uniqueGSM_GEOsearch.txt", "r")
-    for line in file.readlines():
-        geoGSMs.add(line.strip())
-    file.close()
+    if geo:
+        geoGSMs = set()
+        file =  open(geofile, "r")
+        for line in file.readlines():
+            geoGSMs.add(line.strip())
+        file.close()
 
     for filename in os.listdir(cwd):
         if not filename.startswith("GSM"):
@@ -67,7 +64,7 @@ def SOFTQuickParser(output_surfix, cwd=None, geo=True, *features):
         for line in file.readlines():
             if line.startswith("!Sample_title"):
                 sampleTitle = line[line.find("=")+1:].strip()
-                if has_features(sampleTitle, features):
+                if has_features(sampleTitle, features, features_begin, ignorecase):
                     target_feature["Title"] = sampleTitle
                     title_found = True
             if line.startswith("!Sample_type"):
@@ -81,7 +78,7 @@ def SOFTQuickParser(output_surfix, cwd=None, geo=True, *features):
                     characteristics[key] += ", " + value
                 else:
                     characteristics[key] = value
-                if has_features(value, features):
+                if has_features(value, features, features_begin, ignorecase):
                     target_feature[key] = value
             if line.startswith("!Sample_platform_id "):
                 samplePlatForm = line[line.find("=")+1:].strip()
@@ -158,7 +155,7 @@ def SOFTQuickParser(output_surfix, cwd=None, geo=True, *features):
 
         sample.antibody = antibody
         for value in sample.antibody.values():
-            if has_features(value, features):
+            if has_features(value, features, features_begin, ignorecase):
                 ab_found = True
                 break
 
@@ -173,9 +170,12 @@ def SOFTQuickParser(output_surfix, cwd=None, geo=True, *features):
             sample.title_ab = True
 
         if sample.organism == "Homo sapiens" and (sample.SRA != None and sample.SRA.strip() != "") and \
-                sample.InstrumentID.startswith('Illu') and sample.libraryStrategy.lower() == "chip-seq":
-            if sample.title_ab == True:
+                sample.InstrumentID.startswith('Illu') and (sample.libraryStrategy.lower() == type_seq or type_seq is None):
+            if ab_found:
                 Human_Samples[sample.id] = sample
+            elif title_found and len(sample.antibody) == 0:
+                Human_Samples[sample.id] = sample
+
         file.close()
 
         # for char in characteristics.keys():
@@ -186,6 +186,15 @@ def SOFTQuickParser(output_surfix, cwd=None, geo=True, *features):
         else:
             notFeature[sampleName] = sample
 
+    if output_type == "Human":
+        groupByGSE, encodeGSE, relatedSamples = SOFTQuickRelated(Human_Samples, cwd)
+    elif output_type == "All":
+        groupByGSE, encodeGSE, relatedSamples = SOFTQuickRelated(samples, cwd)
+
+    first_category, third_category = input_finder(output_surfix, Human_Samples, groupByGSE, encodeGSE, relatedSamples,
+                                                  features, features_begin, ignorecase)
+
+    #### output results to csv
     if geo:
         outputOrganism = "./"+"GEOsearch"+"organimsWith" + output_surfix +".csv"
         outputHuman = "./"+"GEOsearch"+"humanWith" + output_surfix + ".csv"
@@ -220,15 +229,31 @@ def SOFTQuickParser(output_surfix, cwd=None, geo=True, *features):
     csv_file = open(outputHuman, "wb")
     writer = csv.writer(csv_file)
     writer.writerow(
-        ['Sample_ID', "Title", "Organism", "Series_ID", "GPL_ID", "Instrument Model", "SRA_ID", "Library Strategy",
+        ['Sample_ID', "Title", "Input_ID", "Input_Title", "Organism", "Series_ID", "GPL_ID", "Instrument Model", "SRA_ID", "Library Strategy",
          output_surfix+"_description", "Tissue", "Cell Line", "Cell Type", "Disease", "Treatment", "Genotype", "Antibody", "Feature in Title",
          "Feature in Ab", "Feature in Title or Ab"])
     for sample in Human_Samples.values():
+        potential_input_id = ""
+        potential_input_title = ""
+        if len(first_category[sample.id]) != 0:
+            for id in first_category[sample.id]:
+                potential_input_id += id + ","
+                potential_input_title += relatedSamples[id].title +","
+            potential_input_id = potential_input_id[:-1]
+            potential_input_title = potential_input_title[:-1]
+
+        elif len(third_category) != 0:
+            for id in third_category[sample.id]:
+                potential_input_id += id + ","
+                potential_input_title += relatedSamples[id].title +","
+            potential_input_id = potential_input_id[:-1]
+            potential_input_title = potential_input_title[:-1]
+
         writer.writerow(
-            [sample.id, sample.title, sample.organism, sample.series, sample.platForm, sample.InstrumentID,
-             sample.SRA, sample.libraryStrategy, sample.features, sample.tissue, sample.cellLine, sample.cellType,
-             sample.disease, sample.treatment, sample.genotype, sample.antibody, sample.title_found, sample.ab_found,
-             sample.title_ab])
+            [sample.id, sample.title, potential_input_id, potential_input_title, sample.organism, sample.series,
+             sample.platForm, sample.InstrumentID, sample.SRA, sample.libraryStrategy, sample.features, sample.tissue,
+             sample.cellLine, sample.cellType, sample.disease, sample.treatment, sample.genotype, sample.antibody,
+             sample.title_found, sample.ab_found, sample.title_ab])
     csv_file.close()
 
     if geo:
@@ -245,5 +270,6 @@ def SOFTQuickParser(output_surfix, cwd=None, geo=True, *features):
 
 
 if __name__ == "__main__":
-    SOFTQuickParser("H3K27me3", "/home/tmhbxx3/scratch/XMLhttp/QuickXMLs", False, "H3K27me3", "K27me3")
+    SOFTQuickParser("H3K4me3", ["h3k4me3"], [], type_seq="chip-seq", cwd="/home/tmhbxx3/scratch/XMLhttp/QuickXMLs",
+                    ignorecase=False, geo=False)
 #

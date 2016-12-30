@@ -1,9 +1,12 @@
 from collections import defaultdict
+import re
 
-def f(ab="123", bc="456", *args):
-    print type(args)
-    print len(args)
-    for arg in args:
-        print arg
 
-f("bbb", "aaa", ["1", "2", "3"])
+
+a = "abBc"
+
+b = "BB"
+
+
+print "a"
+print re.search(b, a)

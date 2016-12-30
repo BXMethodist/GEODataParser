@@ -2,7 +2,6 @@
 
 
 from GSM import GSM
-from GSMQuickSoftParser import has_features, SOFTQuickParser
 import os
 import re
 from collections import defaultdict
@@ -13,56 +12,27 @@ import sqlite3
 def similar(a, b):
     return SequenceMatcher(None, a, b).ratio()
 
-def SOFTQuickRelated(output_surffix, cwd=None, geo=True, *features):
+def SOFTQuickRelated(featured_samples, cwd):
     if cwd == None:
         return
-
-    print cwd
-
-    Human_Samples = {}
 
     relatedSamples = {}
 
     groupByGSE = defaultdict(set)
 
-    featureGSMs = set()
-
-    if geo:
-        file = open("./GEOsearchhumanWith" + output_surffix + ".csv", "r")
-    else:
-        file = open("./humanWith" + output_surffix + ".csv", "r")
-
-    for line in file.readlines():
-        gsmid = line.split(",")[0]
-        if gsmid.startswith("GSM"):
-            featureGSMs.add(gsmid)
-    file.close()
-
-    print "conncet to database!"
 
     db = sqlite3.connect('/home/tmhbxx3/archive/GEO_MetaDatabase/geoMetaData.db')
     db.text_factory = str
 
-    relatedGSEs = set()
+    relatedGSEs = []
 
-    featureGSMs = list(featureGSMs)
-    m = 0
-    keep = True
-    while keep:
-        m += 998
-        print m
-        if m < len(featureGSMs):
-            block = featureGSMs[m-998: m]
-        else:
-            block = featureGSMs[m-998: -1]
-            keep = False
-        query = db.execute("SELECT distinct GSE_ID FROM GSEtoGSM WHERE GSM_ID IN (" + ",".join("?" * len(block)) + ")",
-                           block).fetchall()
+    featureGSMs = set()
 
-        for gseid in query:
-            relatedGSEs.add(gseid[0])
+    for key, value in featured_samples:
+        featureGSMs.add(key)
+        relatedGSEs += value.series
 
-    print len(relatedGSEs)
+    relatedGSEs = set(relatedGSEs)
 
     encodeGSE = set()
     allGSEs = db.execute('select distinct GSE_ID from GSE where organization = "ENCODE DCC"').fetchall()
@@ -89,8 +59,8 @@ def SOFTQuickRelated(output_surffix, cwd=None, geo=True, *features):
         query = db.execute("SELECT distinct GSM_ID FROM GSEtoGSM WHERE GSE_ID IN (" + ",".join("?" * len(block)) + ")", block).fetchall()
 
         for gsmid in query:
-            allrelatedGSMs.add(gsmid[0])
-
+            if gsmid not in featureGSMs:
+                allrelatedGSMs.add(gsmid[0])
     db.close()
 
     print len(allrelatedGSMs)
@@ -100,13 +70,11 @@ def SOFTQuickRelated(output_surffix, cwd=None, geo=True, *features):
     for filegsm in allrelatedGSMs:
         filename = filegsm+".xml"
 
-
         file = open(cwd+'/'+filename, "r")
         characteristics = defaultdict(str)
         supplementaryData = defaultdict(str)
         relations = defaultdict(str)
         sampleSeriesID = set()
-        feature = {}
 
         antibody = {}
         title_found = False
@@ -119,9 +87,7 @@ def SOFTQuickRelated(output_surffix, cwd=None, geo=True, *features):
                 sampleTitle = line[line.find("=")+1:].strip()
                 if sampleTitle.find(";"):
                     sampleTitle = sampleTitle[:sampleTitle.find(";")]
-                if has_features(sampleTitle, features):
-                    feature["Title"] = sampleTitle
-                    title_found = True
+
             if line.startswith("!Sample_type"):
                 sampleType = line[line.find("=")+1:].strip()
             if line.startswith("!Sample_organism"):
@@ -133,8 +99,7 @@ def SOFTQuickRelated(output_surffix, cwd=None, geo=True, *features):
                     characteristics[key] += ", " + value
                 else:
                     characteristics[key] = value
-                if has_features(value, features):
-                    feature[key] = value
+
             if line.startswith("!Sample_platform_id "):
                 samplePlatForm = line[line.find("=")+1:].strip()
             if line.startswith("!Sample_library_strategy"):
@@ -163,7 +128,6 @@ def SOFTQuickRelated(output_surffix, cwd=None, geo=True, *features):
         sample.series = list(sampleSeriesID)
 
         sample.platForm = samplePlatForm
-        sample.features = feature
         sample.InstrumentID = sampleInstrumentID
 
         for key, value in characteristics.items():
@@ -186,10 +150,6 @@ def SOFTQuickRelated(output_surffix, cwd=None, geo=True, *features):
                     antibody[key] = value
 
         sample.antibody = antibody
-        for value in sample.antibody.values():
-            if has_features(value, features):
-                ab_found = True
-                break
 
         sample.title_found = title_found
         sample.ab_found = ab_found
@@ -198,15 +158,12 @@ def SOFTQuickRelated(output_surffix, cwd=None, geo=True, *features):
 
         if sample.organism == "Homo sapiens" and (sample.SRA != None or sample.SRA.strip() != "") and \
                 sample.InstrumentID.startswith('Illu') and sample.libraryStrategy.lower() == "chip-seq":
-            if sample.title_ab == True:
-                Human_Samples[sample.id] = sample
-
             relatedSamples[sample.id] = sample
             for gse in sample.series:
                 groupByGSE[gse].add(sample.id)
         file.close()
 
-    return groupByGSE, Human_Samples, relatedSamples, encodeGSE
+    return groupByGSE, encodeGSE, relatedSamples
 
 
 def spliterFinder(title, keyword):
@@ -248,35 +205,29 @@ def Similarity(title1, keyword1, title2, keyword2):
 
     return SequenceMatcher(None, title1, title2).ratio()
 
-def keyword(message, *features):
-    for feature in features:
-        feature = feature.lower()
-        if re.search(feature, message, flags=re.IGNORECASE):
-            return feature
+def keyword(message, features, features_begin, ignorecase):
+    if ignorecase:
+        for feature in features:
+            if re.search(feature, message, flags=re.IGNORECASE):
+                return feature
+        for feature in features_begin:
+            if re.match(feature, message, flags=re.IGNORECASE):
+                return feature
+    else:
+        for feature in features:
+            if re.search(feature, message):
+                return feature
+        for feature in features_begin:
+            if re.match(feature, message):
+                return feature
 
-
-if __name__ == "__main__":
-
-    output_surffix = "h3k27me3"
-
-    # SOFTQuickParser("H3K27me3", "/home/tmhbxx3/scratch/XMLhttp/QuickXMLs", False, "H3K27me3", "K27me3")
-
-    groupbyGSE, HumanSamples, relatedSamples, encodeGSE = \
-        SOFTQuickRelated("h3k27me3","/home/tmhbxx3/scratch/XMLhttp/QuickXMLs", False, "H3K27me3", "K27me3")
-
-    geo = False
-
-    print "parser done!"
-    print "groupbyGSE size is ", len(groupbyGSE)
-    print "HumanSamples size is ", len(HumanSamples)
-    print "relatedSamples size is ", len(relatedSamples)
-
-    # initiate the map of sample to input
+def input_finder(output_surffix, HumanSamples, groupByGSE, encodeGSE, relatedSamples,
+                 features, features_begin, ignorecase):
     FirstSampleToInput = defaultdict(set)
 
     ThirdSampleToInput = defaultdict(set)
 
-    #get all the sample with key word in title
+    # get all the sample with key word in title
     titleCandidates = set()
 
     noneTitle = set()
@@ -292,7 +243,7 @@ if __name__ == "__main__":
     for candidate in titleCandidates:
         sample = HumanSamples[candidate]
 
-        feature_key_word = keyword(sample.title, "h3k27me3", "k27me3")
+        feature_key_word = keyword(sample.title, features, features_begin, ignorecase)
 
         sample_spliter, keyword_index = spliterFinder(sample.title, feature_key_word)
 
@@ -306,14 +257,13 @@ if __name__ == "__main__":
         else:
             targetGSEs = set(sample.series)
 
-        candidate = None
         bestMatchID = None
         bestSimilarity = float("-inf")
 
         related_keyword = None
 
         for gse in targetGSEs:
-            for relatedSample in groupbyGSE[gse]:
+            for relatedSample in groupByGSE[gse]:
                 score = None
                 if keyword_index != None:
                     if relatedSamples[relatedSample].title.lower().find("input") != -1:
@@ -375,16 +325,15 @@ if __name__ == "__main__":
         if bestMatchID:
             FirstSampleToInput[sample.id].add(bestMatchID)
         else:
-            not_found+=1
-
+            not_found += 1
 
     for key in noneTitle:
         sample = HumanSamples[key]
         targetGSEs = set(sample.series)
         for gse in targetGSEs:
-            for relatedSample in groupbyGSE[gse]:
+            for relatedSample in groupByGSE[gse]:
                 for v in relatedSamples[relatedSample].characteristics.values():
-                    if v.find("input") and sample.id != relatedSamples[relatedSample].id\
+                    if v.find("input") and sample.id != relatedSamples[relatedSample].id \
                             and relatedSamples[relatedSample].title.lower().find("h3k") == -1:
                         ThirdSampleToInput[sample.id].add(relatedSamples[relatedSample].id)
                         break
@@ -402,25 +351,20 @@ if __name__ == "__main__":
                 break
 
         if not sample.id in ThirdSampleToInput:
-            not_found+=1
+            not_found += 1
 
     print not_found
 
-
-    if geo:
-        output1 = "./First_" + output_surffix + "_Sample_To_Input.csv"
-        output3 = "./Third_" + output_surffix + "_Sample_To_Input.csv"
-    else:
-        output1 = "./First_" + output_surffix + "_Sample_To_Input.csv"
-        output3 = "./Third_" + output_surffix + "_Sample_To_Input.csv"
+    output1 = "./First_" + output_surffix + "_Sample_To_Input.csv"
+    output3 = "./Third_" + output_surffix + "_Sample_To_Input.csv"
 
     output = open(output1, "w")
     for key, value in FirstSampleToInput.items():
         writer = csv.writer(output)
-        row = [key]+[HumanSamples[key].title]
+        row = [key] + [HumanSamples[key].title]
         # print value
         for id in value:
-            row += [id]+[relatedSamples[id].title]
+            row += [id] + [relatedSamples[id].title]
         writer.writerow(row)
     output.close()
 
@@ -433,3 +377,22 @@ if __name__ == "__main__":
             row += [id] + [relatedSamples[id].title]
         writer.writerow(row)
     output.close()
+
+    return FirstSampleToInput, ThirdSampleToInput
+
+def has_features(message, features, features_begin, ignorecase):
+    if ignorecase:
+        for feature in features:
+            if re.search(feature, message, flags=re.IGNORECASE):
+                return True
+        for feature in features_begin:
+            if re.match(feature, message, flags=re.IGNORECASE):
+                return True
+    else:
+        for feature in features:
+            if re.search(feature, message):
+                return True
+        for feature in features_begin:
+            if re.match(feature, message):
+                return True
+    return False

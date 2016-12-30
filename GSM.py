@@ -27,3 +27,4 @@ class GSM:
         self.title_found = False
         self.ab_found = False
         self.title_ab = False
+        self.input = None
