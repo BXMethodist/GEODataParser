@@ -28,7 +28,6 @@ def SOFTQuickParser(output_surfix, features, features_begin,
         for line in file.readlines():
             geoGSMs.add(line.strip())
         file.close()
-
     for filename in os.listdir(cwd):
         if not filename.startswith("GSM"):
             continue
@@ -64,6 +63,8 @@ def SOFTQuickParser(output_surfix, features, features_begin,
         for line in file.readlines():
             if line.startswith("!Sample_title"):
                 sampleTitle = line[line.find("=")+1:].strip()
+                if sampleTitle.find(";") != -1:
+                    sampleTitle = sampleTitle[:sampleTitle.find(";")]
                 if has_features(sampleTitle, features, features_begin, ignorecase):
                     target_feature["Title"] = sampleTitle
                     title_found = True
@@ -171,10 +172,13 @@ def SOFTQuickParser(output_surfix, features, features_begin,
 
         if sample.organism == "Homo sapiens" and (sample.SRA != None and sample.SRA.strip() != "") and \
                 sample.InstrumentID.startswith('Illu') and (sample.libraryStrategy.lower() == type_seq or type_seq is None):
-            if ab_found:
-                Human_Samples[sample.id] = sample
-            elif title_found and len(sample.antibody) == 0:
-                Human_Samples[sample.id] = sample
+            if sample.title_ab:
+                if sample.title.lower().find("input") == -1 \
+                        and sample.title.lower().find("wce") == -1 \
+                        and sample.title.find("IgG") == -1:
+                    Human_Samples[sample.id] = sample
+                else:
+                    print sample.title, "title has input or wce or IgG!"
 
         file.close()
 
@@ -185,6 +189,8 @@ def SOFTQuickParser(output_surfix, features, features_begin,
             totalOrganismsName[sampleOrganism]+=1
         else:
             notFeature[sampleName] = sample
+
+    print "total human sample found", len(Human_Samples)
 
     if output_type == "Human":
         groupByGSE, encodeGSE, relatedSamples = SOFTQuickRelated(Human_Samples, cwd)
@@ -270,6 +276,11 @@ def SOFTQuickParser(output_surfix, features, features_begin,
 
 
 if __name__ == "__main__":
-    SOFTQuickParser("H3K4me3", ["h3k4me3"], [], type_seq="chip-seq", cwd="/home/tmhbxx3/scratch/XMLhttp/QuickXMLs",
-                    ignorecase=False, geo=False)
+    SOFTQuickParser("androgen_receptor", ["AR ", "AR-", "AR_",
+                                          "androgen_receptor", "androgen-receptor", "androgen receptor"],
+                    [], type_seq="chip-seq", cwd="/home/tmhbxx3/scratch/XMLhttp/QuickXMLs",
+                    ignorecase=False, geo=False, geofile=None)
 #
+    SOFTQuickParser("H3K4me3", ["h3k4me3", "k4me3"],
+                    [], type_seq="chip-seq", cwd="/home/tmhbxx3/scratch/XMLhttp/QuickXMLs",
+                    ignorecase=True, geo=False, geofile=None)

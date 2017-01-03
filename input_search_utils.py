@@ -28,7 +28,7 @@ def SOFTQuickRelated(featured_samples, cwd):
 
     featureGSMs = set()
 
-    for key, value in featured_samples:
+    for key, value in featured_samples.iteritems():
         featureGSMs.add(key)
         relatedGSEs += value.series
 
@@ -39,7 +39,7 @@ def SOFTQuickRelated(featured_samples, cwd):
     for gse in allGSEs:
         encodeGSE.add(gse[0])
 
-    print len(encodeGSE)
+    # print len(encodeGSE)
 
     allrelatedGSEs = encodeGSE.union(relatedGSEs)
     allrelatedGSEs = list(allrelatedGSEs)
@@ -59,11 +59,11 @@ def SOFTQuickRelated(featured_samples, cwd):
         query = db.execute("SELECT distinct GSM_ID FROM GSEtoGSM WHERE GSE_ID IN (" + ",".join("?" * len(block)) + ")", block).fetchall()
 
         for gsmid in query:
-            if gsmid not in featureGSMs:
+            if gsmid[0] not in featureGSMs:
                 allrelatedGSMs.add(gsmid[0])
     db.close()
 
-    print len(allrelatedGSMs)
+    # print len(allrelatedGSMs)
 
     allrelatedGSMs = list(allrelatedGSMs)
 
@@ -85,7 +85,7 @@ def SOFTQuickRelated(featured_samples, cwd):
                 sampleName = line[line.find("=")+1:].strip()
             if line.startswith("!Sample_title"):
                 sampleTitle = line[line.find("=")+1:].strip()
-                if sampleTitle.find(";"):
+                if sampleTitle.find(";") != -1:
                     sampleTitle = sampleTitle[:sampleTitle.find(";")]
 
             if line.startswith("!Sample_type"):
@@ -208,16 +208,28 @@ def Similarity(title1, keyword1, title2, keyword2):
 def keyword(message, features, features_begin, ignorecase):
     if ignorecase:
         for feature in features:
+            feature = feature.replace(" ","")
+            feature = feature.replace("-", "")
+            feature = feature.replace("_", "")
             if re.search(feature, message, flags=re.IGNORECASE):
                 return feature
         for feature in features_begin:
+            feature = feature.replace(" ","")
+            feature = feature.replace("-", "")
+            feature = feature.replace("_", "")
             if re.match(feature, message, flags=re.IGNORECASE):
                 return feature
     else:
         for feature in features:
+            feature = feature.replace(" ","")
+            feature = feature.replace("-", "")
+            feature = feature.replace("_", "")
             if re.search(feature, message):
                 return feature
         for feature in features_begin:
+            feature = feature.replace(" ","")
+            feature = feature.replace("-", "")
+            feature = feature.replace("_", "")
             if re.match(feature, message):
                 return feature
 
@@ -245,7 +257,7 @@ def input_finder(output_surffix, HumanSamples, groupByGSE, encodeGSE, relatedSam
 
         feature_key_word = keyword(sample.title, features, features_begin, ignorecase)
 
-        sample_spliter, keyword_index = spliterFinder(sample.title, feature_key_word)
+        print feature_key_word
 
         encode = False
         for gse in sample.series:
@@ -265,62 +277,94 @@ def input_finder(output_surffix, HumanSamples, groupByGSE, encodeGSE, relatedSam
         for gse in targetGSEs:
             for relatedSample in groupByGSE[gse]:
                 score = None
-                if keyword_index != None:
-                    if relatedSamples[relatedSample].title.lower().find("input") != -1:
-                        score = Similarity(sample.title, feature_key_word, relatedSamples[relatedSample].title,
-                                           "input")
-                        if related_keyword == None or related_keyword == "input":
-                            related_keyword = "input"
-                            if score > bestSimilarity:
-                                bestSimilarity = score
-                                bestMatchID = relatedSamples[relatedSample].id
-                        elif related_keyword == "wce":
-                            if score > bestSimilarity:
-                                bestSimilarity = score
-                                bestMatchID = relatedSamples[relatedSample].id
-                                related_keyword = "input"
-                        else:
-                            related_keyword = "input"
+                if relatedSamples[relatedSample].title.lower().find("input") != -1:
+                    score = Similarity(sample.title, feature_key_word, relatedSamples[relatedSample].title,
+                                       "input")
+                    if related_keyword == None or related_keyword == "input":
+                        related_keyword = "input"
+                        if score > bestSimilarity:
                             bestSimilarity = score
                             bestMatchID = relatedSamples[relatedSample].id
+                    elif related_keyword == "wce":
+                        if score > bestSimilarity:
+                            bestSimilarity = score
+                            bestMatchID = relatedSamples[relatedSample].id
+                            related_keyword = "input"
+                    else:
+                        related_keyword = "input"
+                        bestSimilarity = score
+                        bestMatchID = relatedSamples[relatedSample].id
 
-                    elif relatedSamples[relatedSample].title.lower().find("wce") != -1:
-                        score = Similarity(sample.title, feature_key_word, relatedSamples[relatedSample].title,
-                                           "wce")
-                        if related_keyword == None or related_keyword == "wce":
-                            related_keyword = "wce"
-                            if score > bestSimilarity:
-                                bestSimilarity = score
-                                bestMatchID = relatedSamples[relatedSample].id
-                        elif related_keyword == "input":
-                            if score > bestSimilarity:
-                                bestSimilarity = score
-                                bestMatchID = relatedSamples[relatedSample].id
-                                related_keyword = "wce"
-                        elif related_keyword == "IgG" or related_keyword == "control":
-                            related_keyword = "wce"
+                elif relatedSamples[relatedSample].title.lower().find("inpu") != -1:
+                    score = Similarity(sample.title, feature_key_word, relatedSamples[relatedSample].title,
+                                       "wce")
+                    if related_keyword == None or related_keyword == "inpu":
+                        related_keyword = "inpu"
+                        if score > bestSimilarity:
                             bestSimilarity = score
                             bestMatchID = relatedSamples[relatedSample].id
-                    elif relatedSamples[relatedSample].title.lower().find("IgG") != -1:
-                        score = Similarity(sample.title, feature_key_word, relatedSamples[relatedSample].title,
-                                           "IgG")
-                        if related_keyword == None or related_keyword == "IgG":
-                            related_keyword = "IgG"
-                            if score > bestSimilarity:
-                                bestSimilarity = score
-                                bestMatchID = relatedSamples[relatedSample].id
-                        elif related_keyword == "control":
-                            related_keyword = "IgG"
+                    elif related_keyword == "input":
+                        if score > bestSimilarity:
                             bestSimilarity = score
                             bestMatchID = relatedSamples[relatedSample].id
-                    elif relatedSamples[relatedSample].title.lower().find("control") != -1:
-                        score = Similarity(sample.title, feature_key_word, relatedSamples[relatedSample].title,
-                                           "control")
-                        if related_keyword == None or related_keyword == "control":
-                            related_keyword = "control"
-                            if score > bestSimilarity:
-                                bestSimilarity = score
-                                bestMatchID = relatedSamples[relatedSample].id
+                            related_keyword = "inpu"
+                    elif related_keyword == "wce":
+                        if score > bestSimilarity:
+                            bestSimilarity = score
+                            bestMatchID = relatedSamples[relatedSample].id
+                            related_keyword = "inpu"
+                    elif related_keyword == "IgG" or related_keyword == "control":
+                        related_keyword = "inpu"
+                        bestSimilarity = score
+                        bestMatchID = relatedSamples[relatedSample].id
+
+                elif relatedSamples[relatedSample].title.lower().find("wce") != -1:
+                    score = Similarity(sample.title, feature_key_word, relatedSamples[relatedSample].title,
+                                       "wce")
+                    if related_keyword == None or related_keyword == "wce":
+                        related_keyword = "wce"
+                        if score > bestSimilarity:
+                            bestSimilarity = score
+                            bestMatchID = relatedSamples[relatedSample].id
+                    elif related_keyword == "input":
+                        if score > bestSimilarity:
+                            bestSimilarity = score
+                            bestMatchID = relatedSamples[relatedSample].id
+                            related_keyword = "wce"
+                    elif related_keyword == "inpu":
+                        if score > bestSimilarity:
+                            bestSimilarity = score
+                            bestMatchID = relatedSamples[relatedSample].id
+                            related_keyword = "wce"
+                    elif related_keyword == "IgG" or related_keyword == "control":
+                        related_keyword = "wce"
+                        bestSimilarity = score
+                        bestMatchID = relatedSamples[relatedSample].id
+
+                elif relatedSamples[relatedSample].title.lower().find("IgG") != -1:
+                    score = Similarity(sample.title, feature_key_word, relatedSamples[relatedSample].title,
+                                       "IgG")
+                    if related_keyword == None or related_keyword == "IgG":
+                        related_keyword = "IgG"
+                        if score > bestSimilarity:
+                            bestSimilarity = score
+                            bestMatchID = relatedSamples[relatedSample].id
+                    elif related_keyword == "control":
+                        related_keyword = "IgG"
+                        bestSimilarity = score
+                        bestMatchID = relatedSamples[relatedSample].id
+                elif relatedSamples[relatedSample].title.lower().find("control") != -1:
+                    score = Similarity(sample.title, feature_key_word, relatedSamples[relatedSample].title,
+                                       "control")
+                    if related_keyword == None or related_keyword == "control":
+                        related_keyword = "control"
+                        if score > bestSimilarity:
+                            bestSimilarity = score
+                            bestMatchID = relatedSamples[relatedSample].id
+                # else:
+                #     print relatedSamples[relatedSample].title
+
+        print related_keyword, bestMatchID, bestSimilarity
 
         if bestMatchID:
             FirstSampleToInput[sample.id].add(bestMatchID)
@@ -353,7 +397,7 @@ def input_finder(output_surffix, HumanSamples, groupByGSE, encodeGSE, relatedSam
         if not sample.id in ThirdSampleToInput:
             not_found += 1
 
-    print not_found
+    # print not_found
 
     output1 = "./First_" + output_surffix + "_Sample_To_Input.csv"
     output3 = "./Third_" + output_surffix + "_Sample_To_Input.csv"

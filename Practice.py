@@ -1,12 +1,9 @@
-from collections import defaultdict
-import re
+import pickle
 
+def save_obj(obj, name):
+    with open('obj/'+ name + '.pkl', 'wb') as f:
+        pickle.dump(obj, f, pickle.HIGHEST_PROTOCOL)
 
-
-a = "abBc"
-
-b = "BB"
-
-
-print "a"
-print re.search(b, a)
+def load_obj(name):
+    with open('obj/' + name + '.pkl', 'rb') as f:
+        return pickle.load(f)
