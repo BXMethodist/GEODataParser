@@ -1,9 +1,17 @@
-import pickle
+import psutil
 
-def save_obj(obj, name):
-    with open('obj/'+ name + '.pkl', 'wb') as f:
-        pickle.dump(obj, f, pickle.HIGHEST_PROTOCOL)
+file_obj = open("./csv/humanWithH3K4me3.csv", "r")
 
-def load_obj(name):
-    with open('obj/' + name + '.pkl', 'rb') as f:
-        return pickle.load(f)
+file_obj2 = open("./csv/sampleWithH3K4me3.csv", "r")
+
+proc = psutil.Process()
+print proc.open_files()
+info = file_obj.readlines()
+file_obj.close()
+file_obj2.close()
+print len(info)
+print proc.open_files()
+
+# for line in info:
+#     print line
+

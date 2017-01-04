@@ -1,6 +1,6 @@
 #### TO DO, create new database version
 
-
+import psutil
 from GSM import GSM
 import os
 import re
@@ -15,6 +15,8 @@ def similar(a, b):
 def SOFTQuickRelated(featured_samples, cwd):
     if cwd == None:
         return
+
+    proc = psutil.Process()
 
     relatedSamples = {}
 
@@ -67,10 +69,11 @@ def SOFTQuickRelated(featured_samples, cwd):
 
     allrelatedGSMs = list(allrelatedGSMs)
 
+    # n = 0
+
     for filegsm in allrelatedGSMs:
         filename = filegsm+".xml"
 
-        file = open(cwd+'/'+filename, "r")
         characteristics = defaultdict(str)
         supplementaryData = defaultdict(str)
         relations = defaultdict(str)
@@ -80,7 +83,18 @@ def SOFTQuickRelated(featured_samples, cwd):
         title_found = False
         ab_found = False
 
-        for line in file.readlines():
+        if len(proc.open_files()) > 0:
+            print "More than one file is open, stop!"
+            return
+        # n += 1
+        # print len(proc.open_files())
+        # if n > 10:
+        #     break
+
+        file_obj = open(cwd + '/' + filename, "r")
+        info = file_obj.readlines()
+        file_obj.close()
+        for line in info:
             if line.startswith("^SAMPLE"):
                 sampleName = line[line.find("=")+1:].strip()
             if line.startswith("!Sample_title"):
@@ -116,6 +130,7 @@ def SOFTQuickRelated(featured_samples, cwd):
                 sampleSeriesID.add(line[line.find("=")+1:].strip())
             if line.startswith("!Sample_instrument_model"):
                 sampleInstrumentID = line[line.find("=")+1:].strip()
+        file_obj.close()
 
         sample = GSM(sampleName)
         sample.characteristics = characteristics
@@ -161,7 +176,7 @@ def SOFTQuickRelated(featured_samples, cwd):
             relatedSamples[sample.id] = sample
             for gse in sample.series:
                 groupByGSE[gse].add(sample.id)
-        file.close()
+
 
     return groupByGSE, encodeGSE, relatedSamples
 
@@ -376,17 +391,14 @@ def input_finder(output_surffix, HumanSamples, groupByGSE, encodeGSE, relatedSam
         targetGSEs = set(sample.series)
         for gse in targetGSEs:
             for relatedSample in groupByGSE[gse]:
-                for v in relatedSamples[relatedSample].characteristics.values():
-                    if v.find("input") and sample.id != relatedSamples[relatedSample].id \
-                            and relatedSamples[relatedSample].title.lower().find("h3k") == -1:
+                for v in relatedSamples[relatedSample].antibody.values():
+                    if v.find("input") and sample.id != relatedSamples[relatedSample].id:
                         ThirdSampleToInput[sample.id].add(relatedSamples[relatedSample].id)
                         break
-                    elif v.lower().find(" wce ") and sample.id != relatedSamples[relatedSample].id \
-                            and relatedSamples[relatedSample].title.lower().find("h3k") == -1:
+                    elif v.lower().find(" wce ") and sample.id != relatedSamples[relatedSample].id:
                         ThirdSampleToInput[sample.id].add(relatedSamples[relatedSample].id)
                         break
-                    elif v.lower().find("whole cell extract") and sample.id != relatedSamples[relatedSample].id \
-                            and relatedSamples[relatedSample].title.lower().find("h3k") == -1:
+                    elif v.lower().find("whole cell extract") and sample.id != relatedSamples[relatedSample].id:
                         ThirdSampleToInput[sample.id].add(relatedSamples[relatedSample].id)
                         break
                 if sample.id in ThirdSampleToInput:

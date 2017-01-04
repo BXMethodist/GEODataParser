@@ -1,16 +1,19 @@
-from xml.dom import minidom
+
 from GSM import GSM
 import os
 import re
 from collections import defaultdict
 import csv
 from input_search_utils import SOFTQuickRelated, input_finder, has_features
+import psutil
 
 
 def SOFTQuickParser(output_surfix, features, features_begin,
                     type_seq=None, cwd=None, ignorecase=True, geo=False, geofile=None, output_type="Human"):
     if cwd == None:
         return
+
+    proc = psutil.Process()
 
     type_seq = type_seq.lower()
     # print len(map)
@@ -24,10 +27,13 @@ def SOFTQuickParser(output_surfix, features, features_begin,
 
     if geo:
         geoGSMs = set()
-        file =  open(geofile, "r")
-        for line in file.readlines():
+        file_obj =  open(geofile, "r")
+        for line in file_obj.readlines():
             geoGSMs.add(line.strip())
-        file.close()
+        file_obj.close()
+
+    # n = 0
+
     for filename in os.listdir(cwd):
         if not filename.startswith("GSM"):
             continue
@@ -43,7 +49,6 @@ def SOFTQuickParser(output_surfix, features, features_begin,
         samplePlatForm=''
         sampleInstrumentID=''
 
-        file = open(cwd+'/'+filename, "r")
         characteristics = defaultdict(str)
         supplementaryData = defaultdict(str)
         relations = defaultdict(str)
@@ -60,7 +65,22 @@ def SOFTQuickParser(output_surfix, features, features_begin,
         title_found = False
         ab_found = False
 
-        for line in file.readlines():
+
+        if len(proc.open_files()) > 0:
+            print "More than one file is open, stop!"
+            print proc.open_files()
+            return
+
+        # n += 1
+        print len(proc.open_files())
+        # if n > 10:
+        #     break
+
+
+        file_obj = open(cwd + '/' + filename, "r")
+        info = file_obj.readlines()
+        file_obj.close()
+        for line in info:
             if line.startswith("!Sample_title"):
                 sampleTitle = line[line.find("=")+1:].strip()
                 if sampleTitle.find(";") != -1:
@@ -97,6 +117,7 @@ def SOFTQuickParser(output_surfix, features, features_begin,
                 sampleSeriesID.add(line[line.find("=")+1:].strip())
             if line.startswith("!Sample_instrument_model"):
                 sampleInstrumentID = line[line.find("=")+1:].strip()
+        file_obj.close()
 
         sample = GSM(sampleName)
         sample.characteristics = characteristics
@@ -180,7 +201,7 @@ def SOFTQuickParser(output_surfix, features, features_begin,
                 else:
                     print sample.title, "title has input or wce or IgG!"
 
-        file.close()
+
 
         # for char in characteristics.keys():
         #     totalCharacteristicsName[char]+=1
@@ -213,24 +234,25 @@ def SOFTQuickParser(output_surfix, features, features_begin,
         outputSample = "./" + "sampleWith" + output_surfix + ".csv"
         outputNoFeature = "./" + "noWith" + output_surfix + ".csv"
 
+    csv_file = open(outputOrganism, "wb")
+    writer = csv.writer(csv_file)
+    for key, value in totalOrganismsName.items():
+        writer.writerow([key, value])
+    csv_file.close()
 
-    with open(outputOrganism, "wb") as csv_file:
-        writer = csv.writer(csv_file)
-        for key, value in totalOrganismsName.items():
-            writer.writerow([key, value])
-
-    with open(outputSample, "wb") as csv_file:
-        writer = csv.writer(csv_file)
+    csv_file = open(outputSample, "wb")
+    writer = csv.writer(csv_file)
+    writer.writerow(
+        ['Sample_ID', "Title", "Organism", "Series_ID", "GPL_ID", "Instrument Model", "SRA_ID", "Library Strategy",
+         output_surfix + "_description", "Tissue", "Cell Line", "Cell Type", "Disease", "Treatment", "Genotype", "Antibody", "Feature in Title", "Feature in Ab",
+         "Feature in Title or Ab"])
+    for sample in samples.values():
         writer.writerow(
-            ['Sample_ID', "Title", "Organism", "Series_ID", "GPL_ID", "Instrument Model", "SRA_ID", "Library Strategy",
-             output_surfix + "_description", "Tissue", "Cell Line", "Cell Type", "Disease", "Treatment", "Genotype", "Antibody", "Feature in Title", "Feature in Ab",
-             "Feature in Title or Ab"])
-        for sample in samples.values():
-            writer.writerow(
-                [sample.id, sample.title, sample.organism, sample.series, sample.platForm, sample.InstrumentID,
-                 sample.SRA, sample.libraryStrategy, sample.features, sample.tissue, sample.cellLine, sample.cellType,
-                 sample.disease, sample.treatment, sample.genotype, sample.antibody, sample.title_found, sample.ab_found,
-                 sample.title_ab])
+            [sample.id, sample.title, sample.organism, sample.series, sample.platForm, sample.InstrumentID,
+             sample.SRA, sample.libraryStrategy, sample.features, sample.tissue, sample.cellLine, sample.cellType,
+             sample.disease, sample.treatment, sample.genotype, sample.antibody, sample.title_found, sample.ab_found,
+             sample.title_ab])
+    csv_file.close()
 
     csv_file = open(outputHuman, "wb")
     writer = csv.writer(csv_file)
@@ -263,15 +285,16 @@ def SOFTQuickParser(output_surfix, features, features_begin,
     csv_file.close()
 
     if geo:
-        with open(outputNoFeature, "wb") as csv_file:
-            writer = csv.writer(csv_file)
-            writer.writerow(['Sample_ID', "Title", "Organism", "Series_ID", "GPL_ID", "Instrument Model", "SRA_ID", "Library Strategy",
-                output_surfix+"_description", "Tissue", "Cell Line", "Disease", "Treatment", "Genotype", "Antibody", "Feature in Title", "Feature in Ab"])
-            for sample in notFeature.values():
-                writer.writerow(
-                    [sample.id, sample.title, sample.organism, sample.series, sample.platForm, sample.InstrumentID,
-                     sample.SRA, sample.libraryStrategy, sample.features, sample.tissue, sample.cellLine,
-                     sample.disease, sample.treatment, sample.genotype, sample.antibody, sample.title_found, sample.ab_found])
+        csv_file = open(outputNoFeature, "wb")
+        writer = csv.writer(csv_file)
+        writer.writerow(['Sample_ID', "Title", "Organism", "Series_ID", "GPL_ID", "Instrument Model", "SRA_ID", "Library Strategy",
+            output_surfix+"_description", "Tissue", "Cell Line", "Disease", "Treatment", "Genotype", "Antibody", "Feature in Title", "Feature in Ab"])
+        for sample in notFeature.values():
+            writer.writerow(
+                [sample.id, sample.title, sample.organism, sample.series, sample.platForm, sample.InstrumentID,
+                 sample.SRA, sample.libraryStrategy, sample.features, sample.tissue, sample.cellLine,
+                 sample.disease, sample.treatment, sample.genotype, sample.antibody, sample.title_found, sample.ab_found])
+        csv_file.close()
     return
 
 
