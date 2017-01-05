@@ -1,9 +1,8 @@
 import pickle
 import sqlite3
 from collections import defaultdict
-import urllib
-import re
 from ftplib import FTP
+import pandas as pd
 
 def save_obj(obj, name):
     with open(name + '.pkl', 'wb') as f:
@@ -38,11 +37,14 @@ def GSMGSE_pickle(path='/home/tmhbxx3/archive/GEO_MetaDatabase/geoMetaData.db', 
 
     query = db.execute("select distinct GSM_ID, SRA from GSM").fetchall()
 
+    print "fetching complete!"
+
     GSMSRR_map = defaultdict(set)
+    SRR_map = {}
 
     if partition is not None:
         length = len(query)
-        blocksize = length/100
+        blocksize = length/1000
         start = partition * blocksize
         end = (partition+1) * blocksize
         query = query[start:end]
@@ -51,32 +53,36 @@ def GSMGSE_pickle(path='/home/tmhbxx3/archive/GEO_MetaDatabase/geoMetaData.db', 
         if SRXlink == "":
             continue
 
-        page = urllib.urlopen(SRXlink).read()
-
-        SRRids = re.findall("SRR[0-9]+", page)
-        DRRids = re.findall("DRR[0-9]+", page)
-        ERXids = re.findall("ERX[0-9]+", page)
-
-        SRRids += DRRids + ERXids
-
-        GSMSRR_map[GSM_ID].union(set(SRRids))
-
-        for ID in SRRids:
-            GSMSRR_map[ID].add(GSM_ID)
+        SRX = SRXlink[(SRXlink.find("=") + 1):].strip()
+        url = "https://trace.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?sp=runinfo&acc=" + SRX + "&retmode=txt"
+        page = pd.read_csv(url)
+        for i in range (page.shape[0]):
+            SRRid = page.ix[i, "Run"]
+            download_path = page.ix[i, "download_path"]
+            layout = page.ix[i, "LibraryLayout"]
+            avg_length = page.ix[i, "avgLength"]
+            GSMSRR_map[GSM_ID].add(SRRid)
+            SRR_map[SRRid] = SRR(SRRid, download_path, layout, avg_length, GSM_ID)
 
     if partition is not None:
         output_name_GSMSRR = "GSMSRR_map"+str(partition)
-        output_name_SRR_ftp_map = "SRR_ftp" + str(partition)
+        output_name_SRR_ftp_map = "SRR_map" + str(partition)
     else:
         output_name_GSMSRR = "GSMSRR_map"
-        output_name_SRR_ftp_map = "SRR_ftp"
+        output_name_SRR_ftp_map = "SRR_map"
     save_obj(GSMSRR_map, output_name_GSMSRR)
 
-
-    # SRR_ftp_map = defaultdict(set)
-    # save_obj(SRR_ftp_map, output_name_SRR_ftp_map)
+    save_obj(SRR_map, output_name_SRR_ftp_map)
 
     db.close
+
+class SRR:
+    def __init__(self, SRRid, download_path, layout, avg_length, gsm_id):
+        self.SRRid = SRRid
+        self.download_path = download_path
+        self.layout = layout
+        self.avg_length = avg_length
+        self.gsm_id = gsm_id
 
 if __name__ == "__main__":
     GSMGSE_pickle(partition=None)

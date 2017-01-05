@@ -12,7 +12,7 @@ import sqlite3
 def similar(a, b):
     return SequenceMatcher(None, a, b).ratio()
 
-def SOFTQuickRelated(featured_samples, cwd):
+def SOFTQuickRelated(featured_samples, cwd, output_type, type_seq):
     if cwd == None:
         return
 
@@ -83,7 +83,7 @@ def SOFTQuickRelated(featured_samples, cwd):
         title_found = False
         ab_found = False
 
-        if len(proc.open_files()) > 0:
+        if len(proc.open_files()) > 100:
             print "More than one file is open, stop!"
             return
         # n += 1
@@ -171,8 +171,8 @@ def SOFTQuickRelated(featured_samples, cwd):
         if title_found or ab_found:
             sample.title_ab = True
 
-        if sample.organism == "Homo sapiens" and (sample.SRA != None or sample.SRA.strip() != "") and \
-                sample.InstrumentID.startswith('Illu') and sample.libraryStrategy.lower() == "chip-seq":
+        if (sample.organism == output_type or output_type is None) and (sample.SRA != None or sample.SRA.strip() != "") and \
+                sample.InstrumentID.startswith('Illu') and (sample.libraryStrategy.lower() == type_seq or type_seq is None):
             relatedSamples[sample.id] = sample
             for gse in sample.series:
                 groupByGSE[gse].add(sample.id)
@@ -249,7 +249,7 @@ def keyword(message, features, features_begin, ignorecase):
                 return feature
 
 def input_finder(output_surffix, HumanSamples, groupByGSE, encodeGSE, relatedSamples,
-                 features, features_begin, ignorecase):
+                 features, features_begin, ignorecase, output_type):
     FirstSampleToInput = defaultdict(set)
 
     ThirdSampleToInput = defaultdict(set)
@@ -411,8 +411,8 @@ def input_finder(output_surffix, HumanSamples, groupByGSE, encodeGSE, relatedSam
 
     # print not_found
 
-    output1 = "./First_" + output_surffix + "_Sample_To_Input.csv"
-    output3 = "./Third_" + output_surffix + "_Sample_To_Input.csv"
+    output1 = "./First_" + output_surffix + "_" + output_type + "_Sample_To_Input.csv"
+    output3 = "./Third_" + output_surffix + "_" + output_type +"_Sample_To_Input.csv"
 
     output = open(output1, "w")
     for key, value in FirstSampleToInput.items():
