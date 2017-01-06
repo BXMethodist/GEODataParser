@@ -222,6 +222,8 @@ def SOFTQuickParser(output_surfix, features, features_begin,
                                                   features, features_begin, ignorecase, output_type)
 
     #### output results to csv
+    output_type = output_type.replace(" ", "_")
+
     if geo:
         outputOrganism = "./"+"GEOsearch"+"organimsWith" + output_surfix +".csv"
         outputHuman = "./"+"GEOsearch"+ output_type +"With" + output_surfix + ".csv"
@@ -243,13 +245,13 @@ def SOFTQuickParser(output_surfix, features, features_begin,
     csv_file = open(outputSample, "wb")
     writer = csv.writer(csv_file)
     writer.writerow(
-        ['Sample_ID', "Title", "Organism", "Series_ID", "GPL_ID", "Instrument Model", "SRA_ID", "Library Strategy",
-         output_surfix + "_description", "Tissue", "Cell Line", "Cell Type", "Disease", "Treatment", "Genotype", "Antibody", "Feature in Title", "Feature in Ab",
+        ['Sample_ID', "Series_ID", output_surfix + "_description", "Organism", "Title", "GPL_ID", "Instrument Model", "SRA_ID", "Library Strategy",
+         "Tissue", "Cell Line", "Cell Type", "Disease", "Treatment", "Genotype", "Antibody", "Feature in Title", "Feature in Ab",
          "Feature in Title or Ab"])
     for sample in samples.values():
         writer.writerow(
-            [sample.id, sample.title, sample.organism, sample.series, sample.platForm, sample.InstrumentID,
-             sample.SRA, sample.libraryStrategy, sample.features, sample.tissue, sample.cellLine, sample.cellType,
+            [sample.id, sample.series, sample.features, sample.organism, sample.title, sample.platForm, sample.InstrumentID,
+             sample.SRA, sample.libraryStrategy, sample.tissue, sample.cellLine, sample.cellType,
              sample.disease, sample.treatment, sample.genotype, sample.antibody, sample.title_found, sample.ab_found,
              sample.title_ab])
     csv_file.close()
@@ -257,8 +259,9 @@ def SOFTQuickParser(output_surfix, features, features_begin,
     csv_file = open(outputHuman, "wb")
     writer = csv.writer(csv_file)
     writer.writerow(
-        ['Sample_ID', "Title", "Input_ID", "Input_Title", "Organism", "Series_ID", "GPL_ID", "Instrument Model", "SRA_ID", "Library Strategy",
-         output_surfix+"_description", "Tissue", "Cell Line", "Cell Type", "Disease", "Treatment", "Genotype", "Antibody", "Feature in Title",
+        ['Sample_ID', "Series_ID", output_surfix + "_description", "Input_ID", "Input_Description", "Organism", "Title",
+         "GPL_ID", "Instrument Model", "SRA_ID", "Library Strategy",
+         "Tissue", "Cell Line", "Cell Type", "Disease", "Treatment", "Genotype", "Antibody", "Feature in Title",
          "Feature in Ab", "Feature in Title or Ab"])
     for sample in Human_Samples.values():
         potential_input_id = ""
@@ -273,28 +276,29 @@ def SOFTQuickParser(output_surfix, features, features_begin,
         elif len(third_category) != 0:
             for id in third_category[sample.id]:
                 potential_input_id += id + ","
-                potential_input_title += relatedSamples[id].title +","
+                for key, value in relatedSamples[id].antibody.items():
+                    potential_input_title += key+":"+value+","
             potential_input_id = potential_input_id[:-1]
             potential_input_title = potential_input_title[:-1]
 
         writer.writerow(
-            [sample.id, sample.title, potential_input_id, potential_input_title, sample.organism, sample.series,
-             sample.platForm, sample.InstrumentID, sample.SRA, sample.libraryStrategy, sample.features, sample.tissue,
+            [sample.id, sample.series, sample.features, potential_input_id, potential_input_title, sample.organism, sample.title,
+             sample.platForm, sample.InstrumentID, sample.SRA, sample.libraryStrategy, sample.tissue,
              sample.cellLine, sample.cellType, sample.disease, sample.treatment, sample.genotype, sample.antibody,
              sample.title_found, sample.ab_found, sample.title_ab])
     csv_file.close()
 
-    if geo:
-        csv_file = open(outputNoFeature, "wb")
-        writer = csv.writer(csv_file)
-        writer.writerow(['Sample_ID', "Title", "Organism", "Series_ID", "GPL_ID", "Instrument Model", "SRA_ID", "Library Strategy",
-            output_surfix+"_description", "Tissue", "Cell Line", "Disease", "Treatment", "Genotype", "Antibody", "Feature in Title", "Feature in Ab"])
-        for sample in notFeature.values():
-            writer.writerow(
-                [sample.id, sample.title, sample.organism, sample.series, sample.platForm, sample.InstrumentID,
-                 sample.SRA, sample.libraryStrategy, sample.features, sample.tissue, sample.cellLine,
-                 sample.disease, sample.treatment, sample.genotype, sample.antibody, sample.title_found, sample.ab_found])
-        csv_file.close()
+    # if geo:
+    #     csv_file = open(outputNoFeature, "wb")
+    #     writer = csv.writer(csv_file)
+    #     writer.writerow(['Sample_ID', "Title", "Organism", "Series_ID", "GPL_ID", "Instrument Model", "SRA_ID", "Library Strategy",
+    #         output_surfix+"_description", "Tissue", "Cell Line", "Disease", "Treatment", "Genotype", "Antibody", "Feature in Title", "Feature in Ab"])
+    #     for sample in notFeature.values():
+    #         writer.writerow(
+    #             [sample.id, sample.title, sample.organism, sample.series, sample.platForm, sample.InstrumentID,
+    #              sample.SRA, sample.libraryStrategy, sample.features, sample.tissue, sample.cellLine,
+    #              sample.disease, sample.treatment, sample.genotype, sample.antibody, sample.title_found, sample.ab_found])
+    #     csv_file.close()
     return
 
 
@@ -302,12 +306,12 @@ if __name__ == "__main__":
     SOFTQuickParser("androgen_receptor", ["AR-", "AR_"," AR", "-AR", "_AR",
                                           "androgen_receptor", "androgen-receptor", "androgen receptor"],
                     ["AR ",], type_seq="chip-seq", cwd="/home/tmhbxx3/scratch/XMLhttp/QuickXMLs",
-                    ignorecase=False, geo=False, geofile=None)
+                    ignorecase=False, geo=True, geofile="./unique_AR.txt")
 
-    SOFTQuickParser("androgen_receptor", ["AR-", "AR_"," AR", "-AR", "_AR",
-                                          "androgen_receptor", "androgen-receptor", "androgen receptor"],
-                    ["AR ",], type_seq="chip-seq", cwd="/home/tmhbxx3/scratch/XMLhttp/QuickXMLs",
-                    ignorecase=False, geo=False, geofile=None, output_type="Mus musculus")
+    # SOFTQuickParser("androgen_receptor", ["AR-", "AR_"," AR", "-AR", "_AR",
+    #                                       "androgen_receptor", "androgen-receptor", "androgen receptor"],
+    #                 ["AR ",], type_seq="chip-seq", cwd="/home/tmhbxx3/scratch/XMLhttp/QuickXMLs",
+    #                 ignorecase=False, geo=False, geofile=None, output_type="Mus musculus")
 #
     # SOFTQuickParser("H3K4me3", ["h3k4me3", "k4me3"],
     #                 [], type_seq="chip-seq", cwd="/home/tmhbxx3/scratch/XMLhttp/QuickXMLs",

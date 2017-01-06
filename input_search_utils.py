@@ -51,7 +51,7 @@ def SOFTQuickRelated(featured_samples, cwd, output_type, type_seq):
     n = 0
     keep = True
     while keep:
-        print n
+        # print n
         n += 998
         if n < len(allrelatedGSEs):
             block = allrelatedGSEs[n-998: n]
@@ -272,7 +272,7 @@ def input_finder(output_surffix, HumanSamples, groupByGSE, encodeGSE, relatedSam
 
         feature_key_word = keyword(sample.title, features, features_begin, ignorecase)
 
-        print feature_key_word
+        # print feature_key_word
 
         encode = False
         for gse in sample.series:
@@ -379,7 +379,7 @@ def input_finder(output_surffix, HumanSamples, groupByGSE, encodeGSE, relatedSam
                 # else:
                 #     print relatedSamples[relatedSample].title
 
-        print related_keyword, bestMatchID, bestSimilarity
+        # print related_keyword, bestMatchID, bestSimilarity
 
         if bestMatchID:
             FirstSampleToInput[sample.id].add(bestMatchID)
@@ -392,25 +392,24 @@ def input_finder(output_surffix, HumanSamples, groupByGSE, encodeGSE, relatedSam
         for gse in targetGSEs:
             for relatedSample in groupByGSE[gse]:
                 for v in relatedSamples[relatedSample].antibody.values():
-                    if v.find("input") and sample.id != relatedSamples[relatedSample].id:
+                    if v.find("input")!= -1 and sample.id != relatedSamples[relatedSample].id:
                         ThirdSampleToInput[sample.id].add(relatedSamples[relatedSample].id)
                         break
-                    elif v.lower().find(" wce ") and sample.id != relatedSamples[relatedSample].id:
+                    elif v.lower().find(" wce ") != -1 and sample.id != relatedSamples[relatedSample].id:
                         ThirdSampleToInput[sample.id].add(relatedSamples[relatedSample].id)
                         break
-                    elif v.lower().find("whole cell extract") and sample.id != relatedSamples[relatedSample].id:
+                    elif v.lower().find("whole cell extract") != -1 and sample.id != relatedSamples[relatedSample].id:
                         ThirdSampleToInput[sample.id].add(relatedSamples[relatedSample].id)
                         break
-                if sample.id in ThirdSampleToInput:
-                    break
-            if sample.id in ThirdSampleToInput:
-                break
+                    elif v.find("IgG") != -1 and sample.id != relatedSamples[relatedSample].id:
+                        ThirdSampleToInput[sample.id].add(relatedSamples[relatedSample].id)
+                        break
 
         if not sample.id in ThirdSampleToInput:
             not_found += 1
 
     # print not_found
-
+    output_type = output_type.replace(" ", "_")
     output1 = "./First_" + output_surffix + "_" + output_type + "_Sample_To_Input.csv"
     output3 = "./Third_" + output_surffix + "_" + output_type +"_Sample_To_Input.csv"
 
@@ -427,10 +426,10 @@ def input_finder(output_surffix, HumanSamples, groupByGSE, encodeGSE, relatedSam
     output = open(output3, "w")
     for key, value in ThirdSampleToInput.items():
         writer = csv.writer(output)
-        row = [key] + [HumanSamples[key].title]
+        row = [key] + [HumanSamples[key].antibody]
         # print value
         for id in value:
-            row += [id] + [relatedSamples[id].title]
+            row += [id] + [relatedSamples[id].antibody]
         writer.writerow(row)
     output.close()
 
