@@ -12,7 +12,7 @@ from pickleUtils import load_obj
 def similar(a, b):
     return SequenceMatcher(None, a, b).ratio()
 
-def SOFTQuickRelated(featured_samples, cwd, output_type, type_seq, encodeGSE=set()):
+def SOFTQuickRelated(featured_samples, cwd, output_type, type_seq, GSEGSM_map, encodeGSE=set()):
     if cwd == None:
         return
 
@@ -39,9 +39,6 @@ def SOFTQuickRelated(featured_samples, cwd, output_type, type_seq, encodeGSE=set
     allrelatedGSEs = list(allrelatedGSEs)
 
     allrelatedGSMs = set()
-
-    GSEGSM_map = load_obj("/home/tmhbxx3/scratch/XMLhttp/pickles/GSMGSE_map.pkl")
-
 
     for gse in allrelatedGSEs:
         allrelatedGSMs = allrelatedGSMs.union(GSEGSM_map[gse])

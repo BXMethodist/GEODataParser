@@ -25,6 +25,16 @@ def SOFTQuickParser(output_surfix, features, features_begin,
     else:
         roadmapGSE = set()
 
+    excludedGSE = encodeGSE.union(roadmapGSE)
+
+    GSEGSM_map = load_obj("/home/tmhbxx3/scratch/XMLhttp/pickles/GSMGSE_map.pkl")
+
+    excludedGSM = set()
+
+    for gse in excludedGSE:
+        excludedGSM = excludedGSM.union(GSEGSM_map[gse])
+
+    print excludedGSM
 
     proc = psutil.Process()
 
@@ -207,7 +217,7 @@ def SOFTQuickParser(output_surfix, features, features_begin,
 
         if (sample.organism == output_type or output_type is None) and (sample.SRA != None and sample.SRA.strip() != "") and \
                 sample.InstrumentID.startswith('Illu') and (sample.libraryStrategy.lower() == type_seq or type_seq is None)\
-                and sample.id not in encodeGSE and sample.id not in roadmapGSE:
+                and sample.id not in excludedGSM:
             if sample.title_ab:
                 if sample.title.lower().find("input") == -1 \
                         and sample.title.lower().find("wce") == -1 \
@@ -220,7 +230,7 @@ def SOFTQuickParser(output_surfix, features, features_begin,
 
         # for char in characteristics.keys():
         #     totalCharacteristicsName[char]+=1
-        if len(target_feature) != 0 and sample.id not in encodeGSE and sample.id not in roadmapGSE:
+        if len(target_feature) != 0 and sample.id not in excludedGSM:
             samples[sampleName] = sample
             totalOrganismsName[sampleOrganism]+=1
         else:
@@ -229,9 +239,9 @@ def SOFTQuickParser(output_surfix, features, features_begin,
     print "total human sample found", len(Human_Samples)
 
     if output_type is not None or output_type != "":
-        groupByGSE, encodeGSE, relatedSamples = SOFTQuickRelated(Human_Samples, cwd, output_type, type_seq, encodeGSE)
+        groupByGSE, encodeGSE, relatedSamples = SOFTQuickRelated(Human_Samples, cwd, output_type, type_seq, GSEGSM_map, encodeGSE)
     else:
-        groupByGSE, encodeGSE, relatedSamples = SOFTQuickRelated(samples, cwd, output_type, type_seq, encodeGSE)
+        groupByGSE, encodeGSE, relatedSamples = SOFTQuickRelated(samples, cwd, output_type, type_seq, GSEGSM_map, encodeGSE)
 
     first_category, third_category = input_finder(output_surfix, Human_Samples, groupByGSE, encodeGSE, relatedSamples,
                                                   features, features_begin, ignorecase, output_type)
@@ -303,17 +313,6 @@ def SOFTQuickParser(output_surfix, features, features_begin,
              sample.title_found, sample.ab_found, sample.title_ab])
     csv_file.close()
 
-    # if geo:
-    #     csv_file = open(outputNoFeature, "wb")
-    #     writer = csv.writer(csv_file)
-    #     writer.writerow(['Sample_ID', "Title", "Organism", "Series_ID", "GPL_ID", "Instrument Model", "SRA_ID", "Library Strategy",
-    #         output_surfix+"_description", "Tissue", "Cell Line", "Disease", "Treatment", "Genotype", "Antibody", "Feature in Title", "Feature in Ab"])
-    #     for sample in notFeature.values():
-    #         writer.writerow(
-    #             [sample.id, sample.title, sample.organism, sample.series, sample.platForm, sample.InstrumentID,
-    #              sample.SRA, sample.libraryStrategy, sample.features, sample.tissue, sample.cellLine,
-    #              sample.disease, sample.treatment, sample.genotype, sample.antibody, sample.title_found, sample.ab_found])
-    #     csv_file.close()
     return
 
 
