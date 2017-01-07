@@ -34,7 +34,7 @@ def SOFTQuickParser(output_surfix, features, features_begin,
     for gse in excludedGSE:
         excludedGSM = excludedGSM.union(GSEGSM_map[gse])
 
-    print excludedGSM
+    # print excludedGSM
 
     proc = psutil.Process()
 
@@ -225,6 +225,7 @@ def SOFTQuickParser(output_surfix, features, features_begin,
                     Human_Samples[sample.id] = sample
                 else:
                     print sample.title, "title has input or wce or IgG!"
+                    continue
 
 
 
@@ -329,4 +330,4 @@ if __name__ == "__main__":
 #
     SOFTQuickParser("H3K4me3", ["h3k4me3", "k4me3", "k4m3", "h3k4m3"],
                     [], type_seq="chip-seq", cwd="/home/tmhbxx3/scratch/XMLhttp/QuickXMLs",
-                    ignorecase=True, geo=False, geofile=None, encode_remove=True, roadmap_remove=True)
+                    ignorecase=True, geo=False, geofile=None, encode_remove=False, roadmap_remove=False)
