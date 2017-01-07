@@ -6,12 +6,25 @@ from collections import defaultdict
 import csv
 from input_search_utils import SOFTQuickRelated, input_finder, has_features
 import psutil
+from pickleUtils import load_obj
 
 
 def SOFTQuickParser(output_surfix, features, features_begin,
-                    type_seq="chip-seq", cwd=None, ignorecase=True, geo=False, geofile=None, output_type="Homo sapiens"):
+                    type_seq="chip-seq", cwd=None, ignorecase=True, geo=False, geofile=None, output_type="Homo sapiens",
+                    encode_remove=False, roadmap_remove=False):
     if cwd == None:
         return
+
+    if encode_remove:
+        encodeGSE = load_obj("/home/tmhbxx3/scratch/XMLhttp/pickles/ENCODE_gse.pkl")
+    else:
+        encodeGSE = set()
+
+    if roadmap_remove:
+        roadmapGSE = load_obj("/home/tmhbxx3/scratch/XMLhttp/pickles/Roadmap_gse.pkl")
+    else:
+        roadmapGSE = set()
+
 
     proc = psutil.Process()
 
@@ -193,7 +206,8 @@ def SOFTQuickParser(output_surfix, features, features_begin,
             sample.title_ab = True
 
         if (sample.organism == output_type or output_type is None) and (sample.SRA != None and sample.SRA.strip() != "") and \
-                sample.InstrumentID.startswith('Illu') and (sample.libraryStrategy.lower() == type_seq or type_seq is None):
+                sample.InstrumentID.startswith('Illu') and (sample.libraryStrategy.lower() == type_seq or type_seq is None)\
+                and sample.id not in encodeGSE and sample.id not in roadmapGSE:
             if sample.title_ab:
                 if sample.title.lower().find("input") == -1 \
                         and sample.title.lower().find("wce") == -1 \
@@ -206,7 +220,7 @@ def SOFTQuickParser(output_surfix, features, features_begin,
 
         # for char in characteristics.keys():
         #     totalCharacteristicsName[char]+=1
-        if len(target_feature) != 0:
+        if len(target_feature) != 0 and sample.id not in encodeGSE and sample.id not in roadmapGSE:
             samples[sampleName] = sample
             totalOrganismsName[sampleOrganism]+=1
         else:
@@ -215,9 +229,9 @@ def SOFTQuickParser(output_surfix, features, features_begin,
     print "total human sample found", len(Human_Samples)
 
     if output_type is not None or output_type != "":
-        groupByGSE, encodeGSE, relatedSamples = SOFTQuickRelated(Human_Samples, cwd, output_type, type_seq)
+        groupByGSE, encodeGSE, relatedSamples = SOFTQuickRelated(Human_Samples, cwd, output_type, type_seq, encodeGSE)
     else:
-        groupByGSE, encodeGSE, relatedSamples = SOFTQuickRelated(samples, cwd, output_type, type_seq)
+        groupByGSE, encodeGSE, relatedSamples = SOFTQuickRelated(samples, cwd, output_type, type_seq, encodeGSE)
 
     first_category, third_category = input_finder(output_surfix, Human_Samples, groupByGSE, encodeGSE, relatedSamples,
                                                   features, features_begin, ignorecase, output_type)
@@ -304,16 +318,16 @@ def SOFTQuickParser(output_surfix, features, features_begin,
 
 
 if __name__ == "__main__":
-    SOFTQuickParser("androgen_receptor", ["AR-", "AR_"," AR", "-AR", "_AR",
-                                          "androgen_receptor", "androgen-receptor", "androgen receptor"],
-                    ["AR ",], type_seq="chip-seq", cwd="/home/tmhbxx3/scratch/XMLhttp/QuickXMLs",
-                    ignorecase=False, geo=True, geofile="./unique_AR.txt")
+    # SOFTQuickParser("androgen_receptor", ["AR-", "AR_"," AR", "-AR", "_AR",
+    #                                       "androgen_receptor", "androgen-receptor", "androgen receptor"],
+    #                 ["AR ",], type_seq="chip-seq", cwd="/home/tmhbxx3/scratch/XMLhttp/QuickXMLs",
+    #                 ignorecase=False, geo=True, geofile="./unique_AR.txt")
 
     # SOFTQuickParser("androgen_receptor", ["AR-", "AR_"," AR", "-AR", "_AR",
     #                                       "androgen_receptor", "androgen-receptor", "androgen receptor"],
     #                 ["AR ",], type_seq="chip-seq", cwd="/home/tmhbxx3/scratch/XMLhttp/QuickXMLs",
     #                 ignorecase=False, geo=False, geofile=None, output_type="Mus musculus")
 #
-    # SOFTQuickParser("H3K4me3", ["h3k4me3", "k4me3"],
-    #                 [], type_seq="chip-seq", cwd="/home/tmhbxx3/scratch/XMLhttp/QuickXMLs",
-    #                 ignorecase=True, geo=False, geofile=None)
+    SOFTQuickParser("H3K4me3", ["h3k4me3", "k4me3", "k4m3", "h3k4m3"],
+                    [], type_seq="chip-seq", cwd="/home/tmhbxx3/scratch/XMLhttp/QuickXMLs",
+                    ignorecase=True, geo=False, geofile=None, encode_remove=True, roadmap_remove=True)
