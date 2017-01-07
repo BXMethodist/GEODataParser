@@ -184,6 +184,7 @@ def SOFTQuickParser(output_surfix, features, features_begin,
         sample.treatment = treatment
         sample.disease = disease
         sample.cellLine = cellLine
+        sample.cellType = cellType
         sample.genotype = genoType
         sample.tissue = tissue
         sample.title_found = title_found

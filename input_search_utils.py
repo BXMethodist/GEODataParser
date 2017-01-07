@@ -7,7 +7,7 @@ import re
 from collections import defaultdict
 import csv
 from difflib import SequenceMatcher
-import sqlite3
+from pickleUtils import load_obj
 
 def similar(a, b):
     return SequenceMatcher(None, a, b).ratio()
@@ -22,10 +22,6 @@ def SOFTQuickRelated(featured_samples, cwd, output_type, type_seq):
 
     groupByGSE = defaultdict(set)
 
-
-    db = sqlite3.connect('/home/tmhbxx3/archive/GEO_MetaDatabase/geoMetaData.db')
-    db.text_factory = str
-
     relatedGSEs = []
 
     featureGSMs = set()
@@ -36,10 +32,7 @@ def SOFTQuickRelated(featured_samples, cwd, output_type, type_seq):
 
     relatedGSEs = set(relatedGSEs)
 
-    encodeGSE = set()
-    allGSEs = db.execute('select distinct GSE_ID from GSE where organization = "ENCODE DCC"').fetchall()
-    for gse in allGSEs:
-        encodeGSE.add(gse[0])
+    encodeGSE = load_obj("/home/tmhbxx3/scratch/XMLhttp/pickles/ENCODE_gse.pkl")
 
     # print len(encodeGSE)
 
@@ -48,28 +41,12 @@ def SOFTQuickRelated(featured_samples, cwd, output_type, type_seq):
 
     allrelatedGSMs = set()
 
-    n = 0
-    keep = True
-    while keep:
-        # print n
-        n += 998
-        if n < len(allrelatedGSEs):
-            block = allrelatedGSEs[n-998: n]
-        else:
-            block = allrelatedGSEs[n-998: -1]
-            keep = False
-        query = db.execute("SELECT distinct GSM_ID FROM GSEtoGSM WHERE GSE_ID IN (" + ",".join("?" * len(block)) + ")", block).fetchall()
+    GSEGSM_map = load_obj("/home/tmhbxx3/scratch/XMLhttp/pickles/GSMGSE_map.pkl")
 
-        for gsmid in query:
-            if gsmid[0] not in featureGSMs:
-                allrelatedGSMs.add(gsmid[0])
-    db.close()
-
-    # print len(allrelatedGSMs)
+    for gse in allrelatedGSEs:
+        allrelatedGSMs.union(GSEGSM_map[gse])
 
     allrelatedGSMs = list(allrelatedGSMs)
-
-    # n = 0
 
     for filegsm in allrelatedGSMs:
         filename = filegsm+".xml"
@@ -145,6 +122,9 @@ def SOFTQuickRelated(featured_samples, cwd, output_type, type_seq):
         sample.platForm = samplePlatForm
         sample.InstrumentID = sampleInstrumentID
 
+        cellLine = ""
+        cellType = ""
+
         for key, value in characteristics.items():
             if key.lower() in ["chip antibody", "chip", "antigen", "antibody", "antibodies", "chip antibodies",
                                "antibody name", "antibody target", "target", "antibody/capture", "antibody/vendor/catalog#",
@@ -164,7 +144,16 @@ def SOFTQuickRelated(featured_samples, cwd, output_type, type_seq):
                 else:
                     antibody[key] = value
 
+            if key.lower() in ["cell line",  "cell", "cells pointed by barcodes",
+                           "chicken line", "line"]:
+                cellLine += value
+
+            if key.lower() in ["cell_type", "cell-type", "cell type", "cell lineage"]:
+                cellType += value
+
         sample.antibody = antibody
+        sample.cellLine = cellLine
+        sample.cellType = cellType
 
         sample.title_found = title_found
         sample.ab_found = ab_found
@@ -292,7 +281,8 @@ def input_finder(output_surffix, HumanSamples, groupByGSE, encodeGSE, relatedSam
         for gse in targetGSEs:
             for relatedSample in groupByGSE[gse]:
                 score = None
-                if relatedSamples[relatedSample].title.lower().find("input") != -1:
+                if relatedSamples[relatedSample].title.lower().find("input") != -1\
+                        and sample.cellLine == relatedSamples[relatedSample].cellLine:
                     score = Similarity(sample.title, feature_key_word, relatedSamples[relatedSample].title,
                                        "input")
                     if related_keyword == None or related_keyword == "input":
@@ -310,7 +300,8 @@ def input_finder(output_surffix, HumanSamples, groupByGSE, encodeGSE, relatedSam
                         bestSimilarity = score
                         bestMatchID = relatedSamples[relatedSample].id
 
-                elif relatedSamples[relatedSample].title.lower().find("inpu") != -1:
+                elif relatedSamples[relatedSample].title.lower().find("inpu") != -1\
+                        and sample.cellLine == relatedSamples[relatedSample].cellLine:
                     score = Similarity(sample.title, feature_key_word, relatedSamples[relatedSample].title,
                                        "wce")
                     if related_keyword == None or related_keyword == "inpu":
@@ -333,7 +324,8 @@ def input_finder(output_surffix, HumanSamples, groupByGSE, encodeGSE, relatedSam
                         bestSimilarity = score
                         bestMatchID = relatedSamples[relatedSample].id
 
-                elif relatedSamples[relatedSample].title.lower().find("wce") != -1:
+                elif relatedSamples[relatedSample].title.lower().find("wce") != -1 \
+                        and sample.cellLine == relatedSamples[relatedSample].cellLine:
                     score = Similarity(sample.title, feature_key_word, relatedSamples[relatedSample].title,
                                        "wce")
                     if related_keyword == None or related_keyword == "wce":
@@ -356,7 +348,8 @@ def input_finder(output_surffix, HumanSamples, groupByGSE, encodeGSE, relatedSam
                         bestSimilarity = score
                         bestMatchID = relatedSamples[relatedSample].id
 
-                elif relatedSamples[relatedSample].title.lower().find("IgG") != -1:
+                elif relatedSamples[relatedSample].title.lower().find("IgG") != -1 \
+                        and sample.cellLine == relatedSamples[relatedSample].cellLine:
                     score = Similarity(sample.title, feature_key_word, relatedSamples[relatedSample].title,
                                        "IgG")
                     if related_keyword == None or related_keyword == "IgG":
@@ -368,7 +361,8 @@ def input_finder(output_surffix, HumanSamples, groupByGSE, encodeGSE, relatedSam
                         related_keyword = "IgG"
                         bestSimilarity = score
                         bestMatchID = relatedSamples[relatedSample].id
-                elif relatedSamples[relatedSample].title.lower().find("control") != -1:
+                elif relatedSamples[relatedSample].title.lower().find("control") != -1 \
+                        and sample.cellLine == relatedSamples[relatedSample].cellLine:
                     score = Similarity(sample.title, feature_key_word, relatedSamples[relatedSample].title,
                                        "control")
                     if related_keyword == None or related_keyword == "control":
