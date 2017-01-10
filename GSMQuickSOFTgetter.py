@@ -1,10 +1,10 @@
-from xml.dom import minidom
-from GSM import GSM
+import csv
 import os
 import re
-import json
 from collections import defaultdict
-import csv
+
+from GEOsearch.GSM import GSM
+
 
 def SOFTQuickParser(GSMs, requestedFeature=None, cwd="/home/tmhbxx3/scratch/XMLhttp/QuickXMLs"):
     if cwd == None:

@@ -1,13 +1,15 @@
 #### TO DO, create new database version
 
-import psutil
-from GSM import GSM
-import os
+import csv
 import re
 from collections import defaultdict
-import csv
 from difflib import SequenceMatcher
+
+import psutil
+
+from GEOsearch.GSM import GSM
 from pickleUtils import load_obj
+
 
 def similar(a, b):
     return SequenceMatcher(None, a, b).ratio()
@@ -236,6 +238,15 @@ def keyword(message, features, features_begin, ignorecase):
             if re.match(feature, message):
                 return feature
 
+def Character_Similarity(sample1, sample2):
+    score = 0
+    for key, value in sample1.characteristics.items():
+        if key in sample2.characteristics:
+            if value == sample2.characteristics[key]:
+                score += 1
+    return score
+
+
 def input_finder(output_surffix, HumanSamples, groupByGSE, encodeGSE, relatedSamples,
                  features, features_begin, ignorecase, output_type):
     FirstSampleToInput = defaultdict(set)
@@ -382,24 +393,28 @@ def input_finder(output_surffix, HumanSamples, groupByGSE, encodeGSE, relatedSam
     for key in noneTitle:
         sample = HumanSamples[key]
         targetGSEs = set(sample.series)
+
+        best_char_score = 0
+        best_id = None
+
         for gse in targetGSEs:
             for relatedSample in groupByGSE[gse]:
+                char_score = 0
                 for v in relatedSamples[relatedSample].antibody.values():
                     if v.find("input")!= -1 and sample.id != relatedSamples[relatedSample].id:
-                        ThirdSampleToInput[sample.id].add(relatedSamples[relatedSample].id)
-                        break
+                        char_score = Character_Similarity(sample, relatedSamples[relatedSample])
                     elif v.lower().find(" wce ") != -1 and sample.id != relatedSamples[relatedSample].id:
-                        ThirdSampleToInput[sample.id].add(relatedSamples[relatedSample].id)
-                        break
+                        char_score = Character_Similarity(sample, relatedSamples[relatedSample])
                     elif v.lower().find("whole cell extract") != -1 and sample.id != relatedSamples[relatedSample].id:
-                        ThirdSampleToInput[sample.id].add(relatedSamples[relatedSample].id)
-                        break
+                        char_score = Character_Similarity(sample, relatedSamples[relatedSample])
                     elif v.find("IgG") != -1 and sample.id != relatedSamples[relatedSample].id:
-                        ThirdSampleToInput[sample.id].add(relatedSamples[relatedSample].id)
-                        break
-
-        if not sample.id in ThirdSampleToInput:
-            not_found += 1
+                        char_score = Character_Similarity(sample, relatedSamples[relatedSample])
+                if char_score > best_char_score:
+                    best_id = relatedSamples[relatedSample].id
+        if best_id:
+            ThirdSampleToInput[sample.id].add(best_id)
+        else:
+            not_found+=1
 
     # print not_found
     output_type = output_type.replace(" ", "_")

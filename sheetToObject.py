@@ -1,10 +1,11 @@
 # This module is used for convert the parse sheet results to GSM objects
-from GSM import GSM
-import pandas as pd
-import numpy as np
 import ast
 from collections import defaultdict
-import csv
+
+import pandas as pd
+
+from GEOsearch.GSM import GSM
+
 
 def sheetToObjects(path):
     table = pd.read_csv(path, header=0)

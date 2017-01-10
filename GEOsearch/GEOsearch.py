@@ -1,11 +1,12 @@
-
-from GSM import GSM
+import csv
 import os
 import re
 from collections import defaultdict
-import csv
-from input_search_utils import SOFTQuickRelated, input_finder, has_features
+
 import psutil
+
+from GEOsearch.GSM import GSM
+from input_search_utils import SOFTQuickRelated, input_finder, has_features
 from pickleUtils import load_obj
 
 
@@ -314,7 +315,7 @@ def SOFTQuickParser(output_surfix, features, features_begin,
              sample.title_found, sample.ab_found, sample.title_ab])
     csv_file.close()
 
-    return
+    return Human_Samples
 
 
 if __name__ == "__main__":
@@ -330,4 +331,4 @@ if __name__ == "__main__":
 #
     SOFTQuickParser("H3K4me3", ["h3k4me3", "k4me3", "k4m3", "h3k4m3"],
                     [], type_seq="chip-seq", cwd="/home/tmhbxx3/scratch/XMLhttp/QuickXMLs",
-                    ignorecase=True, geo=False, geofile=None, encode_remove=True, roadmap_remove=True)
+                    ignorecase=True, geo=True, geofile="Third_catagory_test_list.txt", encode_remove=True, roadmap_remove=True)
