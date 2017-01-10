@@ -1,0 +1,42 @@
+GSMQuickSoftParser.py
+GSM.py
+input_search_utils.py
+pickleUtils.py
+
+
+pickles (still need SRR related pickles)
+GSEs metadata
+GSMs metadata
+
+
+
+Download:
+update GSE metadata
+update GSM metadata
+
+update pickles
+
+
+
+Argparser:
+
+
+
+
+
+GSMtoSRRdownload:
+
+
+GSMtoSRRquery:
+generate a txt table
+
+
+
+
+function provide:
+GEO search
+SRR info query
+update metadata
+SRR download
+
+

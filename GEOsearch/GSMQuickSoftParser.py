@@ -330,4 +330,4 @@ if __name__ == "__main__":
 #
     SOFTQuickParser("H3K4me3", ["h3k4me3", "k4me3", "k4m3", "h3k4m3"],
                     [], type_seq="chip-seq", cwd="/home/tmhbxx3/scratch/XMLhttp/QuickXMLs",
-                    ignorecase=True, geo=False, geofile=None, encode_remove=False, roadmap_remove=False)
+                    ignorecase=True, geo=False, geofile=None, encode_remove=True, roadmap_remove=True)
