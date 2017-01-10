@@ -1,4 +1,6 @@
-for i in range(10):
-    if True:
-        print i
-        break
+import re
+
+a = "CGH08AAA"
+
+b = re.sub("\d", "", a)
+print a, b

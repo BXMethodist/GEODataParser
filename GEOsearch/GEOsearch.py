@@ -5,7 +5,7 @@ from collections import defaultdict
 
 import psutil
 
-from GEOsearch.GSM import GSM
+from GSM import GSM
 from input_search_utils import SOFTQuickRelated, input_finder, has_features
 from pickleUtils import load_obj
 
@@ -332,3 +332,4 @@ if __name__ == "__main__":
     SOFTQuickParser("H3K4me3", ["h3k4me3", "k4me3", "k4m3", "h3k4m3"],
                     [], type_seq="chip-seq", cwd="/home/tmhbxx3/scratch/XMLhttp/QuickXMLs",
                     ignorecase=True, geo=True, geofile="Third_catagory_test_list.txt", encode_remove=True, roadmap_remove=True)
+    # pass

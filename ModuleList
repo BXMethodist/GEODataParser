@@ -4,9 +4,10 @@ input_search_utils.py
 pickleUtils.py
 
 
-pickles (still need SRR related pickles)
-GSEs metadata
+pickles
+GSEs metadata (need to test after load is it still collectiondefaultdict?)
 GSMs metadata
+
 
 
 

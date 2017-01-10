@@ -121,6 +121,6 @@ class SRR:
         self.avg_length = avg_length
         self.gsm_id = gsm_id
 
-if __name__ == "__main__":
-    # GSMGSE_pickle(partition=None)
-    roadmap_encode()
+# if __name__ == "__main__":
+#     # GSMGSE_pickle(partition=None)
+#     roadmap_encode()

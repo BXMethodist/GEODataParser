@@ -7,7 +7,7 @@ from difflib import SequenceMatcher
 
 import psutil
 
-from GEOsearch.GSM import GSM
+from GSM import GSM
 from pickleUtils import load_obj
 
 
@@ -239,11 +239,14 @@ def keyword(message, features, features_begin, ignorecase):
                 return feature
 
 def Character_Similarity(sample1, sample2):
-    score = 0
+    title1 = re.sub("\d", "", sample1.title)
+    title2 = re.sub("\d", "", sample2.title)
+    score = similar(title1, title2)
     for key, value in sample1.characteristics.items():
         if key in sample2.characteristics:
-            if value == sample2.characteristics[key]:
-                score += 1
+            score += similar(value, sample2.characteristics[key])
+
+    # print sample1.id, sample2.id, score
     return score
 
 
@@ -283,7 +286,7 @@ def input_finder(output_surffix, HumanSamples, groupByGSE, encodeGSE, relatedSam
         else:
             targetGSEs = set(sample.series)
 
-        bestMatchID = None
+        bestMatchID = set()
         bestSimilarity = float("-inf")
 
         related_keyword = None
@@ -299,40 +302,23 @@ def input_finder(output_surffix, HumanSamples, groupByGSE, encodeGSE, relatedSam
                         related_keyword = "input"
                         if score > bestSimilarity:
                             bestSimilarity = score
-                            bestMatchID = relatedSamples[relatedSample].id
+                            bestMatchID = set()
+                            bestMatchID.add(relatedSamples[relatedSample].id)
+                        elif score == bestSimilarity:
+                            bestMatchID.add(relatedSamples[relatedSample].id)
                     elif related_keyword == "wce":
                         if score > bestSimilarity:
                             bestSimilarity = score
-                            bestMatchID = relatedSamples[relatedSample].id
+                            bestMatchID = set()
+                            bestMatchID.add(relatedSamples[relatedSample].id)
                             related_keyword = "input"
+                        elif score == bestSimilarity:
+                            bestMatchID.add(relatedSamples[relatedSample].id)
                     else:
                         related_keyword = "input"
                         bestSimilarity = score
-                        bestMatchID = relatedSamples[relatedSample].id
-
-                elif relatedSamples[relatedSample].title.lower().find("inpu") != -1\
-                        and sample.cellLine == relatedSamples[relatedSample].cellLine:
-                    score = Similarity(sample.title, feature_key_word, relatedSamples[relatedSample].title,
-                                       "wce")
-                    if related_keyword == None or related_keyword == "inpu":
-                        related_keyword = "inpu"
-                        if score > bestSimilarity:
-                            bestSimilarity = score
-                            bestMatchID = relatedSamples[relatedSample].id
-                    elif related_keyword == "input":
-                        if score > bestSimilarity:
-                            bestSimilarity = score
-                            bestMatchID = relatedSamples[relatedSample].id
-                            related_keyword = "inpu"
-                    elif related_keyword == "wce":
-                        if score > bestSimilarity:
-                            bestSimilarity = score
-                            bestMatchID = relatedSamples[relatedSample].id
-                            related_keyword = "inpu"
-                    elif related_keyword == "IgG" or related_keyword == "control":
-                        related_keyword = "inpu"
-                        bestSimilarity = score
-                        bestMatchID = relatedSamples[relatedSample].id
+                        bestMatchID = set()
+                        bestMatchID.add(relatedSamples[relatedSample].id)
 
                 elif relatedSamples[relatedSample].title.lower().find("wce") != -1 \
                         and sample.cellLine == relatedSamples[relatedSample].cellLine:
@@ -342,21 +328,23 @@ def input_finder(output_surffix, HumanSamples, groupByGSE, encodeGSE, relatedSam
                         related_keyword = "wce"
                         if score > bestSimilarity:
                             bestSimilarity = score
-                            bestMatchID = relatedSamples[relatedSample].id
+                            bestMatchID = set()
+                            bestMatchID.add(relatedSamples[relatedSample].id)
+                        elif score == bestSimilarity:
+                            bestMatchID.add(relatedSamples[relatedSample].id)
                     elif related_keyword == "input":
                         if score > bestSimilarity:
                             bestSimilarity = score
-                            bestMatchID = relatedSamples[relatedSample].id
+                            bestMatchID = set()
+                            bestMatchID.add(relatedSamples[relatedSample].id)
                             related_keyword = "wce"
-                    elif related_keyword == "inpu":
-                        if score > bestSimilarity:
-                            bestSimilarity = score
-                            bestMatchID = relatedSamples[relatedSample].id
-                            related_keyword = "wce"
+                        elif score == bestSimilarity:
+                            bestMatchID.add(relatedSamples[relatedSample].id)
                     elif related_keyword == "IgG" or related_keyword == "control":
                         related_keyword = "wce"
                         bestSimilarity = score
-                        bestMatchID = relatedSamples[relatedSample].id
+                        bestMatchID = set()
+                        bestMatchID.add(relatedSamples[relatedSample].id)
 
                 elif relatedSamples[relatedSample].title.lower().find("IgG") != -1 \
                         and sample.cellLine == relatedSamples[relatedSample].cellLine:
@@ -366,11 +354,15 @@ def input_finder(output_surffix, HumanSamples, groupByGSE, encodeGSE, relatedSam
                         related_keyword = "IgG"
                         if score > bestSimilarity:
                             bestSimilarity = score
-                            bestMatchID = relatedSamples[relatedSample].id
+                            bestMatchID = set()
+                            bestMatchID.add(relatedSamples[relatedSample].id)
+                        elif score == bestSimilarity:
+                            bestMatchID.add(relatedSamples[relatedSample].id)
                     elif related_keyword == "control":
                         related_keyword = "IgG"
                         bestSimilarity = score
-                        bestMatchID = relatedSamples[relatedSample].id
+                        bestMatchID = set()
+                        bestMatchID.add(relatedSamples[relatedSample].id)
                 elif relatedSamples[relatedSample].title.lower().find("control") != -1 \
                         and sample.cellLine == relatedSamples[relatedSample].cellLine:
                     score = Similarity(sample.title, feature_key_word, relatedSamples[relatedSample].title,
@@ -379,14 +371,13 @@ def input_finder(output_surffix, HumanSamples, groupByGSE, encodeGSE, relatedSam
                         related_keyword = "control"
                         if score > bestSimilarity:
                             bestSimilarity = score
-                            bestMatchID = relatedSamples[relatedSample].id
-                # else:
-                #     print relatedSamples[relatedSample].title
-
-        # print related_keyword, bestMatchID, bestSimilarity
+                            bestMatchID = set()
+                            bestMatchID.add(relatedSamples[relatedSample].id)
+                        elif score == bestSimilarity:
+                            bestMatchID.add(relatedSamples[relatedSample].id)
 
         if bestMatchID:
-            FirstSampleToInput[sample.id].add(bestMatchID)
+            FirstSampleToInput[sample.id] = FirstSampleToInput[sample.id].union(bestMatchID)
         else:
             not_found += 1
 
@@ -395,24 +386,33 @@ def input_finder(output_surffix, HumanSamples, groupByGSE, encodeGSE, relatedSam
         targetGSEs = set(sample.series)
 
         best_char_score = 0
-        best_id = None
+        best_id = set()
 
         for gse in targetGSEs:
             for relatedSample in groupByGSE[gse]:
-                char_score = 0
+                char_score = None
                 for v in relatedSamples[relatedSample].antibody.values():
-                    if v.find("input")!= -1 and sample.id != relatedSamples[relatedSample].id:
+                    if v.find("input")!= -1 and sample.id != relatedSamples[relatedSample].id \
+                            and sample.cellLine == relatedSamples[relatedSample].cellLine:
                         char_score = Character_Similarity(sample, relatedSamples[relatedSample])
-                    elif v.lower().find(" wce ") != -1 and sample.id != relatedSamples[relatedSample].id:
+                    elif v.lower().find(" wce ") != -1 and sample.id != relatedSamples[relatedSample].id \
+                            and sample.cellLine == relatedSamples[relatedSample].cellLine:
                         char_score = Character_Similarity(sample, relatedSamples[relatedSample])
-                    elif v.lower().find("whole cell extract") != -1 and sample.id != relatedSamples[relatedSample].id:
+                    elif v.lower().find("whole cell extract") != -1 and sample.id != relatedSamples[relatedSample].id \
+                            and sample.cellLine == relatedSamples[relatedSample].cellLine:
                         char_score = Character_Similarity(sample, relatedSamples[relatedSample])
-                    elif v.find("IgG") != -1 and sample.id != relatedSamples[relatedSample].id:
+                    elif v.find("IgG") != -1 and sample.id != relatedSamples[relatedSample].id \
+                            and sample.cellLine == relatedSamples[relatedSample].cellLine:
                         char_score = Character_Similarity(sample, relatedSamples[relatedSample])
                 if char_score > best_char_score:
-                    best_id = relatedSamples[relatedSample].id
+                    best_id = set()
+                    best_id.add(relatedSamples[relatedSample].id)
+                    best_char_score = char_score
+                elif char_score == best_char_score:
+                    best_id.add(relatedSamples[relatedSample].id)
+
         if best_id:
-            ThirdSampleToInput[sample.id].add(best_id)
+            ThirdSampleToInput[sample.id] = best_id
         else:
             not_found+=1
 
