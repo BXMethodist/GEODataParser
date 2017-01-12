@@ -329,7 +329,7 @@ if __name__ == "__main__":
     #                 ["AR ",], type_seq="chip-seq", cwd="/home/tmhbxx3/scratch/XMLhttp/QuickXMLs",
     #                 ignorecase=False, geo=False, geofile=None, output_type="Mus musculus")
 #
-    SOFTQuickParser("H3K4me3", ["h3k4me3", "k4me3", "k4m3", "h3k4m3"],
+    SOFTQuickParser("H3K27me3", ["h3k27me3", "k27me3", "k27m3","h3k27m3"],
                     [], type_seq="chip-seq", cwd="/home/tmhbxx3/scratch/XMLhttp/QuickXMLs",
-                    ignorecase=True, geo=True, geofile="Third_catagory_test_list.txt", encode_remove=True, roadmap_remove=True)
+                    ignorecase=True, geo=False, geofile=None, encode_remove=False, roadmap_remove=False)
     # pass
