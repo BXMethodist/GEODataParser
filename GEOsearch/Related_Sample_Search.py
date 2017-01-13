@@ -86,56 +86,56 @@ def Related_Sample_Search(output_surfix, first_features, first_features_begin, s
             if best_id:
                 pairs[sample.id] = pairs[sample.id].union(best_id)
 
-    for sample in second_samples.values():
-        targetGSMs = set()
-        for gse in sample.series:
-            targetGSMs = targetGSMs.union(first_groupbygse[gse])
-        if sample.title_found:
-            feature_key_word = keyword(sample.title, second_features, second_begin_features, second_ignorecase)
-
-            best_score = float("-inf")
-            best_id = set()
-
-            for related_id in targetGSMs:
-                score = None
-                related_sample = first_samples[related_id]
-                if related_sample.title_found:
-                    related_feature_key_word = keyword(related_sample.title, first_features, first_features_begin, first_ignorecase)
-
-                    if sample.cellType == related_sample.cellType:
-                        score = Similarity(sample.title, feature_key_word, related_sample.title, related_feature_key_word)
-
-                    if score > best_score:
-                        best_score = score
-                        best_id = set()
-                        best_id.add(related_sample.id)
-                    elif score == best_score:
-                        best_id.add(related_sample.id)
-                else:
-                    continue
-
-            if best_id:
-                pairs[sample.id] = pairs[sample.id].union(best_id)
-
-        else:
-            # TODO none-title sample
-            best_score = float("-inf")
-            best_id = set()
-            for related_id in targetGSMs:
-                score = None
-                related_sample = first_samples[related_id]
-
-                if sample.cellType == related_sample.cellType:
-                    score = Character_Similarity(sample, related_sample)
-
-                if score > best_score:
-                    best_score = score
-                    best_id = set()
-                    best_id.add(related_sample.id)
-                elif score == best_score:
-                    best_id.add(related_sample.id)
-            if best_id:
-                pairs[sample.id] = pairs[sample.id].union(best_id)
+    # for sample in second_samples.values():
+    #     targetGSMs = set()
+    #     for gse in sample.series:
+    #         targetGSMs = targetGSMs.union(first_groupbygse[gse])
+    #     if sample.title_found:
+    #         feature_key_word = keyword(sample.title, second_features, second_begin_features, second_ignorecase)
+    #
+    #         best_score = float("-inf")
+    #         best_id = set()
+    #
+    #         for related_id in targetGSMs:
+    #             score = None
+    #             related_sample = first_samples[related_id]
+    #             if related_sample.title_found:
+    #                 related_feature_key_word = keyword(related_sample.title, first_features, first_features_begin, first_ignorecase)
+    #
+    #                 if sample.cellType == related_sample.cellType:
+    #                     score = Similarity(sample.title, feature_key_word, related_sample.title, related_feature_key_word)
+    #
+    #                 if score > best_score:
+    #                     best_score = score
+    #                     best_id = set()
+    #                     best_id.add(related_sample.id)
+    #                 elif score == best_score:
+    #                     best_id.add(related_sample.id)
+    #             else:
+    #                 continue
+    #
+    #         if best_id:
+    #             pairs[sample.id] = pairs[sample.id].union(best_id)
+    #
+    #     else:
+    #         # TODO none-title sample
+    #         best_score = float("-inf")
+    #         best_id = set()
+    #         for related_id in targetGSMs:
+    #             score = None
+    #             related_sample = first_samples[related_id]
+    #
+    #             if sample.cellType == related_sample.cellType:
+    #                 score = Character_Similarity(sample, related_sample)
+    #
+    #             if score > best_score:
+    #                 best_score = score
+    #                 best_id = set()
+    #                 best_id.add(related_sample.id)
+    #             elif score == best_score:
+    #                 best_id.add(related_sample.id)
+    #         if best_id:
+    #             pairs[sample.id] = pairs[sample.id].union(best_id)
 
     ### cross validation
     for key, values in pairs.items():
