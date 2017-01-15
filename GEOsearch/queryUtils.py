@@ -1,4 +1,4 @@
-import csv, pandas as pd
+import pandas as pd
 import pickle
 from collections import defaultdict
 import os
@@ -43,9 +43,7 @@ def query_GSE(names, output_name):
         else:
             table = table.append(df)
     table['GSE_ID'] = pd.Series(result)
-
     table.to_csv(output_name + ".txt", sep="\t")
-
     return table
 
 def query_other(names, output_name):
@@ -64,16 +62,10 @@ def query_other(names, output_name):
     GSMs = table.index.values
     for gsm in GSMs:
         result[gsm] = GSM_GSE_map[gsm]
-
     table['GSE_ID'] = pd.Series(result)
-
     table.to_csv(output_name+".txt", sep="\t")
-
     return table
 
-
-
-GEO_query(["SRR3472952", "SRR3472962", "SRR3472972", "SRR3475778", "SRR3475781", "SRR3475784"], "test")
 
 
 

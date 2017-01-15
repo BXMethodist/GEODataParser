@@ -20,67 +20,34 @@ def getConnection(ftpAddress='ftp-trace.ncbi.nlm.nih.gov', user='anonymous', pas
     return ftp
 
 
-def GSMGSE_pickle(path='/home/tmhbxx3/archive/GEO_MetaDatabase/geoMetaData.db', partition=None):
-    ftp = getConnection()
+def GSMGSE_pickle(path="/home/tmhbxx3/scratch/XMLhttp/GSESoftQuick/"):
+    GSMGSE_map = defaultdict(set)
 
-    db = sqlite3.connect(path)
-    db.text_factory = str
+    import psutil
+    proc = psutil.Process()
 
-    # query = db.execute("select distinct GSM_ID, GSE_ID from GSEtoGSM").fetchall()
-    #
-    # GSMGSE_map = defaultdict(set)
-    # for GSM_ID, GSE_ID in query:
-    #     GSMGSE_map[GSM_ID].add(GSE_ID)
-    #     GSMGSE_map[GSE_ID].add(GSM_ID)
-    #
-    # save_obj(GSMGSE_map, "GSMGSE_map")
+    gse_files = os.listdir(path)
 
-    query = db.execute("select distinct GSM_ID, SRA from GSM").fetchall()
+    for gse_file in gse_files:
+        gse_file_obj = open(path + gse_file, "r")
+        info = gse_file_obj.readlines()
+        gse_file_obj.close()
 
-    print "fetching complete!"
+        gse_id = gse_file[:-4]
 
-    GSMSRR_map = defaultdict(set)
-    SRR_map = {}
-    failed = []
+        if len(proc.open_files()) > 100:
+            print "More than one file is open, stop!"
+            print proc.open_files()
+            return
 
-    if partition is not None:
-        length = len(query)
-        blocksize = length/1000
-        start = partition * blocksize
-        end = (partition+1) * blocksize
-        query = query[start:end]
+        for line in info:
+            if line.startswith("!Series_sample_id"):
+                gsm = line.split("=")[1].strip()
+                GSMGSE_map[gsm].add(gse_id)
+                GSMGSE_map[gse_id].add(gsm)
 
-    for GSM_ID, SRXlink in query:
-        if SRXlink == "":
-            continue
-        try:
-            SRX = SRXlink[(SRXlink.find("=") + 1):].strip()
-            url = "https://trace.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?sp=runinfo&acc=" + SRX + "&retmode=txt"
-            page = pd.read_csv(url)
-            for i in range (page.shape[0]):
-                SRRid = page.ix[i, "Run"]
-                download_path = page.ix[i, "download_path"]
-                layout = page.ix[i, "LibraryLayout"]
-                avg_length = page.ix[i, "avgLength"]
-                GSMSRR_map[GSM_ID].add(SRRid)
-                SRR_map[SRRid] = SRR(SRRid, download_path, layout, avg_length, GSM_ID)
-        except:
-            failed.append(SRXlink)
-
-    if partition is not None:
-        output_name_GSMSRR = "GSMSRR_map"+str(partition)
-        output_name_SRR_ftp_map = "SRR_map" + str(partition)
-    else:
-        output_name_GSMSRR = "GSMSRR_map"
-        output_name_SRR_ftp_map = "SRR_map"
-    save_obj(GSMSRR_map, output_name_GSMSRR)
-
-    save_obj(SRR_map, output_name_SRR_ftp_map)
-
-    for srx in failed:
-        print srx
-
-    db.close
+    save_obj(GSMGSE_map, "GSMGSE_map")
+    return
 
 
 def roadmap_encode(path="/home/tmhbxx3/scratch/XMLhttp/GSESoftQuick/"):
@@ -111,16 +78,3 @@ def roadmap_encode(path="/home/tmhbxx3/scratch/XMLhttp/GSESoftQuick/"):
     save_obj(roadmap, "Roadmap_gse")
     save_obj(encode, "ENCODE_gse")
     return
-
-
-class SRR:
-    def __init__(self, SRRid, download_path, layout, avg_length, gsm_id):
-        self.SRRid = SRRid
-        self.download_path = download_path
-        self.layout = layout
-        self.avg_length = avg_length
-        self.gsm_id = gsm_id
-
-# if __name__ == "__main__":
-#     # GSMGSE_pickle(partition=None)
-#     roadmap_encode()
