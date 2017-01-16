@@ -14,22 +14,22 @@ def Related_Sample_Search(output_surfix1, output_surfix2,  first_features, first
     second_samples = SOFTQuickParser(output_surfix2, second_features, second_begin_features, type_seq=second_type_seq,
                                      cwd=cwd, ignorecase=second_ignorecase, geo=second_geo, geofile=second_geofile,
                                      output_type=output_type, encode_remove=encode_remove, roadmap_remove=roadmap_remove)
-    try:
-        print first_samples["GSM942122"].features, "first"
-    except:
-        pass
+    # try:
+    #     print first_samples["GSM942122"].features, "first"
+    # except:
+    #     pass
+    #
+    # try:
+    #     print second_samples["GSM942122"].features, "second"
+    # except:
+    #     pass
 
-    try:
-        print second_samples["GSM942122"].features, "second"
-    except:
-        pass
-
-    for key in first_samples.keys():
-        if key in second_samples:
-            print key, "in first and second"
-    for key in second_samples.keys():
-        if key in first_samples:
-            print key, "in first and second"
+    # for key in first_samples.keys():
+    #     if key in second_samples:
+    #         print key, "in first and second"
+    # for key in second_samples.keys():
+    #     if key in first_samples:
+    #         print key, "in first and second"
 
     ###TODO: find common gse and decide which samples are a pair
     ## STEP1 groupbygse
@@ -187,7 +187,7 @@ def Related_Sample_Search(output_surfix1, output_surfix2,  first_features, first
     return pairs
 
 if __name__ == "__main__":
-    Related_Sample_Search("H3K4me3_vs_H3K27me3", ["h3k4me3", "k4me3", "k4m3", "h3k4m3"],[],
+    Related_Sample_Search("H3K4me3", "H3K27me3", ["h3k4me3", "k4me3", "k4m3", "h3k4m3"],[],
                           ["h3k27me3", "k27me3", "k27m3","h3k27m3"], [],
                           cwd="/home/tmhbxx3/scratch/XMLhttp/QuickXMLs",
                           first_geo=False, first_geofile="uniqueGSM_GEOsearch.txt",
