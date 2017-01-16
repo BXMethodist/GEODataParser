@@ -9,22 +9,32 @@ def load_obj(name):
 
 
 def GEO_query(names, output_name):
-    # names could be a list or a file
-    if isinstance(names, str) and os.path.exists(names) and os.path.isfile(names):
-        list_names_obj = open(names, "r")
-        list_names = [x.strip() for x in list_names_obj.readlines()]
-        list_names_obj.close()
-        names = list_names
+    # names could be a list
+    GSEs = []
 
-    first_name = names[0]
+    non_GSEs = []
+    for name in names:
+        if name.startswith("GSE"):
+            GSEs.append(name)
+        else:
+            non_GSEs.append(name)
 
-    if first_name.startswith("GSE"):
-        return query_GSE(names, output_name)
+    table1 = query_GSE(GSEs)
+    table2 = query_other(non_GSEs)
+
+    if table1 is None:
+        table2.to_csv(output_name, sep="\t")
+        return table2
+    elif table2 is None:
+        table1.to_csv(output_name, sep="\t")
+        return table1
     else:
-        return query_other(names, output_name)
+        table = table1.append(table2)
+        table.to_csv(output_name, sep="\t")
+        return table
 
 
-def query_GSE(names, output_name):
+def query_GSE(names):
     table = None
     result = defaultdict(set)
     GSM_GSE_map = load_obj("/home/tmhbxx3/scratch/XMLhttp/pickles/GSMGSE_map.pkl")
@@ -43,10 +53,9 @@ def query_GSE(names, output_name):
         else:
             table = table.append(df)
     table['GSE_ID'] = pd.Series(result)
-    table.to_csv(output_name + ".txt", sep="\t")
     return table
 
-def query_other(names, output_name):
+def query_other(names):
     table = None
     for name in names:
         df = pd.read_csv("https://trace.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?sp=runinfo&acc="+name+"&retmode=txt", index_col=29)
@@ -63,7 +72,6 @@ def query_other(names, output_name):
     for gsm in GSMs:
         result[gsm] = GSM_GSE_map[gsm]
     table['GSE_ID'] = pd.Series(result)
-    table.to_csv(output_name+".txt", sep="\t")
     return table
 
 
