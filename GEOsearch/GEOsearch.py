@@ -12,23 +12,23 @@ from pickleUtils import load_obj
 
 def SOFTQuickParser(output_surfix, features, features_begin,
                     type_seq="chip-seq", cwd=None, ignorecase=True, geo=False, geofile=None, output_type="Homo sapiens",
-                    encode_remove=False, roadmap_remove=False):
+                    encode_remove=False, roadmap_remove=False, encode_pkl=None, roadmap_pkl=None, GSMGSE_pkl=None):
     if cwd == None:
         return
 
     if encode_remove:
-        encodeGSE = load_obj("/home/tmhbxx3/scratch/XMLhttp/pickles/ENCODE_gse.pkl")
+        encodeGSE = load_obj(encode_pkl)
     else:
         encodeGSE = set()
 
     if roadmap_remove:
-        roadmapGSE = load_obj("/home/tmhbxx3/scratch/XMLhttp/pickles/Roadmap_gse.pkl")
+        roadmapGSE = load_obj(roadmap_pkl)
     else:
         roadmapGSE = set()
 
     excludedGSE = encodeGSE.union(roadmapGSE)
 
-    GSEGSM_map = load_obj("/home/tmhbxx3/scratch/XMLhttp/pickles/GSMGSE_map.pkl")
+    GSEGSM_map = load_obj(GSMGSE_pkl)
 
     excludedGSM = set()
 
@@ -49,8 +49,8 @@ def SOFTQuickParser(output_surfix, features, features_begin,
 
     notFeature = {}
 
+    geoGSMs = set()
     if geo:
-        geoGSMs = set()
         file_obj =  open(geofile, "r")
         for line in file_obj.readlines():
             geoGSMs.add(line.strip())
@@ -319,17 +319,4 @@ def SOFTQuickParser(output_surfix, features, features_begin,
 
 
 if __name__ == "__main__":
-    # SOFTQuickParser("androgen_receptor", ["AR-", "AR_"," AR", "-AR", "_AR",
-    #                                       "androgen_receptor", "androgen-receptor", "androgen receptor"],
-    #                 ["AR ",], type_seq="chip-seq", cwd="/home/tmhbxx3/scratch/XMLhttp/QuickXMLs",
-    #                 ignorecase=False, geo=True, geofile="./unique_AR.txt")
-
-    # SOFTQuickParser("androgen_receptor", ["AR-", "AR_"," AR", "-AR", "_AR",
-    #                                       "androgen_receptor", "androgen-receptor", "androgen receptor"],
-    #                 ["AR ",], type_seq="chip-seq", cwd="/home/tmhbxx3/scratch/XMLhttp/QuickXMLs",
-    #                 ignorecase=False, geo=False, geofile=None, output_type="Mus musculus")
-#
-    SOFTQuickParser("H3K27me3", ["h3k27me3", "k27me3", "k27m3","h3k27m3"],
-                    [], type_seq="chip-seq", cwd="/home/tmhbxx3/scratch/XMLhttp/QuickXMLs",
-                    ignorecase=True, geo=False, geofile=None, encode_remove=False, roadmap_remove=False)
-    # pass
+    pass

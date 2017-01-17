@@ -6,30 +6,17 @@ from input_search_utils import keyword, Similarity, Character_Similarity
 def Related_Sample_Search(output_surfix1, output_surfix2,  first_features, first_features_begin, second_features, second_begin_features,
                     first_type_seq="chip-seq", second_type_seq="chip-seq", cwd=None, first_ignorecase=True, second_ignorecase=True,
                     first_geo=False, first_geofile=None, second_geo=False, second_geofile=None, output_type="Homo sapiens",
-                    encode_remove=False, roadmap_remove=False):
+                    encode_remove=False, roadmap_remove=False, encode_pkl=None, roadmap_pkl=None, GSMGSE_pkl=None):
+
     first_samples = SOFTQuickParser(output_surfix1, first_features, first_features_begin, type_seq=first_type_seq,
                                     cwd=cwd, ignorecase=first_ignorecase, geo=first_geo, geofile=first_geofile,
-                                    output_type=output_type, encode_remove=encode_remove, roadmap_remove=roadmap_remove)
+                                    output_type=output_type, encode_remove=encode_remove, roadmap_remove=roadmap_remove,
+                                    encode_pkl=encode_pkl, roadmap_pkl=roadmap_pkl, GSMGSE_pkl=GSMGSE_pkl)
 
     second_samples = SOFTQuickParser(output_surfix2, second_features, second_begin_features, type_seq=second_type_seq,
                                      cwd=cwd, ignorecase=second_ignorecase, geo=second_geo, geofile=second_geofile,
-                                     output_type=output_type, encode_remove=encode_remove, roadmap_remove=roadmap_remove)
-    # try:
-    #     print first_samples["GSM942122"].features, "first"
-    # except:
-    #     pass
-    #
-    # try:
-    #     print second_samples["GSM942122"].features, "second"
-    # except:
-    #     pass
-
-    # for key in first_samples.keys():
-    #     if key in second_samples:
-    #         print key, "in first and second"
-    # for key in second_samples.keys():
-    #     if key in first_samples:
-    #         print key, "in first and second"
+                                     output_type=output_type, encode_remove=encode_remove, roadmap_remove=roadmap_remove,
+                                     encode_pkl=encode_pkl, roadmap_pkl=roadmap_pkl, GSMGSE_pkl=GSMGSE_pkl)
 
     ###TODO: find common gse and decide which samples are a pair
     ## STEP1 groupbygse
@@ -191,5 +178,5 @@ if __name__ == "__main__":
                           ["h3k27me3", "k27me3", "k27m3","h3k27m3"], [],
                           cwd="/home/tmhbxx3/scratch/XMLhttp/QuickXMLs",
                           first_geo=False, first_geofile="uniqueGSM_GEOsearch.txt",
-                          second_geo=False, second_geofile="unique_H3K27me3.txt")
+                          second_geo=False, second_geofile="unique_H3K27me3.txt", encode_remove=True, roadmap_remove=True)
 

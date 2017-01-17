@@ -1,6 +1,6 @@
 import re
 
-a = "CGH08AAA"
+a= "a   b"
 
-b = re.sub("\d", "", a)
-print a, b
+b = a.split()
+print b

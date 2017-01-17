@@ -8,7 +8,7 @@ def load_obj(name):
         return pickle.load(f)
 
 
-def GEO_query(names, output_name):
+def GEO_query(names, output_name, pkl_path, GSE=False):
     # names could be a list
     GSEs = []
 
@@ -18,9 +18,12 @@ def GEO_query(names, output_name):
             GSEs.append(name)
         else:
             non_GSEs.append(name)
+    if GSE:
+        table1 = query_GSE(GSEs, pkl_path)
+    else:
+        table1 = None
 
-    table1 = query_GSE(GSEs)
-    table2 = query_other(non_GSEs)
+    table2 = query_other(non_GSEs, pkl_path, GSE)
 
     if table1 is None:
         table2.to_csv(output_name, sep="\t")
@@ -34,10 +37,10 @@ def GEO_query(names, output_name):
         return table
 
 
-def query_GSE(names):
+def query_GSE(names, pkl_path):
     table = None
     result = defaultdict(set)
-    GSM_GSE_map = load_obj("/home/tmhbxx3/scratch/XMLhttp/pickles/GSMGSE_map.pkl")
+    GSM_GSE_map = load_obj(pkl_path)
 
     GSMs = set()
     for name in names:
@@ -55,7 +58,7 @@ def query_GSE(names):
     table['GSE_ID'] = pd.Series(result)
     return table
 
-def query_other(names):
+def query_other(names, pkl_path, GSE):
     table = None
     for name in names:
         df = pd.read_csv("https://trace.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?sp=runinfo&acc="+name+"&retmode=txt", index_col=29)
@@ -65,13 +68,14 @@ def query_other(names):
         else:
             table = table.append(df)
 
-    GSM_GSE_map = load_obj("/home/tmhbxx3/scratch/XMLhttp/pickles/GSMGSE_map.pkl")
+    if GSE:
+        GSM_GSE_map = load_obj(pkl_path)
 
-    result = {}
-    GSMs = table.index.values
-    for gsm in GSMs:
-        result[gsm] = GSM_GSE_map[gsm]
-    table['GSE_ID'] = pd.Series(result)
+        result = {}
+        GSMs = table.index.values
+        for gsm in GSMs:
+            result[gsm] = GSM_GSE_map[gsm]
+        table['GSE_ID'] = pd.Series(result)
     return table
 
 
