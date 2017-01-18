@@ -49,7 +49,7 @@ def SOFTQuickParser(output_surfix, features, features_begin,
             geoGSMs.add(line.strip())
         file_obj.close()
     else:
-        geoGSMs = search_term_to_GSM(features)
+        geoGSMs = search_term_to_GSM(features+features_begin)
 
     for sampleName in geoGSMs:
         sample = GSM(sampleName)
