@@ -216,7 +216,7 @@ def SOFTQuickParser(output_surfix, features, features_begin,
         if title_found or ab_found:
             sample.title_ab = True
 
-        if (sample.organism == output_type or output_type is None) and (sample.SRA != None and sample.SRA.strip() != "") and \
+        if (sample.organism.lower() == output_type.lower() or output_type is None) and (sample.SRA != None and sample.SRA.strip() != "") and \
                 sample.InstrumentID.startswith('Illu') and (sample.libraryStrategy.lower() == type_seq or type_seq is None)\
                 and sample.id not in excludedGSM:
             if sample.title_ab:
@@ -238,7 +238,7 @@ def SOFTQuickParser(output_surfix, features, features_begin,
         else:
             notFeature[sampleName] = sample
 
-    print "total human sample found", len(Human_Samples)
+    print "total ", output_type, " sample found", len(Human_Samples)
 
     if output_type is not None or output_type != "":
         groupByGSE, encodeGSE, relatedSamples = SOFTQuickRelated(Human_Samples, cwd, output_type, type_seq, GSEGSM_map, encodeGSE)

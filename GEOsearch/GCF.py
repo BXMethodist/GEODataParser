@@ -55,7 +55,8 @@ def GCF_search():
     parser.add_argument('--candidateslist', dest='geo_file', default=None, metavar='',
                         help="specify the file path of GSM ID list if '--hasCandidates' set to 1")
     parser.add_argument('-s','--species', dest='species', default='Homo sapiens', metavar='',
-                        help="specify the samples' species. Default is Homo sapiens. Please use the species official name. For example, human is Homo sapiens.")
+                        help="specify the samples' species. Default is Homo sapiens. Please use the species official name. For example, human is Homo sapiens."
+                             "If the species name contains space, surround the name with double quotes, for example \"Homo sapiens\"")
     parser.add_argument('-e', '--encode', dest='encode_remove', default=0, type=int, metavar='',
                         help="specify whether need to remove Encode data. Default is 0. Set to 1 to remove Encode data from search.")
     parser.add_argument('-r', '--roadmap', dest='roadmap_remove', default=0, type=int, metavar='',
@@ -163,7 +164,8 @@ def GCF_match():
 
 
     parser.add_argument('-s','--species', dest='species', default='Homo sapiens', metavar='',
-                        help="specify the samples' species. Default is Homo sapiens. Please use the species official name. For example, human is Homo sapiens.")
+                        help="specify the samples' species. Default is Homo sapiens. Please use the species official name. For example, human is Homo sapiens."
+                             "If the species name contains space, surround the name with double quotes, for example \"Homo sapiens\"")
     parser.add_argument('-e', '--encode', dest='encode_remove', default=0, type=int, metavar='',
                         help="specify whether need to remove Encode data. Default is 0. Set to 1 to remove Encode data from search.")
     parser.add_argument('-r', '--roadmap', dest='roadmap_remove', default=0, type=int, metavar='',
