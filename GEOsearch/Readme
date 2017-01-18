@@ -4,14 +4,7 @@ input_search_utils.py
 pickleUtils.py
 queryUtils.py
 
-Download:
-update GSE metadata
-update GSM metadata
 
-update pickles, only GSE, GSM SRR pickle
-
-
-H3K4tri,  Histone 3 Lysine 4 Trimethylation
 Argparser:
 
 
@@ -22,5 +15,11 @@ GEO search
 SRR info query
 update metadata
 
+1. provide update but only for pkl
+2. new search term
+H3K4tri,  Histone 3 Lysine 4 Trimethylation
 
+3. test download
+
+5. provide parser for geo search result
 

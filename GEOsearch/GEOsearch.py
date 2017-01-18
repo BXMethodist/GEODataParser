@@ -1,20 +1,13 @@
-import csv
-import os
-import re
+import csv, os, re, psutil, urllib
 from collections import defaultdict
-
-import psutil
-
-from GSM import GSM
+from GSM import GSM, search_term_to_GSM
 from input_search_utils import SOFTQuickRelated, input_finder, has_features
 from pickleUtils import load_obj
 
 
 def SOFTQuickParser(output_surfix, features, features_begin,
-                    type_seq="chip-seq", cwd=None, ignorecase=True, geo=False, geofile=None, output_type="Homo sapiens",
+                    type_seq="chip-seq", ignorecase=True, geo=False, geofile=None, output_type="Homo sapiens",
                     encode_remove=False, roadmap_remove=False, encode_pkl=None, roadmap_pkl=None, GSMGSE_pkl=None):
-    if cwd == None:
-        return
 
     if encode_remove:
         encodeGSE = load_obj(encode_pkl)
@@ -51,21 +44,16 @@ def SOFTQuickParser(output_surfix, features, features_begin,
 
     geoGSMs = set()
     if geo:
-        file_obj =  open(geofile, "r")
+        file_obj = open(geofile, "r")
         for line in file_obj.readlines():
             geoGSMs.add(line.strip())
         file_obj.close()
+    else:
+        geoGSMs = search_term_to_GSM(features)
 
-    # n = 0
+    for sampleName in geoGSMs:
+        sample = GSM(sampleName)
 
-    for filename in os.listdir(cwd):
-        if not filename.startswith("GSM"):
-            continue
-
-        if geo and filename[:-4] not in geoGSMs:
-            continue
-
-        sampleName = filename[:-4]
         sampleTitle = ""
         sampleType = ""
         sampleLibraryStrategy=''
@@ -95,16 +83,7 @@ def SOFTQuickParser(output_surfix, features, features_begin,
             print proc.open_files()
             return
 
-        # n += 1
-        # print len(proc.open_files())
-        # if n > 10:
-        #     break
-
-
-        file_obj = open(cwd + '/' + filename, "r")
-        info = file_obj.readlines()
-        file_obj.close()
-        for line in info:
+        for line in urllib.urlopen(sample.url).readlines():
             if line.startswith("!Sample_title"):
                 sampleTitle = line[line.find("=")+1:].strip()
                 if sampleTitle.find(";") != -1:
@@ -141,9 +120,7 @@ def SOFTQuickParser(output_surfix, features, features_begin,
                 sampleSeriesID.add(line[line.find("=")+1:].strip())
             if line.startswith("!Sample_instrument_model"):
                 sampleInstrumentID = line[line.find("=")+1:].strip()
-        file_obj.close()
 
-        sample = GSM(sampleName)
         sample.characteristics = characteristics
         sample.supplementaryData = supplementaryData
         sample.title = sampleTitle
@@ -241,9 +218,9 @@ def SOFTQuickParser(output_surfix, features, features_begin,
     print "total ", output_type, " sample found", len(Human_Samples)
 
     if output_type is not None or output_type != "":
-        groupByGSE, encodeGSE, relatedSamples = SOFTQuickRelated(Human_Samples, cwd, output_type, type_seq, GSEGSM_map, encodeGSE)
+        groupByGSE, encodeGSE, relatedSamples = SOFTQuickRelated(Human_Samples, output_type, type_seq, GSEGSM_map, encodeGSE)
     else:
-        groupByGSE, encodeGSE, relatedSamples = SOFTQuickRelated(samples, cwd, output_type, type_seq, GSEGSM_map, encodeGSE)
+        groupByGSE, encodeGSE, relatedSamples = SOFTQuickRelated(samples, output_type, type_seq, GSEGSM_map, encodeGSE)
 
     first_category, third_category = input_finder(output_surfix, Human_Samples, groupByGSE, encodeGSE, relatedSamples,
                                                   features, features_begin, ignorecase, output_type)

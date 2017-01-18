@@ -4,17 +4,17 @@ from input_search_utils import keyword, Similarity, Character_Similarity
 
 
 def Related_Sample_Search(output_surfix1, output_surfix2,  first_features, first_features_begin, second_features, second_begin_features,
-                    first_type_seq="chip-seq", second_type_seq="chip-seq", cwd=None, first_ignorecase=True, second_ignorecase=True,
+                    first_type_seq="chip-seq", second_type_seq="chip-seq", first_ignorecase=True, second_ignorecase=True,
                     first_geo=False, first_geofile=None, second_geo=False, second_geofile=None, output_type="Homo sapiens",
                     encode_remove=False, roadmap_remove=False, encode_pkl=None, roadmap_pkl=None, GSMGSE_pkl=None):
 
     first_samples = SOFTQuickParser(output_surfix1, first_features, first_features_begin, type_seq=first_type_seq,
-                                    cwd=cwd, ignorecase=first_ignorecase, geo=first_geo, geofile=first_geofile,
+                                    ignorecase=first_ignorecase, geo=first_geo, geofile=first_geofile,
                                     output_type=output_type, encode_remove=encode_remove, roadmap_remove=roadmap_remove,
                                     encode_pkl=encode_pkl, roadmap_pkl=roadmap_pkl, GSMGSE_pkl=GSMGSE_pkl)
 
     second_samples = SOFTQuickParser(output_surfix2, second_features, second_begin_features, type_seq=second_type_seq,
-                                     cwd=cwd, ignorecase=second_ignorecase, geo=second_geo, geofile=second_geofile,
+                                     ignorecase=second_ignorecase, geo=second_geo, geofile=second_geofile,
                                      output_type=output_type, encode_remove=encode_remove, roadmap_remove=roadmap_remove,
                                      encode_pkl=encode_pkl, roadmap_pkl=roadmap_pkl, GSMGSE_pkl=GSMGSE_pkl)
 
@@ -144,37 +144,37 @@ def Related_Sample_Search(output_surfix1, output_surfix2,  first_features, first
 
 
     wrong_pairs = set()
+    new_pairs = set()
     ### cross validation
     for key, values in pairs.items():
         for value in values:
             if key not in pairs[value]:
                 wrong_pairs.add((key, value))
+            elif (key, value) not in new_pairs and (value, key) not in new_pairs:
+                new_pairs.add((key, value))
 
     #### save file
     import csv
     output = open(output_surfix1+output_surfix2+".txt", "w")
     writer = csv.writer(output)
     writer.writerow(["sample1_id", "sample1_title", "sample1_descriptions", "sample1_series_id", "sample2_id", "sample2_title", "sample2_descriptions", "sample2_series_id"])
-    for key, values in pairs.items():
+    for pair in new_pairs:
+        key, value = pair
         if key in first_samples:
-            for value in values:
-                if (key, value) not in wrong_pairs:
-                    try:
-                        writer.writerow([key, first_samples[key].title, first_samples[key].features, first_samples[key].series,
-                                         value, second_samples[value].title, second_samples[value].features, second_samples[value].series])
-                    except:
-                        writer.writerow([value, first_samples[value].title, first_samples[value].features, first_samples[value].series,
-                                         key, second_samples[key].title, second_samples[key].features, second_samples[key].series,])
+            try:
+                writer.writerow([key, first_samples[key].title, first_samples[key].features, first_samples[key].series,
+                                 value, second_samples[value].title, second_samples[value].features, second_samples[value].series])
+            except:
+                writer.writerow([value, first_samples[value].title, first_samples[value].features, first_samples[value].series,
+                                 key, second_samples[key].title, second_samples[key].features, second_samples[key].series,])
         elif key in second_samples:
-            for value in values:
-                if (key, value) not in wrong_pairs:
-                    try:
-                        writer.writerow([value, first_samples[value].title, first_samples[value].features, first_samples[value].series,
-                                         key, second_samples[key].title, second_samples[key].features, second_samples[key].series,
-                             ])
-                    except:
-                        writer.writerow([key, first_samples[key].title, first_samples[key].features, first_samples[key].series,
-                             value, second_samples[value].title, second_samples[value].features, second_samples[value].series])
+            try:
+                writer.writerow([value, first_samples[value].title, first_samples[value].features, first_samples[value].series,
+                                 key, second_samples[key].title, second_samples[key].features, second_samples[key].series,
+                     ])
+            except:
+                writer.writerow([key, first_samples[key].title, first_samples[key].features, first_samples[key].series,
+                     value, second_samples[value].title, second_samples[value].features, second_samples[value].series])
         else:
             print key
     output.close()

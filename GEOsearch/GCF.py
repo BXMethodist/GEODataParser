@@ -78,7 +78,6 @@ def GCF_search():
 
     if args is not None:
         settings = get_settings()
-        metadata_path = settings['MetaData']
         encode_pkl = settings['Encode']
         roadmap_pkl = settings['Roadmap']
         GSMGSE_pkl = settings['GSMGSE_pkl_path']
@@ -99,7 +98,7 @@ def GCF_search():
         encode_remove = args.encode_remove
         roadmap_remove = args.roadmap_remove
 
-        SOFTQuickParser(output_path, keywords, keywords_begin, type_seq=type_seq, cwd=metadata_path, ignorecase=ignorcase,
+        SOFTQuickParser(output_path, keywords, keywords_begin, type_seq=type_seq, ignorecase=ignorcase,
                         geo=geo, geofile=geo_file, output_type=species, encode_remove=encode_remove,
                         roadmap_remove=roadmap_remove, encode_pkl=encode_pkl, roadmap_pkl=roadmap_pkl,
                         GSMGSE_pkl=GSMGSE_pkl)
@@ -187,7 +186,6 @@ def GCF_match():
 
     if args is not None:
         settings = get_settings()
-        metadata_path = settings['MetaData']
         encode_pkl = settings['Encode']
         roadmap_pkl = settings['Roadmap']
         GSMGSE_pkl = settings['GSMGSE_pkl_path']
@@ -226,7 +224,7 @@ def GCF_match():
 
         Related_Sample_Search(output_path1, output_path2, keywords1, keywords_begin1, keywords2,
                               keywords_begin2,
-                              first_type_seq=type_seq1, second_type_seq=type_seq2, cwd=metadata_path,
+                              first_type_seq=type_seq1, second_type_seq=type_seq2,
                               first_ignorecase=ignorcase1, second_ignorecase=ignorcase2,
                               first_geo=geo1, first_geofile=geo_file1, second_geo=geo2, second_geofile=geo_file2,
                               output_type=species, encode_remove=encode_remove, roadmap_remove=roadmap_remove,

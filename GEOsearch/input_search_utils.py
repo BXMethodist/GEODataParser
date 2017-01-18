@@ -1,7 +1,5 @@
-#### TO DO, create new database version
 
-import csv
-import re
+import csv, re, urllib
 from collections import defaultdict
 from difflib import SequenceMatcher
 
@@ -14,10 +12,7 @@ from pickleUtils import load_obj
 def similar(a, b):
     return SequenceMatcher(None, a, b).ratio()
 
-def SOFTQuickRelated(featured_samples, cwd, output_type, type_seq, GSEGSM_map, encodeGSE=set()):
-    if cwd == None:
-        return
-
+def SOFTQuickRelated(featured_samples, output_type, type_seq, GSEGSM_map, encodeGSE=set()):
     proc = psutil.Process()
 
     relatedSamples = {}
@@ -50,8 +45,6 @@ def SOFTQuickRelated(featured_samples, cwd, output_type, type_seq, GSEGSM_map, e
     # print allrelatedGSMs
 
     for filegsm in allrelatedGSMs:
-        filename = filegsm+".xml"
-
         characteristics = defaultdict(str)
         supplementaryData = defaultdict(str)
         relations = defaultdict(str)
@@ -69,12 +62,9 @@ def SOFTQuickRelated(featured_samples, cwd, output_type, type_seq, GSEGSM_map, e
         # if n > 10:
         #     break
 
-        file_obj = open(cwd + '/' + filename, "r")
-        info = file_obj.readlines()
-        file_obj.close()
-        for line in info:
-            if line.startswith("^SAMPLE"):
-                sampleName = line[line.find("=")+1:].strip()
+        sample = GSM(filegsm)
+
+        for line in urllib.urlopen(sample.url).readlines():
             if line.startswith("!Sample_title"):
                 sampleTitle = line[line.find("=")+1:].strip()
                 if sampleTitle.find(";") != -1:
@@ -108,9 +98,7 @@ def SOFTQuickRelated(featured_samples, cwd, output_type, type_seq, GSEGSM_map, e
                 sampleSeriesID.add(line[line.find("=")+1:].strip())
             if line.startswith("!Sample_instrument_model"):
                 sampleInstrumentID = line[line.find("=")+1:].strip()
-        file_obj.close()
 
-        sample = GSM(sampleName)
         sample.characteristics = characteristics
         sample.supplementaryData = supplementaryData
         sample.title = sampleTitle
