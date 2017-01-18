@@ -18,6 +18,12 @@ def Related_Sample_Search(output_surfix1, output_surfix2,  first_features, first
                                      output_type=output_type, encode_remove=encode_remove, roadmap_remove=roadmap_remove,
                                      encode_pkl=encode_pkl, roadmap_pkl=roadmap_pkl, GSMGSE_pkl=GSMGSE_pkl)
 
+    for id in first_samples.keys():
+        if id in second_samples:
+            print id, " in both results"
+
+
+
     ###TODO: find common gse and decide which samples are a pair
     ## STEP1 groupbygse
     first_groupbygse = defaultdict(set)
@@ -148,7 +154,7 @@ def Related_Sample_Search(output_surfix1, output_surfix2,  first_features, first
     import csv
     output = open(output_surfix1+output_surfix2+".txt", "w")
     writer = csv.writer(output)
-    writer.writerow(["sample1_id", "sample1_descriptions", "sample1_series_id", "sample2_id", "sample2_descriptions", "sample2_series_id"])
+    writer.writerow(["sample1_id", "sample1_title", "sample1_descriptions", "sample1_series_id", "sample2_id", "sample2_title", "sample2_descriptions", "sample2_series_id"])
     for key, values in pairs.items():
         if key in first_samples:
             for value in values:
@@ -157,14 +163,15 @@ def Related_Sample_Search(output_surfix1, output_surfix2,  first_features, first
                         writer.writerow([key, first_samples[key].title, first_samples[key].features, first_samples[key].series,
                                          value, second_samples[value].title, second_samples[value].features, second_samples[value].series])
                     except:
-                        writer.writerow([key, second_samples[key].title, second_samples[key].features, second_samples[key].series,
-                                         value, first_samples[value].title, first_samples[value].features, first_samples[value].series])
+                        writer.writerow([value, first_samples[value].title, first_samples[value].features, first_samples[value].series,
+                                         key, second_samples[key].title, second_samples[key].features, second_samples[key].series,])
         elif key in second_samples:
             for value in values:
                 if (key, value) not in wrong_pairs:
                     try:
-                        writer.writerow([key, second_samples[key].title, second_samples[key].features, second_samples[key].series,
-                             value, first_samples[value].title, first_samples[value].features, first_samples[value].series])
+                        writer.writerow([value, first_samples[value].title, first_samples[value].features, first_samples[value].series,
+                                         key, second_samples[key].title, second_samples[key].features, second_samples[key].series,
+                             ])
                     except:
                         writer.writerow([key, first_samples[key].title, first_samples[key].features, first_samples[key].series,
                              value, second_samples[value].title, second_samples[value].features, second_samples[value].series])

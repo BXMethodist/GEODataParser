@@ -8,10 +8,10 @@ Download:
 update GSE metadata
 update GSM metadata
 
-update pickles, only GSE, GSM pickle need update
+update pickles, only GSE, GSM SRR pickle
 
 
-
+H3K4tri,  Histone 3 Lysine 4 Trimethylation
 Argparser:
 
 
@@ -21,6 +21,6 @@ function provide:
 GEO search
 SRR info query
 update metadata
-SRR download
+
 
 
