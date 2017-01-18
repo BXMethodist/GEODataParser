@@ -2,81 +2,59 @@ import pandas as pd
 import pickle
 from collections import defaultdict
 import os
+import pickleUtils
+
 
 def load_obj(name):
     with open(name, 'rb') as f:
         return pickle.load(f)
 
 
-def GEO_query(names, output_name, pkl_path, GSE=False):
+def GEO_query(names, output_name, GSM_GSE_pkl, GSM_SRR_pkl):
     # names could be a list
-    GSEs = []
 
-    non_GSEs = []
+    GSM_GSE_map = load_obj(GSM_GSE_pkl)
+    GSM_SRR_map = load_obj(GSM_SRR_pkl)
+
+    query_ids = set()
+
     for name in names:
         if name.startswith("GSE"):
-            GSEs.append(name)
+            for gsm in GSM_GSE_map[name]:
+                query_ids.add(gsm)
         else:
-            non_GSEs.append(name)
-    if GSE:
-        table1 = query_GSE(GSEs, pkl_path)
-    else:
-        table1 = None
+            query_ids.add(name)
 
-    table2 = query_other(non_GSEs, pkl_path, GSE)
-
-    if table1 is None:
-        table2.to_csv(output_name, sep="\t")
-        return table2
-    elif table2 is None:
-        table1.to_csv(output_name, sep="\t")
-        return table1
-    else:
-        table = table1.append(table2)
-        table.to_csv(output_name, sep="\t")
-        return table
-
-
-def query_GSE(names, pkl_path):
     table = None
-    result = defaultdict(set)
-    GSM_GSE_map = load_obj(pkl_path)
 
-    GSMs = set()
-    for name in names:
-        GSMs = GSMs.union(GSM_GSE_map[name])
-        for gsm in GSM_GSE_map[name]:
-            result[gsm].add(name)
+    for id in query_ids:
+        try:
+            id = id.strip()
+            df = pd.read_csv("http://trace.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?save=efetch&db=sra&rettype=runinfo&term=" + id,
+                             index_col=0)
+            if table is None:
+                table = df
+            else:
+                table = table.append(df)
+        except:
+            print id, " might not have SRA related information"
 
-    for gsm in GSMs:
-        df = pd.read_csv("https://trace.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?sp=runinfo&acc=" + gsm + "&retmode=txt",
-                         index_col=29)
-        if table is None:
-            table = df
-        else:
-            table = table.append(df)
-    table['GSE_ID'] = pd.Series(result)
-    return table
+    result_srr_gsm ={}
+    result_srr_gse={}
 
-def query_other(names, pkl_path, GSE):
-    table = None
-    for name in names:
-        df = pd.read_csv("https://trace.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?sp=runinfo&acc="+name+"&retmode=txt", index_col=29)
+    for srr in table.index.values:
+        result_srr_gsm[srr] = GSM_SRR_map[srr]
+        result_srr_gse[srr] = GSM_GSE_map[result_srr_gsm[srr]]
 
-        if table is None:
-            table = df
-        else:
-            table = table.append(df)
+    table['GSM_ID'] = pd.Series(result_srr_gsm)
+    table['GSE_ID'] = pd.Series(result_srr_gse)
 
-    if GSE:
-        GSM_GSE_map = load_obj(pkl_path)
+    table.to_csv(output_name, sep="\t")
 
-        result = {}
-        GSMs = table.index.values
-        for gsm in GSMs:
-            result[gsm] = GSM_GSE_map[gsm]
-        table['GSE_ID'] = pd.Series(result)
-    return table
+
+
+
+
 
 
 

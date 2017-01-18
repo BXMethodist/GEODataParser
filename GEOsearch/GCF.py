@@ -38,27 +38,27 @@ def GCF_search():
                                      description='',epilog="Chen lab, Houston Methodist")
     parser.add_argument('command', default=None, help="set as 'search' to looking for samples with key words")
 
-    parser.add_argument('feature key words', dest='keywords', default=None,
+    parser.add_argument('feature_key_words', default=None,
                         help="list of feature key words need to used to looking for the NGS sequencing samples, "
                              "different key words need to be separated by ','")
     parser.add_argument('output_prefix', default=None, help="specify the output file prefix.")
 
     ## optional parameters
-    parser.add_argument('-b', dest='keywords_begin', default='',
+    parser.add_argument('-b', dest='keywords_begin', metavar='', default='',
                         help="list of feature key words need to used to occur in the beginning of a word, "
                              "different key words need to be separated by ','")
-    parser.add_argument('-t', '--type', dest='type_seq', default='chip-seq', help="type of sequencing specified in the search. Default is 'chip-seq")
-    parser.add_argument('-c', '--ignorecase', dest='ignorecase', default=1, type=int,
+    parser.add_argument('-t', '--type', dest='type_seq', metavar='', default='chip-seq', help="type of sequencing specified in the search. Default is 'chip-seq")
+    parser.add_argument('-c', '--ignorecase', dest='ignorecase', metavar='', default=1, type=int,
                         help="specify whether case (A vs a) need to be ignored in the search. Default is 1 which means case will be ignored in the search. Set to 0 if don't want to ignore the case. ")
-    parser.add_argument('--hasCandidates', dest='geo', default=0,
+    parser.add_argument('--hasCandidates', dest='geo', default=0, metavar='',
                         help="specify whether there will be a pre-search GSM ID list provided. Default is 0. Set to 1 if GSM ID list will be provided.")
-    parser.add_argument('--candidateslist', dest='geo_file', default=None,
+    parser.add_argument('--candidateslist', dest='geo_file', default=None, metavar='',
                         help="specify the file path of GSM ID list if '--hasCandidates' set to 1")
-    parser.add_argument('-s','--species', dest='species', default='Homo sapiens',
+    parser.add_argument('-s','--species', dest='species', default='Homo sapiens', metavar='',
                         help="specify the samples' species. Default is Homo sapiens. Please use the species official name. For example, human is Homo sapiens.")
-    parser.add_argument('-e', '--encode', dest='encode_remove', default=0, type=int,
+    parser.add_argument('-e', '--encode', dest='encode_remove', default=0, type=int, metavar='',
                         help="specify whether need to remove Encode data. Default is 0. Set to 1 to remove Encode data from search.")
-    parser.add_argument('-r', '--roadmap', dest='roadmap_remove', default=0, type=int,
+    parser.add_argument('-r', '--roadmap', dest='roadmap_remove', default=0, type=int, metavar='',
                         help="specify whether need to remove Roadmap data. Default is 0. Set to 1 to remove Roadmap data from search.")
 
     args = None
@@ -82,7 +82,7 @@ def GCF_search():
         roadmap_pkl = settings['Roadmap']
         GSMGSE_pkl = settings['GSMGSE_pkl_path']
 
-        keywords = args.keywords.split(",")
+        keywords = args.feature_key_words.split(",")
         output_path = args.output_prefix
         keywords_begin = args.keywords_begin.split(",")
         type_seq = args.type_seq
@@ -122,10 +122,10 @@ def GCF_match():
                                      description='',epilog="Chen lab, Houston Methodist")
     parser.add_argument('command', default=None, help="set as 'match' to match samples with different key words within same study")
 
-    parser.add_argument('first feature key words', dest='keywords1', default=None,
+    parser.add_argument('first_feature_key_words', default=None,
                         help="list of first feature key words need to used to looking for the first set of NGS sequencing samples, "
                              "different key words need to be separated by ','")
-    parser.add_argument('second feature key words', dest='keywords2', default=None,
+    parser.add_argument('second_feature_key_words', default=None,
                         help="list of second feature key words need to used to looking for the second set of NGS sequencing samples, "
                              "different key words need to be separated by ','")
 
@@ -133,40 +133,40 @@ def GCF_match():
     parser.add_argument('output_prefix2', default=None, help="specify the second output file name prefix.")
 
     ## optional parameters
-    parser.add_argument('-bf', dest='keywords_begin1', default='',
+    parser.add_argument('-bf', dest='keywords_begin1', default='', metavar='',
                         help="list of first feature key words need to used to occur in the beginning of a word, "
                              "different key words need to be separated by ','")
-    parser.add_argument('-bs', dest='keywords_begin2', default='',
+    parser.add_argument('-bs', dest='keywords_begin2', default='', metavar='',
                         help="list of second feature key words need to used to occur in the beginning of a word, "
                              "different key words need to be separated by ','")
 
-    parser.add_argument('-tf', '--typef', dest='type_seq1', default='chip-seq',
+    parser.add_argument('-tf', '--typef', dest='type_seq1', default='chip-seq', metavar='',
                         help="first type of sequencing specified in the search. Default is 'chip-seq")
-    parser.add_argument('-ts', '--types', dest='type_seq2', default='chip-seq',
+    parser.add_argument('-ts', '--types', dest='type_seq2', default='chip-seq', metavar='',
                         help="second type of sequencing specified in the search. Default is 'chip-seq")
 
-    parser.add_argument('-cf', '--ignorecasef', dest='ignorecase1', default=1, type=int,
+    parser.add_argument('-cf', '--ignorecasef', dest='ignorecase1', default=1, type=int, metavar='',
                         help="specify whether case (A vs a) need to be ignored in the first search. Default is 1 which means case will be ignored in the search. Set to 0 if don't want to ignore the case. ")
-    parser.add_argument('-cs', '--ignorecases', dest='ignorecase2', default=1, type=int,
+    parser.add_argument('-cs', '--ignorecases', dest='ignorecase2', default=1, type=int, metavar='',
                         help="specify whether case (A vs a) need to be ignored in the second search. Default is 1 which means case will be ignored in the search. Set to 0 if don't want to ignore the case. ")
 
-    parser.add_argument('--hasCandidatesf', dest='geo1', default=0,
+    parser.add_argument('--hasCandidatesf', dest='geo1', default=0, metavar='',
                         help="specify whether there will be a pre-search GSM ID list provided for the first search. Default is 0. Set to 1 if GSM ID list will be provided.")
-    parser.add_argument('--hasCandidatess', dest='geo2', default=0,
+    parser.add_argument('--hasCandidatess', dest='geo2', default=0, metavar='',
                         help="specify whether there will be a pre-search GSM ID list provided for the second search. Default is 0. Set to 1 if GSM ID list will be provided.")
 
 
-    parser.add_argument('--candidateslistf', dest='geo_file1', default=None,
+    parser.add_argument('--candidateslistf', dest='geo_file1', default=None, metavar='',
                         help="specify the first file path of GSM ID list if '--hasCandidates' set to 1")
-    parser.add_argument('--candidateslists', dest='geo_file2', default=None,
+    parser.add_argument('--candidateslists', dest='geo_file2', default=None, metavar='',
                         help="specify the second file path of GSM ID list if '--hasCandidates' set to 1")
 
 
-    parser.add_argument('-s','--species', dest='species', default='Homo sapiens',
+    parser.add_argument('-s','--species', dest='species', default='Homo sapiens', metavar='',
                         help="specify the samples' species. Default is Homo sapiens. Please use the species official name. For example, human is Homo sapiens.")
-    parser.add_argument('-e', '--encode', dest='encode_remove', default=0, type=int,
+    parser.add_argument('-e', '--encode', dest='encode_remove', default=0, type=int, metavar='',
                         help="specify whether need to remove Encode data. Default is 0. Set to 1 to remove Encode data from search.")
-    parser.add_argument('-r', '--roadmap', dest='roadmap_remove', default=0, type=int,
+    parser.add_argument('-r', '--roadmap', dest='roadmap_remove', default=0, type=int, metavar='',
                         help="specify whether need to remove Roadmap data. Default is 0. Set to 1 to remove Roadmap data from search.")
 
     args = None
@@ -190,8 +190,8 @@ def GCF_match():
         roadmap_pkl = settings['Roadmap']
         GSMGSE_pkl = settings['GSMGSE_pkl_path']
 
-        keywords1 = args.keywords1.split(",")
-        keywords2 = args.keywords2.split(",")
+        keywords1 = args.first_feature_key_words.split(",")
+        keywords2 = args.second_feature_key_words.split(",")
 
         output_path1 = args.output_prefix1
         output_path2 = args.output_prefix2
@@ -250,10 +250,10 @@ def GCF_query():
 
     parser.add_argument('GEO_IDs', default=None,
                         help="list of IDs need to used to looking for the NGS sequencing information, "
-                             "it could be a list of IDs separated by ',', or a file containing a list of IDs")
+                             "it could be a list of IDs separated by ',', or a file containing a list of IDs,"
+                             " accepted IDs: GSM, GSE, SRR, SRP, SRX, SAMN, SRP, ",
+                        )
     parser.add_argument('output_path', default=None, help="specify the output file name and path.")
-
-    parser.add_argument('-g', '--gse', dest='hasGSE', default=0, type=int, help="indicate whether query contains GSE ID, default is 0 (False). If query contains GSE ID, set -g to 1.")
 
     args = None
 
@@ -279,34 +279,32 @@ def GCF_query():
         else:
             id_list = GEO_ids.split(",")
 
-        if not args.hasGSE:
-            GSMGSE_pkl_path = None
-        else:
-            settings = get_settings()
-            GSMGSE_pkl_path = settings['GSMGSE_pkl_path']
+        settings = get_settings()
+        GSMGSE_pkl = settings['GSMGSE_pkl_path']
+        GSM_SRR_pkl = settings['GSMtoSRRpkl']
 
-        GEO_query(id_list, args.output_path, GSMGSE_pkl_path, args.hasGSE)
+        GEO_query(id_list, args.output_path, GSMGSE_pkl, GSM_SRR_pkl)
         return
 
     return 1
 
 
 
-if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        if sys.argv[1] == "search":
-            GCF_search()
-        elif sys.argv[1] == "match":
-            GCF_match()
-        elif sys.argv[1] == "query":
-            GCF_query()
-        else:
-            Help()
+
+if len(sys.argv) > 1:
+    if sys.argv[1] == "search":
+        GCF_search()
+    elif sys.argv[1] == "match":
+        GCF_match()
+    elif sys.argv[1] == "query":
+        GCF_query()
     else:
-        print "\nGEO Chip Finder"
-        print "A list of functions for GEO Chip Seq Sample Finder, please try:\npython GCF.py -h"
-        print "\nFuctions:"
-        print "\tsearch:\n\tsearch chip-seq samples and corresponding input from GEO based on the key words."
-        print "\tmatch:\n\tmatch different types of samples from GEO based, for example, looking for the corresponding H3K27me3 samples for each H3K4me3 samples."
-        print "\tquery:\n\tget SRR sequencing information by several common identifiers from GEO such as GSE, GSM, SRR, SRX, SRP, etc"
-        print ""
+        Help()
+else:
+    print "\nGEO Chip Finder"
+    print "A list of functions for GEO Chip Seq Sample Finder, please try:\npython GCF.py -h"
+    print "\nFuctions:"
+    print "\tsearch:\n\tsearch chip-seq samples and corresponding input from GEO based on the key words."
+    print "\tmatch:\n\tmatch different types of samples from GEO based, for example, looking for the corresponding H3K27me3 samples for each H3K4me3 samples."
+    print "\tquery:\n\tget SRR sequencing information by several common identifiers from GEO such as GSE, GSM, SRR, SRX, SRP, etc"
+    print ""

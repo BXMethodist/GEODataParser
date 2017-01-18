@@ -20,7 +20,7 @@ def getConnection(ftpAddress='ftp-trace.ncbi.nlm.nih.gov', user='anonymous', pas
     return ftp
 
 
-def GSMGSE_pickle(path="/home/tmhbxx3/scratch/XMLhttp/GSESoftQuick/"):
+def GSMGSESRR_pickle(path="/home/tmhbxx3/scratch/XMLhttp/GSESoftQuick/"):
     GSMGSE_map = defaultdict(set)
 
     import psutil

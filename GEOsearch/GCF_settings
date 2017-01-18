@@ -2,3 +2,4 @@ GSMGSE_pkl_path /home/tmhbxx3/scratch/XMLhttp/pickles/GSMGSE_map.pkl
 Encode  /home/tmhbxx3/scratch/XMLhttp/pickles/ENCODE_gse.pkl
 Roadmap /home/tmhbxx3/scratch/XMLhttp/pickles/Roadmap_gse.pkl
 MetaData    /home/tmhbxx3/scratch/XMLhttp/QuickXMLs
+GSMtoSRRpkl /home/tmhbxx3/scratch/XMLhttp/pickles/GSMSRR_map.pkl
