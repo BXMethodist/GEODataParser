@@ -92,8 +92,8 @@ def GCF_search():
             return 1
 
         species = args.species
-        encode_remove = True # args.encode_remove
-        roadmap_remove = True #args.roadmap_remove
+        encode_remove = False # args.encode_remove
+        roadmap_remove = False #args.roadmap_remove
 
         cwd = "/home/tmhbxx3/scratch/XMLhttp/QuickXMLs"
 

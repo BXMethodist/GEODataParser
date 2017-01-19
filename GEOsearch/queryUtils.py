@@ -27,6 +27,8 @@ def GEO_query(names, output_name, GSM_GSE_pkl, GSM_SRR_pkl):
 
     table = None
 
+    failed = []
+
     for id in query_ids:
         try:
             id = id.strip()
@@ -38,6 +40,7 @@ def GEO_query(names, output_name, GSM_GSE_pkl, GSM_SRR_pkl):
                 table = table.append(df)
         except:
             print id, " might not have SRA related information"
+            failed.append(id)
 
     result_srr_gsm ={}
     result_srr_gse={}
@@ -50,6 +53,12 @@ def GEO_query(names, output_name, GSM_GSE_pkl, GSM_SRR_pkl):
     table['GSE_ID'] = pd.Series(result_srr_gse)
 
     table.to_csv(output_name, sep="\t")
+
+    failed_file = open(output_name[:-4]+"_failed_id.txt", "w")
+
+    for id in failed:
+        failed_file.write(id+"\n")
+    failed_file.close()
 
 
 
