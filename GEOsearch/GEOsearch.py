@@ -83,11 +83,15 @@ def SOFTQuickParser(output_surfix, features, features_begin,
             return
 
         if cwd is not None:
-            if not cwd.enswith("/"):
+            if not cwd.endswith("/"):
                 cwd += "/"
-            file_obj = open(cwd+sampleName+".xml", "r")
-            info = file_obj.readlines()
-            file_obj.close()
+
+            if os.path.isfile(cwd+sampleName+".xml"):
+                file_obj = open(cwd+sampleName+".xml", "r")
+                info = file_obj.readlines()
+                file_obj.close()
+            else:
+                info = urllib.urlopen(sample.url).readlines()
         else:
             info = urllib.urlopen(sample.url).readlines()
 

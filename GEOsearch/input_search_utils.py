@@ -1,5 +1,5 @@
 
-import csv, re, urllib
+import csv, re, urllib, os
 from collections import defaultdict
 from difflib import SequenceMatcher
 
@@ -64,11 +64,15 @@ def SOFTQuickRelated(featured_samples, output_type, type_seq, GSEGSM_map, encode
         sample = GSM(filegsm)
 
         if cwd is not None:
-            if not cwd.enswith("/"):
+            if not cwd.endswith("/"):
                 cwd += "/"
-            file_obj = open(cwd+filegsm+".xml", "r")
-            info = file_obj.readlines()
-            file_obj.close()
+
+            if os.path.isfile(cwd + filegsm + ".xml"):
+                file_obj = open(cwd + filegsm + ".xml", "r")
+                info = file_obj.readlines()
+                file_obj.close()
+            else:
+                info = urllib.urlopen(sample.url).readlines()
         else:
             info = urllib.urlopen(sample.url).readlines()
 
@@ -440,7 +444,6 @@ def input_finder(output_surffix, HumanSamples, groupByGSE, encodeGSE, relatedSam
     return FirstSampleToInput, ThirdSampleToInput
 
 def has_features(message, features, features_begin, ignorecase):
-    print features
     if ignorecase:
         for feature in features:
             if re.search(feature, message, flags=re.IGNORECASE):
