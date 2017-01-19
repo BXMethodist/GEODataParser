@@ -76,7 +76,12 @@ def GCF_search():
 
         keywords = args.feature_key_words.split(",")
         output_path = args.output_prefix
-        keywords_begin = args.keywords_begin.split(",")
+
+        if args.keywords_begin == '':
+            keywords_begin = []
+        else:
+            keywords_begin = args.keywords_begin.split(",")
+
         type_seq = args.type_seq
         ignorcase = args.ignorecase
         geo = args.geo
@@ -188,8 +193,14 @@ def GCF_match():
         output_path1 = args.output_prefix1
         output_path2 = args.output_prefix2
 
-        keywords_begin1 = args.keywords_begin1.split(",")
-        keywords_begin2 = args.keywords_begin2.split(",")
+        if args.keywords_begin1 == '':
+            keywords_begin1 = []
+        else:
+            keywords_begin1 = args.keywords_begin1.split(",")
+        if args.keywords_begin2 == '':
+            keywords_begin2 = []
+        else:
+            keywords_begin2 = args.keywords_begin2.split(",")
 
         type_seq1 = args.type_seq1
         type_seq2 = args.type_seq2

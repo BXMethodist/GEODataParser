@@ -1,13 +1,13 @@
 #!/bin/bash
 #PBS -r n
-#PBS -o testjob.out
-#PBS -e testjob.err
+#PBS -o out.out
+#PBS -e error.err
 #PBS -m e
 #PBS -M bxia@houstonmethodist.org
-#PBS -l walltime=12:00:00
+#PBS -l walltime=32:00:00
 #PBS -l nodes=1:ppn=1
-cd /home/tmhbxx3/archive/GEO_MetaDatabase
+#PBS -q mediummem
+cd /home/tmhbxx3/scratch/GCF_OL
 
 module load python/2.7.11
 
-python ./updateDB.py

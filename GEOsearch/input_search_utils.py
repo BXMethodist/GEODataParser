@@ -431,6 +431,7 @@ def input_finder(output_surffix, HumanSamples, groupByGSE, encodeGSE, relatedSam
     return FirstSampleToInput, ThirdSampleToInput
 
 def has_features(message, features, features_begin, ignorecase):
+    print features
     if ignorecase:
         for feature in features:
             if re.search(feature, message, flags=re.IGNORECASE):
