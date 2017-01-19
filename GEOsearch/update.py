@@ -116,5 +116,3 @@ def update():
     save_obj(GSMSRR_map, parameters['GSMtoSRRpkl'][:-4])
     save_obj(Encode_map, parameters['Encode'][:-4])
     save_obj(Roadmap_map, parameters['Roadmap'][:-4])
-
-update()
