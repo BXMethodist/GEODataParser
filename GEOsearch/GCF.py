@@ -2,7 +2,8 @@ import argparse, sys, os
 from queryUtils import GEO_query
 from GEOsearch import SOFTQuickParser
 from Related_Sample_Search import Related_Sample_Search
-from setup import get_settings
+from setup import get_settings, setup
+from update import update
 
 
 def Help():
@@ -290,6 +291,10 @@ if len(sys.argv) > 1:
         GCF_match()
     elif sys.argv[1] == "query":
         GCF_query()
+    elif sys.argv[1] == "update":
+        update()
+    elif sys.argv[1] == "setup":
+        setup()
     else:
         Help()
 else:

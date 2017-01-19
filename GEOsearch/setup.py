@@ -11,7 +11,18 @@ def get_settings():
     return settings
 
 
-def setup(email):
+def setup():
+    import argparse
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+                                     usage="\n\npython setup.py <command>\n\n",
+                                     description='', epilog="Chen lab, Houston Methodist")
+
+    parser.add_argument('email', default=None, help="email is required to connect to NCBI ftp site")
+
+    args = parser.parse_args()
+
+    email = args.email
+
     os.system("wget -P ./pkl/ http://cigwiki.houstonmethodist.org/trackhub/boxia/GCF/pkl/GSMGSE_map.pkl")
     os.system("wget -P ./pkl/ http://cigwiki.houstonmethodist.org/trackhub/boxia/GCF/pkl/ENCODE_gse.pkl")
     os.system("wget -P ./pkl/ http://cigwiki.houstonmethodist.org/trackhub/boxia/GCF/pkl/Roadmap_gse.pkl")
@@ -23,15 +34,3 @@ def setup(email):
     settings.write("Roadmap" + "\t" + "./pkl/Roadmap_gse.pkl" + "\n")
     settings.write("GSMtoSRRpkl" + "\t" + "./pkl/GSMSRR_map.pkl" + "\n")
     settings.write("email" + "\t" + email + "\n")
-
-if __name__ == "__main__":
-    import argparse
-    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-                                     usage="\n\npython setup.py <command>\n\n",
-                                     description='', epilog="Chen lab, Houston Methodist")
-
-    parser.add_argument('email', default=None, help="email is required to connect to NCBI ftp site")
-
-    args = parser.parse_args()
-
-    setup(args.email)
