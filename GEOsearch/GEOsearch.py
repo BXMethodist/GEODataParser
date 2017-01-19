@@ -7,7 +7,8 @@ from pickleUtils import load_obj
 
 def SOFTQuickParser(output_surfix, features, features_begin,
                     type_seq="chip-seq", ignorecase=True, geo=False, geofile=None, output_type="Homo sapiens",
-                    encode_remove=True, roadmap_remove=True, encode_pkl=None, roadmap_pkl=None, GSMGSE_pkl=None):
+                    encode_remove=True, roadmap_remove=True, encode_pkl=None, roadmap_pkl=None, GSMGSE_pkl=None,
+                    cwd=None):
 
     encodeGSE = load_obj(encode_pkl)
 
@@ -81,7 +82,16 @@ def SOFTQuickParser(output_surfix, features, features_begin,
             print proc.open_files()
             return
 
-        for line in urllib.urlopen(sample.url).readlines():
+        if cwd is not None:
+            if not cwd.enswith("/"):
+                cwd += "/"
+            file_obj = open(cwd+sampleName+".xml", "r")
+            info = file_obj.readlines()
+            file_obj.close()
+        else:
+            info = urllib.urlopen(sample.url).readlines()
+
+        for line in info:
             if line.startswith("!Sample_title"):
                 sampleTitle = line[line.find("=")+1:].strip()
                 if sampleTitle.find(";") != -1:
@@ -215,9 +225,11 @@ def SOFTQuickParser(output_surfix, features, features_begin,
     print "total ", output_type, " sample found", len(Human_Samples)
 
     if output_type is not None or output_type != "":
-        groupByGSE, encodeGSE, relatedSamples = SOFTQuickRelated(Human_Samples, output_type, type_seq, GSEGSM_map, encode_remove, encodeGSE)
+        groupByGSE, encodeGSE, relatedSamples = SOFTQuickRelated(Human_Samples, output_type, type_seq,
+                                                                 GSEGSM_map, encode_remove, encodeGSE, cwd)
     else:
-        groupByGSE, encodeGSE, relatedSamples = SOFTQuickRelated(samples, output_type, type_seq, GSEGSM_map, encode_remove, encodeGSE)
+        groupByGSE, encodeGSE, relatedSamples = SOFTQuickRelated(samples, output_type, type_seq,
+                                                                 GSEGSM_map, encode_remove, encodeGSE, cwd)
 
     first_category, third_category = input_finder(output_surfix, Human_Samples, groupByGSE, encodeGSE, relatedSamples,
                                                   features, features_begin, ignorecase, output_type)

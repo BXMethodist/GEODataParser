@@ -12,7 +12,7 @@ from pickleUtils import load_obj
 def similar(a, b):
     return SequenceMatcher(None, a, b).ratio()
 
-def SOFTQuickRelated(featured_samples, output_type, type_seq, GSEGSM_map, encode_remove ,encodeGSE):
+def SOFTQuickRelated(featured_samples, output_type, type_seq, GSEGSM_map, encode_remove ,encodeGSE, cwd):
     proc = psutil.Process()
 
     relatedSamples = {}
@@ -63,7 +63,16 @@ def SOFTQuickRelated(featured_samples, output_type, type_seq, GSEGSM_map, encode
 
         sample = GSM(filegsm)
 
-        for line in urllib.urlopen(sample.url).readlines():
+        if cwd is not None:
+            if not cwd.enswith("/"):
+                cwd += "/"
+            file_obj = open(cwd+filegsm+".xml", "r")
+            info = file_obj.readlines()
+            file_obj.close()
+        else:
+            info = urllib.urlopen(sample.url).readlines()
+
+        for line in info:
             if line.startswith("!Sample_title"):
                 sampleTitle = line[line.find("=")+1:].strip()
                 if sampleTitle.find(";") != -1:
