@@ -1,7 +1,17 @@
 import os
 
 
-def setup(command):
+def get_settings():
+    settings = {}
+    settings_file = open('GCF_settings', "r")
+    for line in settings_file.readlines():
+        info = line.split()
+        settings[info[0]] = info[1].strip()
+    settings_file.close()
+    return settings
+
+
+def setup(email):
     os.system("wget -P ./pkl/ http://cigwiki.houstonmethodist.org/trackhub/boxia/GCF/pkl/GSMGSE_map.pkl")
     os.system("wget -P ./pkl/ http://cigwiki.houstonmethodist.org/trackhub/boxia/GCF/pkl/ENCODE_gse.pkl")
     os.system("wget -P ./pkl/ http://cigwiki.houstonmethodist.org/trackhub/boxia/GCF/pkl/Roadmap_gse.pkl")
@@ -12,20 +22,7 @@ def setup(command):
     settings.write("Encode" + "\t" + "./pkl/ENCODE_gse.pkl" + "\n")
     settings.write("Roadmap" + "\t" + "./pkl/Roadmap_gse.pkl" + "\n")
     settings.write("GSMtoSRRpkl" + "\t" + "./pkl/GSMSRR_map.pkl" + "\n")
-
-    if command == "query":
-        settings.close()
-        return 0
-    elif command == "all":
-        settings.write("MetaData" + "\t" + "./MetaData/GSM" + "\n")
-        settings.close()
-        os.system("wget -P ./MetaData/ http://cigwiki.houstonmethodist.org/trackhub/boxia/GCF/MetaData/GSE.tar.gz")
-        os.system("mkdir ./MetaData/GSE")
-        os.system("tar -xvzf ./MetaData/GSE.tar.gz -C ./MetaData/GSE")
-        os.system("wget -P ./MetaData/ http://cigwiki.houstonmethodist.org/trackhub/boxia/GCF/MetaData/GSM.tar.gz")
-        os.system("mkdir ./MetaData/GSM")
-        os.system("tar -xvzf ./MetaData/GSM.tar.gz -C ./MetaData/GSM")
-
+    settings.write("email" + "\t" + email + "\n")
 
 if __name__ == "__main__":
     import argparse
@@ -33,5 +30,8 @@ if __name__ == "__main__":
                                      usage="\n\npython setup.py <command>\n\n",
                                      description='', epilog="Chen lab, Houston Methodist")
 
-    parser.add_argument('command', default=None, help="set as 'query' if only need to use NGS sample information query function,"
-                                                      "set as 'all' if need search and match NGS sample with key words functions")
+    parser.add_argument('email', default=None, help="email is required to connect to NCBI ftp site")
+
+    args = parser.parse_args()
+
+    setup(args.email)

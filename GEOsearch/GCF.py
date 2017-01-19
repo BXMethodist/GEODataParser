@@ -2,6 +2,7 @@ import argparse, sys, os
 from queryUtils import GEO_query
 from GEOsearch import SOFTQuickParser
 from Related_Sample_Search import Related_Sample_Search
+from setup import get_settings
 
 
 def Help():
@@ -11,16 +12,6 @@ def Help():
     print "\tsearch:\n\tsearch chip-seq samples and corresponding input from GEO based on the key words."
     print "\tmatch:\n\tmatch different types of samples from GEO based, for example, looking for the corresponding H3K27me3 samples for each H3K4me3 samples."
     print "\tquery:\n\tget SRR sequencing information by several common identifiers from GEO such as GSE, GSM, SRR, SRX, SRP, etc"
-
-
-def get_settings():
-    settings = {}
-    settings_file = open('GCF_settings', "r")
-    for line in settings_file.readlines():
-        info = line.split()
-        settings[info[0]] = info[1].strip()
-    settings_file.close()
-    return settings
 
 
 def GCF_search():
@@ -45,7 +36,7 @@ def GCF_search():
 
     ## optional parameters
     parser.add_argument('-b', dest='keywords_begin', metavar='', default='',
-                        help="list of feature key words need to used to occur in the beginning of a word, "
+                        help="list of key words in features need to be used to occur in the beginning of a word, "
                              "different key words need to be separated by ','")
     parser.add_argument('-t', '--type', dest='type_seq', metavar='', default='chip-seq', help="type of sequencing specified in the search. Default is 'chip-seq")
     parser.add_argument('-c', '--ignorecase', dest='ignorecase', metavar='', default=1, type=int,
@@ -57,10 +48,10 @@ def GCF_search():
     parser.add_argument('-s','--species', dest='species', default='Homo sapiens', metavar='',
                         help="specify the samples' species. Default is Homo sapiens. Please use the species official name. For example, human is Homo sapiens."
                              "If the species name contains space, surround the name with double quotes, for example \"Homo sapiens\"")
-    parser.add_argument('-e', '--encode', dest='encode_remove', default=0, type=int, metavar='',
-                        help="specify whether need to remove Encode data. Default is 0. Set to 1 to remove Encode data from search.")
-    parser.add_argument('-r', '--roadmap', dest='roadmap_remove', default=0, type=int, metavar='',
-                        help="specify whether need to remove Roadmap data. Default is 0. Set to 1 to remove Roadmap data from search.")
+    # parser.add_argument('-e', '--encode', dest='encode_remove', default=0, type=int, metavar='',
+    #                     help="specify whether need to remove Encode data. Default is 0. Set to 1 to remove Encode data from search.")
+    # parser.add_argument('-r', '--roadmap', dest='roadmap_remove', default=0, type=int, metavar='',
+    #                     help="specify whether need to remove Roadmap data. Default is 0. Set to 1 to remove Roadmap data from search.")
 
     args = None
 
@@ -95,8 +86,8 @@ def GCF_search():
             return 1
 
         species = args.species
-        encode_remove = args.encode_remove
-        roadmap_remove = args.roadmap_remove
+        encode_remove = True # args.encode_remove
+        roadmap_remove = True #args.roadmap_remove
 
         SOFTQuickParser(output_path, keywords, keywords_begin, type_seq=type_seq, ignorecase=ignorcase,
                         geo=geo, geofile=geo_file, output_type=species, encode_remove=encode_remove,
@@ -134,10 +125,10 @@ def GCF_match():
 
     ## optional parameters
     parser.add_argument('-bf', dest='keywords_begin1', default='', metavar='',
-                        help="list of first feature key words need to used to occur in the beginning of a word, "
+                        help="list of key words in first features need to be used to occur in the beginning of a word, "
                              "different key words need to be separated by ','")
     parser.add_argument('-bs', dest='keywords_begin2', default='', metavar='',
-                        help="list of second feature key words need to used to occur in the beginning of a word, "
+                        help="list of key words in second features need to be used to occur in the beginning of a word, "
                              "different key words need to be separated by ','")
 
     parser.add_argument('-tf', '--typef', dest='type_seq1', default='chip-seq', metavar='',
@@ -165,10 +156,10 @@ def GCF_match():
     parser.add_argument('-s','--species', dest='species', default='Homo sapiens', metavar='',
                         help="specify the samples' species. Default is Homo sapiens. Please use the species official name. For example, human is Homo sapiens."
                              "If the species name contains space, surround the name with double quotes, for example \"Homo sapiens\"")
-    parser.add_argument('-e', '--encode', dest='encode_remove', default=0, type=int, metavar='',
-                        help="specify whether need to remove Encode data. Default is 0. Set to 1 to remove Encode data from search.")
-    parser.add_argument('-r', '--roadmap', dest='roadmap_remove', default=0, type=int, metavar='',
-                        help="specify whether need to remove Roadmap data. Default is 0. Set to 1 to remove Roadmap data from search.")
+    # parser.add_argument('-e', '--encode', dest='encode_remove', default=0, type=int, metavar='',
+    #                     help="specify whether need to remove Encode data. Default is 0. Set to 1 to remove Encode data from search.")
+    # parser.add_argument('-r', '--roadmap', dest='roadmap_remove', default=0, type=int, metavar='',
+    #                     help="specify whether need to remove Roadmap data. Default is 0. Set to 1 to remove Roadmap data from search.")
 
     args = None
 
@@ -219,8 +210,9 @@ def GCF_match():
             return 1
 
         species = args.species
-        encode_remove = args.encode_remove
-        roadmap_remove = args.roadmap_remove
+
+        encode_remove = True  # args.encode_remove
+        roadmap_remove = True  # args.roadmap_remove
 
         Related_Sample_Search(output_path1, output_path2, keywords1, keywords_begin1, keywords2,
                               keywords_begin2,

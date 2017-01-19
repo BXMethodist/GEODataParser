@@ -12,7 +12,7 @@ from pickleUtils import load_obj
 def similar(a, b):
     return SequenceMatcher(None, a, b).ratio()
 
-def SOFTQuickRelated(featured_samples, output_type, type_seq, GSEGSM_map, encodeGSE=set()):
+def SOFTQuickRelated(featured_samples, output_type, type_seq, GSEGSM_map, encode_remove ,encodeGSE):
     proc = psutil.Process()
 
     relatedSamples = {}
@@ -28,11 +28,10 @@ def SOFTQuickRelated(featured_samples, output_type, type_seq, GSEGSM_map, encode
         relatedGSEs += value.series
 
     relatedGSEs = set(relatedGSEs)
-
-    if len(encodeGSE) == 0:
-        encodeGSE = load_obj("/home/tmhbxx3/scratch/XMLhttp/pickles/ENCODE_gse.pkl")
-
-    allrelatedGSEs = encodeGSE.union(relatedGSEs)
+    if encode_remove:
+        allrelatedGSEs = relatedGSEs
+    else:
+        allrelatedGSEs = encodeGSE.union(relatedGSEs)
     allrelatedGSEs = list(allrelatedGSEs)
 
     allrelatedGSMs = set()

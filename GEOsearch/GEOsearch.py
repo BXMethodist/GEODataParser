@@ -7,19 +7,17 @@ from pickleUtils import load_obj
 
 def SOFTQuickParser(output_surfix, features, features_begin,
                     type_seq="chip-seq", ignorecase=True, geo=False, geofile=None, output_type="Homo sapiens",
-                    encode_remove=False, roadmap_remove=False, encode_pkl=None, roadmap_pkl=None, GSMGSE_pkl=None):
+                    encode_remove=True, roadmap_remove=True, encode_pkl=None, roadmap_pkl=None, GSMGSE_pkl=None):
 
+    encodeGSE = load_obj(encode_pkl)
+
+    roadmapGSE = load_obj(roadmap_pkl)
+
+    excludedGSE = set()
     if encode_remove:
-        encodeGSE = load_obj(encode_pkl)
-    else:
-        encodeGSE = set()
-
+        excludedGSE = excludedGSE.union(encodeGSE)
     if roadmap_remove:
-        roadmapGSE = load_obj(roadmap_pkl)
-    else:
-        roadmapGSE = set()
-
-    excludedGSE = encodeGSE.union(roadmapGSE)
+        excludedGSE = excludedGSE.union(roadmapGSE)
 
     GSEGSM_map = load_obj(GSMGSE_pkl)
 
@@ -206,7 +204,6 @@ def SOFTQuickParser(output_surfix, features, features_begin,
                     continue
 
 
-
         # for char in characteristics.keys():
         #     totalCharacteristicsName[char]+=1
         if len(target_feature) != 0 and sample.id not in excludedGSM:
@@ -218,9 +215,9 @@ def SOFTQuickParser(output_surfix, features, features_begin,
     print "total ", output_type, " sample found", len(Human_Samples)
 
     if output_type is not None or output_type != "":
-        groupByGSE, encodeGSE, relatedSamples = SOFTQuickRelated(Human_Samples, output_type, type_seq, GSEGSM_map, encodeGSE)
+        groupByGSE, encodeGSE, relatedSamples = SOFTQuickRelated(Human_Samples, output_type, type_seq, GSEGSM_map, encode_remove, encodeGSE)
     else:
-        groupByGSE, encodeGSE, relatedSamples = SOFTQuickRelated(samples, output_type, type_seq, GSEGSM_map, encodeGSE)
+        groupByGSE, encodeGSE, relatedSamples = SOFTQuickRelated(samples, output_type, type_seq, GSEGSM_map, encode_remove, encodeGSE)
 
     first_category, third_category = input_finder(output_surfix, Human_Samples, groupByGSE, encodeGSE, relatedSamples,
                                                   features, features_begin, ignorecase, output_type)
@@ -296,4 +293,4 @@ def SOFTQuickParser(output_surfix, features, features_begin,
 
 
 if __name__ == "__main__":
-    pass
+    SOFTQuickParser("H3K4me3", ["H3K4me3"], [], geo=True, geofile='./testlist.txt', encode_remove=True,encode_pkl='./pkl/ENCODE_gse.pkl', roadmap_pkl='./pkl/Roadmap_gse.pkl', GSMGSE_pkl='./pkl/GSMGSE_map.pkl')

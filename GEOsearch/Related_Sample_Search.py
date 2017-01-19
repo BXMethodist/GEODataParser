@@ -183,7 +183,6 @@ def Related_Sample_Search(output_surfix1, output_surfix2,  first_features, first
 if __name__ == "__main__":
     Related_Sample_Search("H3K4me3", "H3K27me3", ["h3k4me3", "k4me3", "k4m3", "h3k4m3"],[],
                           ["h3k27me3", "k27me3", "k27m3","h3k27m3"], [],
-                          cwd="/home/tmhbxx3/scratch/XMLhttp/QuickXMLs",
                           first_geo=False, first_geofile="uniqueGSM_GEOsearch.txt",
                           second_geo=False, second_geofile="unique_H3K27me3.txt", encode_remove=True, roadmap_remove=True)
 
