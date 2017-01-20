@@ -1,5 +1,5 @@
 import csv
-from pickleUtils import *
+from GEOsearch.pickleUtils import *
 
 
 ##/home/tmhbxx3/scratch/XMLhttp/pickles/GSMSRR_map.pkl
