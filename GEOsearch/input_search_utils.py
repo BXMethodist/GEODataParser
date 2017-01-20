@@ -40,7 +40,7 @@ def SOFTQuickRelated(featured_samples, output_type, type_seq, GSEGSM_map, encode
 
     chunksize = len(allrelatedGSMs)/process
 
-    print chunksize
+    print "chunksize is ", chunksize
 
     queue = Queue()
     processes = []
@@ -64,6 +64,8 @@ def SOFTQuickRelated(featured_samples, output_type, type_seq, GSEGSM_map, encode
 
 
 def related_sample_info(cur_relatedGSMs, queue, proc, output_type, type_seq, cwd):
+    print os.getpid()
+
     relatedSamples = {}
     groupByGSE = defaultdict(set)
     for filegsm in cur_relatedGSMs:
@@ -197,7 +199,7 @@ def related_sample_info(cur_relatedGSMs, queue, proc, output_type, type_seq, cwd
             for gse in sample.series:
                 groupByGSE[gse].add(sample.id)
     queue.put((relatedSamples, groupByGSE))
-    print os.getpid()
+
     return
 
 

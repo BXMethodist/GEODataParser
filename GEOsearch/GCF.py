@@ -49,10 +49,10 @@ def GCF_search():
     parser.add_argument('-s','--species', dest='species', default='Homo sapiens', metavar='',
                         help="specify the samples' species. Default is Homo sapiens. Please use the species official name. For example, human is Homo sapiens."
                              "If the species name contains space, surround the name with double quotes, for example \"Homo sapiens\"")
-    # parser.add_argument('-e', '--encode', dest='encode_remove', default=0, type=int, metavar='',
-    #                     help="specify whether need to remove Encode data. Default is 0. Set to 1 to remove Encode data from search.")
-    # parser.add_argument('-r', '--roadmap', dest='roadmap_remove', default=0, type=int, metavar='',
-    #                     help="specify whether need to remove Roadmap data. Default is 0. Set to 1 to remove Roadmap data from search.")
+    parser.add_argument('-e', '--encode', dest='encode_remove', default=0, type=int, metavar='',
+                        help="specify whether need to remove Encode data. Default is 0. Set to 1 to remove Encode data from search.")
+    parser.add_argument('-r', '--roadmap', dest='roadmap_remove', default=0, type=int, metavar='',
+                        help="specify whether need to remove Roadmap data. Default is 0. Set to 1 to remove Roadmap data from search.")
 
     args = None
 
@@ -92,11 +92,11 @@ def GCF_search():
             return 1
 
         species = args.species
-        encode_remove = False # args.encode_remove
-        roadmap_remove = False #args.roadmap_remove
+        encode_remove = True # args.encode_remove
+        roadmap_remove = True #args.roadmap_remove
 
-        # cwd = None
-        cwd = "/home/tmhbxx3/scratch/XMLhttp/QuickXMLs"
+        cwd = None
+        # cwd = "/home/tmhbxx3/scratch/XMLhttp/QuickXMLs"
 
         SOFTQuickParser(output_path, keywords, keywords_begin, type_seq=type_seq, ignorecase=ignorcase,
                         geo=geo, geofile=geo_file, output_type=species, encode_remove=encode_remove,

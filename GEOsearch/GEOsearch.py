@@ -9,7 +9,7 @@ from multiprocessing import Process, Queue
 def SOFTQuickParser(output_surfix, features, features_begin,
                     type_seq="chip-seq", ignorecase=True, geo=False, geofile=None, output_type="Homo sapiens",
                     encode_remove=True, roadmap_remove=True, encode_pkl=None, roadmap_pkl=None, GSMGSE_pkl=None,
-                    cwd=None, process=10):
+                    cwd=None, process=20):
 
     encodeGSE = load_obj(encode_pkl)
 
@@ -152,6 +152,7 @@ def SOFTQuickParser(output_surfix, features, features_begin,
 def feature_filter(geoGSMs, queue, proc, features, features_begin, excludedGSM,
                     type_seq, ignorecase, output_type,
                     cwd):
+    print os.getpid()
     samples = {}
     Human_Samples = {}
     notFeature = {}
@@ -339,7 +340,7 @@ def feature_filter(geoGSMs, queue, proc, features, features_begin, excludedGSM,
         else:
             notFeature[sampleName] = sample
     queue.put((samples, Human_Samples, notFeature))
-    print os.getpid()
+
 
 
 if __name__ == "__main__":
