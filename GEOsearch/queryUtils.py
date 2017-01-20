@@ -32,6 +32,7 @@ def GEO_query(names, output_name, GSM_GSE_pkl, GSM_SRR_pkl):
     for id in query_ids:
         try:
             id = id.strip()
+            print id
             df = pd.read_csv("http://trace.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?save=efetch&db=sra&rettype=runinfo&term=" + id,
                              index_col=0)
             if table is None:
@@ -46,8 +47,11 @@ def GEO_query(names, output_name, GSM_GSE_pkl, GSM_SRR_pkl):
     result_srr_gse={}
 
     for srr in table.index.values:
-        result_srr_gsm[srr] = GSM_SRR_map[srr]
-        result_srr_gse[srr] = GSM_GSE_map[result_srr_gsm[srr]]
+        if srr in GSM_SRR_map:
+            result_srr_gsm[srr] = GSM_SRR_map[srr]
+            result_srr_gse[srr] = GSM_GSE_map[result_srr_gsm[srr]]
+        else:
+            print srr, " need to be updated"
 
     table['GSM_ID'] = pd.Series(result_srr_gsm)
     table['GSE_ID'] = pd.Series(result_srr_gse)

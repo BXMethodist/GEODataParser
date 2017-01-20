@@ -2,7 +2,7 @@
 import csv, re, urllib, os
 from collections import defaultdict
 from difflib import SequenceMatcher
-
+from update import GSE_info
 import psutil
 
 from GSM import GSM
@@ -37,7 +37,10 @@ def SOFTQuickRelated(featured_samples, output_type, type_seq, GSEGSM_map, encode
     allrelatedGSMs = set()
 
     for gse in allrelatedGSEs:
-        allrelatedGSMs = allrelatedGSMs.union(GSEGSM_map[gse])
+        if gse in GSEGSM_map:
+            allrelatedGSMs = allrelatedGSMs.union(GSEGSM_map[gse])
+        else:
+            allrelatedGSMs = allrelatedGSMs.union(GSE_info(gse)[0])
 
     allrelatedGSMs = list(allrelatedGSMs)
 
