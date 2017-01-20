@@ -6,17 +6,18 @@ from input_search_utils import keyword, Similarity, Character_Similarity
 def Related_Sample_Search(output_surfix1, output_surfix2,  first_features, first_features_begin, second_features, second_begin_features,
                     first_type_seq="chip-seq", second_type_seq="chip-seq", first_ignorecase=True, second_ignorecase=True,
                     first_geo=False, first_geofile=None, second_geo=False, second_geofile=None, output_type="Homo sapiens",
-                    encode_remove=False, roadmap_remove=False, encode_pkl=None, roadmap_pkl=None, GSMGSE_pkl=None, cwd=None):
+                    encode_remove=False, roadmap_remove=False, encode_pkl=None, roadmap_pkl=None, GSMGSE_pkl=None, cwd=None
+                          , process=20):
 
     first_samples = SOFTQuickParser(output_surfix1, first_features, first_features_begin, type_seq=first_type_seq,
                                     ignorecase=first_ignorecase, geo=first_geo, geofile=first_geofile,
                                     output_type=output_type, encode_remove=encode_remove, roadmap_remove=roadmap_remove,
-                                    encode_pkl=encode_pkl, roadmap_pkl=roadmap_pkl, GSMGSE_pkl=GSMGSE_pkl, cwd=cwd)
+                                    encode_pkl=encode_pkl, roadmap_pkl=roadmap_pkl, GSMGSE_pkl=GSMGSE_pkl, cwd=cwd, process=process)
 
     second_samples = SOFTQuickParser(output_surfix2, second_features, second_begin_features, type_seq=second_type_seq,
                                      ignorecase=second_ignorecase, geo=second_geo, geofile=second_geofile,
                                      output_type=output_type, encode_remove=encode_remove, roadmap_remove=roadmap_remove,
-                                     encode_pkl=encode_pkl, roadmap_pkl=roadmap_pkl, GSMGSE_pkl=GSMGSE_pkl, cwd=cwd)
+                                     encode_pkl=encode_pkl, roadmap_pkl=roadmap_pkl, GSMGSE_pkl=GSMGSE_pkl, cwd=cwd, process=process)
 
     for id in first_samples.keys():
         if id in second_samples:

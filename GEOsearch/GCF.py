@@ -49,10 +49,14 @@ def GCF_search():
     parser.add_argument('-s','--species', dest='species', default='Homo sapiens', metavar='',
                         help="specify the samples' species. Default is Homo sapiens. Please use the species official name. For example, human is Homo sapiens."
                              "If the species name contains space, surround the name with double quotes, for example \"Homo sapiens\"")
-    parser.add_argument('-e', '--encode', dest='encode_remove', default=0, type=int, metavar='',
-                        help="specify whether need to remove Encode data. Default is 0. Set to 1 to remove Encode data from search.")
-    parser.add_argument('-r', '--roadmap', dest='roadmap_remove', default=0, type=int, metavar='',
-                        help="specify whether need to remove Roadmap data. Default is 0. Set to 1 to remove Roadmap data from search.")
+    parser.add_argument('-e', '--encode', dest='encode_remove', default=1, type=int, metavar='',
+                        help="specify whether need to remove Encode data. Default is 1. Set to 0 to keep Encode data from search.")
+    parser.add_argument('-r', '--roadmap', dest='roadmap_remove', default=1, type=int, metavar='',
+                        help="specify whether need to remove Roadmap data. Default is 1. Set to 0 to keep Roadmap data from search.")
+    parser.add_argument('-m', '--metadata', dest='MetaData', default=None, metavar='',
+                        help="specify the GSMs metadata files path")
+    parser.add_argument('-p', '--process', dest='process', default=20, type=20, metavar='',
+                        help="specify the number of parallel search processes want to use.")
 
     args = None
 
@@ -92,16 +96,24 @@ def GCF_search():
             return 1
 
         species = args.species
-        encode_remove = True # args.encode_remove
-        roadmap_remove = True #args.roadmap_remove
+        encode_remove = args.encode_remove
+        roadmap_remove = args.roadmap_remove
 
-        cwd = None
-        # cwd = "/home/tmhbxx3/scratch/XMLhttp/QuickXMLs"
+        cwd = args.MetaData
+        process = args.process
+
+        if cwd is None:
+            cwd = settings['MetaData']
+
+        if cwd is None or cwd == "None":
+            cwd = None
+            encode_remove = True
+            roadmap_remove = True
 
         SOFTQuickParser(output_path, keywords, keywords_begin, type_seq=type_seq, ignorecase=ignorcase,
                         geo=geo, geofile=geo_file, output_type=species, encode_remove=encode_remove,
                         roadmap_remove=roadmap_remove, encode_pkl=encode_pkl, roadmap_pkl=roadmap_pkl,
-                        GSMGSE_pkl=GSMGSE_pkl, cwd=cwd)
+                        GSMGSE_pkl=GSMGSE_pkl, cwd=cwd, process=process)
         return
 
     return 1
@@ -165,10 +177,14 @@ def GCF_match():
     parser.add_argument('-s','--species', dest='species', default='Homo sapiens', metavar='',
                         help="specify the samples' species. Default is Homo sapiens. Please use the species official name. For example, human is Homo sapiens."
                              "If the species name contains space, surround the name with double quotes, for example \"Homo sapiens\"")
-    # parser.add_argument('-e', '--encode', dest='encode_remove', default=0, type=int, metavar='',
-    #                     help="specify whether need to remove Encode data. Default is 0. Set to 1 to remove Encode data from search.")
-    # parser.add_argument('-r', '--roadmap', dest='roadmap_remove', default=0, type=int, metavar='',
-    #                     help="specify whether need to remove Roadmap data. Default is 0. Set to 1 to remove Roadmap data from search.")
+    parser.add_argument('-e', '--encode', dest='encode_remove', default=1, type=int, metavar='',
+                        help="specify whether need to remove Encode data. Default is 1. Set to 0 to keep Encode data from search.")
+    parser.add_argument('-r', '--roadmap', dest='roadmap_remove', default=1, type=int, metavar='',
+                        help="specify whether need to remove Roadmap data. Default is 1. Set to 0 to keep Roadmap data from search.")
+    parser.add_argument('-m', '--metadata', dest='MetaData', default=None, metavar='',
+                        help="specify the GSMs metadata files path")
+    parser.add_argument('-p', '--process', dest='process', default=20, type=20, metavar='',
+                        help="specify the number of parallel search processes want to use.")
 
     args = None
 
@@ -226,10 +242,20 @@ def GCF_match():
 
         species = args.species
 
-        encode_remove = True  # args.encode_remove
-        roadmap_remove = True  # args.roadmap_remove
+        encode_remove = args.encode_remove
+        roadmap_remove = args.roadmap_remove
 
-        cwd = "/home/tmhbxx3/scratch/XMLhttp/QuickXMLs"
+        cwd = args.MetaData
+        process = args.process
+
+        if cwd is None:
+            cwd = settings['MetaData']
+
+        if cwd is None or cwd == "None":
+            cwd = None
+            encode_remove = True
+            roadmap_remove = True
+
 
         Related_Sample_Search(output_path1, output_path2, keywords1, keywords_begin1, keywords2,
                               keywords_begin2,
@@ -237,7 +263,8 @@ def GCF_match():
                               first_ignorecase=ignorcase1, second_ignorecase=ignorcase2,
                               first_geo=geo1, first_geofile=geo_file1, second_geo=geo2, second_geofile=geo_file2,
                               output_type=species, encode_remove=encode_remove, roadmap_remove=roadmap_remove,
-                              encode_pkl=encode_pkl, roadmap_pkl=roadmap_pkl, GSMGSE_pkl=GSMGSE_pkl, cwd=cwd)
+                              encode_pkl=encode_pkl, roadmap_pkl=roadmap_pkl, GSMGSE_pkl=GSMGSE_pkl, cwd=cwd,
+                              process=process)
         return
 
     return 1
