@@ -196,9 +196,13 @@ def feature_filter(geoGSMs, queue, proc, features, features_begin, excludedGSM,
                 info = file_obj.readlines()
                 file_obj.close()
             else:
-                info = urllib.urlopen(sample.url).readlines()
+                web = urllib.urlopen(sample.url)
+                info = web.readlines()
+                web.close()
         else:
-            info = urllib.urlopen(sample.url).readlines()
+            web = urllib.urlopen(sample.url)
+            info = web.readlines()
+            web.close()
 
         for line in info:
             if line.startswith("!Sample_title"):

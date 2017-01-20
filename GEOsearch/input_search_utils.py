@@ -98,9 +98,13 @@ def related_sample_info(cur_relatedGSMs, queue, proc, output_type, type_seq, cwd
                 info = file_obj.readlines()
                 file_obj.close()
             else:
-                info = urllib.urlopen(sample.url).readlines()
+                web = urllib.urlopen(sample.url)
+                info = web.readlines()
+                web.close()
         else:
-            info = urllib.urlopen(sample.url).readlines()
+            web = urllib.urlopen(sample.url)
+            info = web.readlines()
+            web.close()
 
         for line in info:
             if line.startswith("!Sample_title"):
