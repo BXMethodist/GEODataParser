@@ -2,7 +2,7 @@
 from ftplib import FTP
 from setup import get_settings
 from pickleUtils import load_obj, save_obj
-import pandas as pd, urllib
+import pandas as pd, urllib, requests, mimetypes
 
 
 def connectToGEO(user='anonymous', ftpAddress='ftp.ncbi.nlm.nih.gov'):
@@ -15,7 +15,7 @@ def connectToGEO(user='anonymous', ftpAddress='ftp.ncbi.nlm.nih.gov'):
     return ftp
 
 
-def updateGSMGSE_Encode_Roadmap(GSMGSE_map, Encode_map, Roadmap_map):
+def updateGSMGSE_Encode_Roadmap(GSMGSE_map, Encode_map, Roadmap_map, MetaData_path):
     # looking for new GSE, if not in local, update the pkl
     local_GSEs = set()
     local_GSMs = set()
@@ -55,21 +55,25 @@ def updateGSMGSE_Encode_Roadmap(GSMGSE_map, Encode_map, Roadmap_map):
                 related_GSEs = GSM_info(gsm)
                 GSMGSE_map[gsm] = related_GSEs
                 GSM_need_update.add(gsm)
+                downloadGSM(gsm, MetaData_path)
 
     return GSMGSE_map, Encode_map, Roadmap_map, GSM_need_update
 
 
 def updateGSMSRR(GSMSRR_map, GSMs):
     for gsm in GSMs:
-        df = pd.read_csv(
-            "http://trace.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?save=efetch&db=sra&rettype=runinfo&term=" + gsm,
-            index_col=0)
+        try:
+            df = pd.read_csv(
+                "http://trace.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?save=efetch&db=sra&rettype=runinfo&term=" + gsm,
+                index_col=0)
 
-        SRRs = set(df.index.values)
-        GSMSRR_map[gsm] = SRRs
+            SRRs = set(df.index.values)
+            GSMSRR_map[gsm] = SRRs
 
-        for srr in SRRs:
-            GSMSRR_map[srr] = gsm
+            for srr in SRRs:
+                GSMSRR_map[srr] = gsm
+        except:
+            pass
 
     return GSMSRR_map
 
@@ -80,7 +84,11 @@ def GSE_info(id):
     roadmap = False
     gsms = set()
 
-    for line in urllib.urlopen(url).readlines():
+    web = urllib.urlopen(url)
+    info = web.readlines()
+    web.close()
+
+    for line in info:
         if line.startswith("!Series_project"):
             if line.find("Roadmap Epigenomics") != -1:
                 roadmap = True
@@ -95,11 +103,25 @@ def GSE_info(id):
 def GSM_info(id):
     url = "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=" + id + "&targ=self&form=text&view=quick"
 
+    web = urllib.urlopen(url)
+    info = web.readlines()
+    web.close()
+
     gses = set()
-    for line in urllib.urlopen(url).readlines():
+    for line in info:
         if line.startswith("!Sample_series_id"):
             gses.add(line[line.find("=")+1:].strip())
     return gses
+
+def downloadGSM(gsmID, MetaData_path):
+    ## download GSM meta data from NCBI
+    url = "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=" + gsmID + "&targ=self&form=text&view=quick"
+    response = requests.get(url)
+    content_type = response.headers['content-type']
+    extension = mimetypes.guess_extension(content_type)
+    if content_type == "geo/text" and extension != ".html":
+        urllib.urlretrieve(url, MetaData_path + gsmID + ".txt")
+    return
 
 def update():
     parameters = get_settings()
@@ -108,11 +130,18 @@ def update():
     Encode_map = load_obj(parameters['Encode'])
     Roadmap_map = load_obj(parameters['Roadmap'])
 
-    GSMGSE_map, Encode_map, Roadmap_map, GSM_need_update = updateGSMGSE_Encode_Roadmap(GSMGSE_map, Encode_map, Roadmap_map)
+    MetaData_path = parameters["MetaData"]
+
+    if not MetaData_path.endswith("/"):
+        MetaData_path += "/"
+
+    GSMGSE_map, Encode_map, Roadmap_map, GSM_need_update = updateGSMGSE_Encode_Roadmap(GSMGSE_map, Encode_map, Roadmap_map, MetaData_path)
 
     GSMSRR_map = updateGSMSRR(GSMSRR_map, GSM_need_update)
 
-    save_obj(GSMGSE_map, parameters['GSMGSE_pkl_path'][:-4])
-    save_obj(GSMSRR_map, parameters['GSMtoSRRpkl'][:-4])
-    save_obj(Encode_map, parameters['Encode'][:-4])
-    save_obj(Roadmap_map, parameters['Roadmap'][:-4])
+    # save_obj(GSMGSE_map, parameters['GSMGSE_pkl_path'][:-4])
+    # save_obj(GSMSRR_map, parameters['GSMtoSRRpkl'][:-4])
+    # save_obj(Encode_map, parameters['Encode'][:-4])
+    # save_obj(Roadmap_map, parameters['Roadmap'][:-4])
+
+
