@@ -3,6 +3,7 @@ import csv, re, urllib, os
 from collections import defaultdict
 from difflib import SequenceMatcher
 from update import GSE_info
+from multiprocessing import Queue, Process
 import psutil
 
 from GSM import GSM
@@ -12,19 +13,12 @@ from pickleUtils import load_obj
 def similar(a, b):
     return SequenceMatcher(None, a, b).ratio()
 
-def SOFTQuickRelated(featured_samples, output_type, type_seq, GSEGSM_map, encode_remove ,encodeGSE, cwd):
+def SOFTQuickRelated(featured_samples, output_type, type_seq, GSEGSM_map, encode_remove ,encodeGSE, cwd, process):
     proc = psutil.Process()
-
-    relatedSamples = {}
-
-    groupByGSE = defaultdict(set)
 
     relatedGSEs = []
 
-    featureGSMs = set()
-
     for key, value in featured_samples.iteritems():
-        featureGSMs.add(key)
         relatedGSEs += value.series
 
     relatedGSEs = set(relatedGSEs)
@@ -44,9 +38,35 @@ def SOFTQuickRelated(featured_samples, output_type, type_seq, GSEGSM_map, encode
 
     allrelatedGSMs = list(allrelatedGSMs)
 
-    # print allrelatedGSMs
+    chunksize = len(allrelatedGSMs)/process
 
-    for filegsm in allrelatedGSMs:
+    print chunksize
+
+    queue = Queue()
+    processes = []
+    for i in range(process):
+        cur_relatedGSMs = allrelatedGSMs[i * chunksize:(i + 1) * chunksize]
+        p = Process(target=related_sample_info, args=(cur_relatedGSMs, queue, proc, output_type, type_seq, cwd))
+        processes.append(p)
+        p.start()
+
+    relatedSamples = {}
+    groupByGSE = defaultdict(set)
+
+    for i in range(process):
+        cur_relatedSamples, cur_groupByGSE = queue.get()
+        relatedSamples.update(cur_relatedSamples)
+        for key, value in cur_groupByGSE.items():
+            groupByGSE[key]=groupByGSE[key].union(value)
+    for p in processes:
+        p.join()
+    return groupByGSE, encodeGSE, relatedSamples
+
+
+def related_sample_info(cur_relatedGSMs, queue, proc, output_type, type_seq, cwd):
+    relatedSamples = {}
+    groupByGSE = defaultdict(set)
+    for filegsm in cur_relatedGSMs:
         characteristics = defaultdict(str)
         supplementaryData = defaultdict(str)
         relations = defaultdict(str)
@@ -56,13 +76,16 @@ def SOFTQuickRelated(featured_samples, output_type, type_seq, GSEGSM_map, encode
         title_found = False
         ab_found = False
 
+        sampleTitle = ""
+        sampleType = ""
+        sampleLibraryStrategy = ""
+        sampleOrganism = ""
+        samplePlatForm = ""
+        sampleInstrumentID= ""
+
         if len(proc.open_files()) > 100:
             print "More than one file is open, stop!"
             return
-        # n += 1
-        # print len(proc.open_files())
-        # if n > 10:
-        #     break
 
         sample = GSM(filegsm)
 
@@ -169,9 +192,9 @@ def SOFTQuickRelated(featured_samples, output_type, type_seq, GSEGSM_map, encode
             relatedSamples[sample.id] = sample
             for gse in sample.series:
                 groupByGSE[gse].add(sample.id)
-
-
-    return groupByGSE, encodeGSE, relatedSamples
+    queue.put((relatedSamples, groupByGSE))
+    print os.getpid()
+    return
 
 
 def spliterFinder(title, keyword):

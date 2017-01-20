@@ -45,6 +45,7 @@ def SOFTQuickParser(output_surfix, features, features_begin,
         if cwd is not None:
             localGSMs = set([x[:-4] for x in os.listdir(cwd) if x.startswith("GSM")])
             geoGSMs = geoGSMs.union(localGSMs)
+    geoGSMs = list(geoGSMs)
 
     queue = Queue()
     chucksize = len(geoGSMs)/(process-1)
@@ -70,7 +71,7 @@ def SOFTQuickParser(output_surfix, features, features_begin,
     print "total ", output_type, " sample found", len(Human_Samples)
 
     groupByGSE, encodeGSE, relatedSamples = SOFTQuickRelated(Human_Samples, output_type, type_seq,
-                                                             GSEGSM_map, encode_remove, encodeGSE, cwd)
+                                                             GSEGSM_map, encode_remove, encodeGSE, cwd, process)
 
     first_category, third_category = input_finder(output_surfix, Human_Samples, groupByGSE, encodeGSE, relatedSamples,
                                                   features, features_begin, ignorecase, output_type)
@@ -173,8 +174,8 @@ def feature_filter(geoGSMs, queue, proc, features, features_begin, excludedGSM,
 
         antibody = {}
         treatment = {}
-        tissue = None
-        disease = None
+        tissue = ""
+        disease = ""
         cellLine = ""
         cellType = ""
         genoType = {}
@@ -334,6 +335,7 @@ def feature_filter(geoGSMs, queue, proc, features, features_begin, excludedGSM,
         else:
             notFeature[sampleName] = sample
     queue.put((samples, Human_Samples, notFeature))
+    print os.getpid()
 
 
 if __name__ == "__main__":

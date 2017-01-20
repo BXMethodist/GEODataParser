@@ -95,6 +95,7 @@ def GCF_search():
         encode_remove = False # args.encode_remove
         roadmap_remove = False #args.roadmap_remove
 
+        # cwd = None
         cwd = "/home/tmhbxx3/scratch/XMLhttp/QuickXMLs"
 
         SOFTQuickParser(output_path, keywords, keywords_begin, type_seq=type_seq, ignorecase=ignorcase,
