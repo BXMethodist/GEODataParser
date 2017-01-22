@@ -140,10 +140,10 @@ def update():
 
     GSMSRR_map = updateGSMSRR(GSMSRR_map, GSM_need_update)
 
-    # save_obj(GSMGSE_map, parameters['GSMGSE_pkl_path'][:-4])
-    # save_obj(GSMSRR_map, parameters['GSMtoSRRpkl'][:-4])
-    # save_obj(Encode_map, parameters['Encode'][:-4])
-    # save_obj(Roadmap_map, parameters['Roadmap'][:-4])
+    save_obj(GSMGSE_map, parameters['GSMGSE_pkl_path'][:-4])
+    save_obj(GSMSRR_map, parameters['GSMtoSRRpkl'][:-4])
+    save_obj(Encode_map, parameters['Encode'][:-4])
+    save_obj(Roadmap_map, parameters['Roadmap'][:-4])
 
 
 
