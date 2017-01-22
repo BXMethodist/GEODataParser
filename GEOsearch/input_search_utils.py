@@ -95,8 +95,8 @@ def related_sample_info(cur_relatedGSMs, queue, proc, output_type, type_seq, cwd
             if not cwd.endswith("/"):
                 cwd += "/"
 
-            if os.path.isfile(cwd + filegsm + ".xml"):
-                file_obj = open(cwd + filegsm + ".xml", "r")
+            if os.path.isfile(cwd + filegsm + ".txt"):
+                file_obj = open(cwd + filegsm + ".txt", "r")
                 info = file_obj.readlines()
                 file_obj.close()
             else:

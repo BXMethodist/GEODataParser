@@ -192,8 +192,8 @@ def feature_filter(geoGSMs, queue, proc, features, features_begin, excludedGSM,
             if not cwd.endswith("/"):
                 cwd += "/"
 
-            if os.path.isfile(cwd + sampleName + ".xml"):
-                file_obj = open(cwd + sampleName + ".xml", "r")
+            if os.path.isfile(cwd + sampleName + ".txt"):
+                file_obj = open(cwd + sampleName + ".txt", "r")
                 info = file_obj.readlines()
                 file_obj.close()
             else:
