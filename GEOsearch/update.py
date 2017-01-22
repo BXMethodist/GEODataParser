@@ -56,6 +56,7 @@ def updateGSMGSE_Encode_Roadmap(GSMGSE_map, Encode_map, Roadmap_map, MetaData_pa
                 GSMGSE_map[gsm] = related_GSEs
                 GSM_need_update.add(gsm)
                 downloadGSM(gsm, MetaData_path)
+            break
 
     return GSMGSE_map, Encode_map, Roadmap_map, GSM_need_update
 
@@ -143,5 +144,7 @@ def update():
     # save_obj(GSMSRR_map, parameters['GSMtoSRRpkl'][:-4])
     # save_obj(Encode_map, parameters['Encode'][:-4])
     # save_obj(Roadmap_map, parameters['Roadmap'][:-4])
+
+
 
 
