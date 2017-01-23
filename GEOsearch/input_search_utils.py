@@ -14,7 +14,7 @@ def similar(a, b):
     return SequenceMatcher(None, a, b).ratio()
 
 
-def get_MetaInfo(path):
+def get_MetaInfo(path, count):
     proc = psutil.Process()
     file_obj = open(path, "r")
     info = file_obj.readlines()
@@ -22,16 +22,18 @@ def get_MetaInfo(path):
     if len(proc.open_files()) > 3:
         return None
     del file_obj
-    gc.collect()
+    if count % 50 == 0:
+        gc.collect()
     return info
 
 
-def get_WebInfo(url):
+def get_WebInfo(url, count):
     with contextlib.closing(urllib.urlopen(url)) as web:
         info = web.readlines()
     web.close()
     del web
-    gc.collect()
+    if count % 50 == 0:
+        gc.collect()
     return info
 
 
@@ -88,6 +90,9 @@ def related_sample_info(cur_relatedGSMs, queue, output_type, type_seq, cwd):
 
     relatedSamples = {}
     groupByGSE = defaultdict(set)
+
+    count = 0
+
     for filegsm in cur_relatedGSMs:
         characteristics = defaultdict(str)
         supplementaryData = defaultdict(str)
@@ -112,11 +117,11 @@ def related_sample_info(cur_relatedGSMs, queue, output_type, type_seq, cwd):
                 cwd += "/"
 
             if os.path.isfile(cwd + filegsm + ".txt"):
-                info = get_MetaInfo(cwd + filegsm + ".txt")
+                info = get_MetaInfo(cwd + filegsm + ".txt", count)
             else:
-                info = get_WebInfo(sample.url)
+                info = get_WebInfo(sample.url, count)
         else:
-            info = get_WebInfo(sample.url)
+            info = get_WebInfo(sample.url, count)
 
         if info is None:
             continue
