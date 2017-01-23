@@ -1,10 +1,10 @@
 
-import csv, re, urllib, os
+import csv, re, urllib, os, gc
 from collections import defaultdict
 from difflib import SequenceMatcher
 from update import GSE_info
 from multiprocessing import Queue, Process
-import psutil
+import psutil, contextlib
 
 from GSM import GSM
 from pickleUtils import load_obj
@@ -13,9 +13,29 @@ from pickleUtils import load_obj
 def similar(a, b):
     return SequenceMatcher(None, a, b).ratio()
 
-def SOFTQuickRelated(featured_samples, output_type, type_seq, GSEGSM_map, encode_remove ,encodeGSE, cwd, process):
-    proc = psutil.Process()
 
+def get_MetaInfo(path):
+    proc = psutil.Process()
+    file_obj = open(path, "r")
+    info = file_obj.readlines()
+    file_obj.close()
+    if len(proc.open_files()) > 3:
+        return None
+    del file_obj
+    gc.collect()
+    return info
+
+
+def get_WebInfo(url):
+    with contextlib.closing(urllib.urlopen(url)) as web:
+        info = web.readlines()
+    web.close()
+    del web
+    gc.collect()
+    return info
+
+
+def SOFTQuickRelated(featured_samples, output_type, type_seq, GSEGSM_map, encode_remove ,encodeGSE, cwd, process):
     relatedGSEs = []
 
     for key, value in featured_samples.iteritems():
@@ -38,7 +58,7 @@ def SOFTQuickRelated(featured_samples, output_type, type_seq, GSEGSM_map, encode
 
     allrelatedGSMs = list(allrelatedGSMs)
 
-    chunksize = len(allrelatedGSMs)/process
+    chunksize = len(allrelatedGSMs)/(process-1) if process > 1 else len(allrelatedGSMs)
 
     print "chunksize is ", chunksize
 
@@ -46,7 +66,7 @@ def SOFTQuickRelated(featured_samples, output_type, type_seq, GSEGSM_map, encode
     processes = []
     for i in range(process):
         cur_relatedGSMs = allrelatedGSMs[i * chunksize:(i + 1) * chunksize]
-        p = Process(target=related_sample_info, args=(cur_relatedGSMs, queue, proc, output_type, type_seq, cwd))
+        p = Process(target=related_sample_info, args=(cur_relatedGSMs, queue, output_type, type_seq, cwd))
         processes.append(p)
         p.start()
 
@@ -63,7 +83,7 @@ def SOFTQuickRelated(featured_samples, output_type, type_seq, GSEGSM_map, encode
     return groupByGSE, encodeGSE, relatedSamples
 
 
-def related_sample_info(cur_relatedGSMs, queue, proc, output_type, type_seq, cwd):
+def related_sample_info(cur_relatedGSMs, queue, output_type, type_seq, cwd):
     print os.getpid()
 
     relatedSamples = {}
@@ -85,10 +105,6 @@ def related_sample_info(cur_relatedGSMs, queue, proc, output_type, type_seq, cwd
         samplePlatForm = ""
         sampleInstrumentID= ""
 
-        if len(proc.open_files()) > 100:
-            print "More than one file is open, stop!"
-            return
-
         sample = GSM(filegsm)
 
         if cwd is not None:
@@ -96,17 +112,14 @@ def related_sample_info(cur_relatedGSMs, queue, proc, output_type, type_seq, cwd
                 cwd += "/"
 
             if os.path.isfile(cwd + filegsm + ".txt"):
-                file_obj = open(cwd + filegsm + ".txt", "r")
-                info = file_obj.readlines()
-                file_obj.close()
+                info = get_MetaInfo(cwd + filegsm + ".txt")
             else:
-                web = urllib.urlopen(sample.url)
-                info = web.readlines()
-                web.close()
+                info = get_WebInfo(sample.url)
         else:
-            web = urllib.urlopen(sample.url)
-            info = web.readlines()
-            web.close()
+            info = get_WebInfo(sample.url)
+
+        if info is None:
+            continue
 
         for line in info:
             if line.startswith("!Sample_title"):

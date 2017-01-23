@@ -1,9 +1,30 @@
-import csv, os, re, psutil, urllib
+import csv, os, re, psutil, urllib, contextlib, gc
 from collections import defaultdict
 from GSM import GSM, search_term_to_GSM
 from input_search_utils import SOFTQuickRelated, input_finder, has_features
 from pickleUtils import load_obj
 from multiprocessing import Process, Queue
+
+
+def get_MetaInfo(path):
+    proc = psutil.Process()
+    file_obj = open(path, "r")
+    info = file_obj.readlines()
+    file_obj.close()
+    if len(proc.open_files()) > 3:
+        return None
+    del file_obj
+    gc.collect()
+    return info
+
+
+def get_WebInfo(url):
+    with contextlib.closing(urllib.urlopen(url)) as web:
+        info = web.readlines()
+    web.close()
+    del web
+    gc.collect()
+    return info
 
 
 def SOFTQuickParser(output_surfix, features, features_begin,
@@ -28,8 +49,6 @@ def SOFTQuickParser(output_surfix, features, features_begin,
     for gse in excludedGSE:
         excludedGSM = excludedGSM.union(GSEGSM_map[gse])
 
-    proc = psutil.Process()
-    # print excludedGSM
     type_seq = type_seq.lower()
     # print len(map)
 
@@ -48,11 +67,11 @@ def SOFTQuickParser(output_surfix, features, features_begin,
     geoGSMs = list(geoGSMs)
 
     queue = Queue()
-    chucksize = len(geoGSMs)/(process-1)
+    chucksize = len(geoGSMs)/(process-1) if process > 1 else len(geoGSMs)
     processes = []
     for i in range(process):
         cur_geoGSMs = geoGSMs[i*chucksize:(i+1)*chucksize]
-        p = Process(target=feature_filter, args=(cur_geoGSMs, queue, proc, features, features_begin, excludedGSM,
+        p = Process(target=feature_filter, args=(cur_geoGSMs, queue, features, features_begin, excludedGSM,
                     type_seq, ignorecase, output_type,cwd,))
         processes.append(p)
         p.start()
@@ -149,7 +168,7 @@ def SOFTQuickParser(output_surfix, features, features_begin,
     return Human_Samples
 
 
-def feature_filter(geoGSMs, queue, proc, features, features_begin, excludedGSM,
+def feature_filter(geoGSMs, queue, features, features_begin, excludedGSM,
                     type_seq, ignorecase, output_type,
                     cwd):
     print os.getpid()
@@ -183,27 +202,19 @@ def feature_filter(geoGSMs, queue, proc, features, features_begin, excludedGSM,
         title_found = False
         ab_found = False
 
-        if len(proc.open_files()) > 100:
-            print "More than one file is open, stop!"
-            print proc.open_files()
-            return
-
         if cwd is not None:
             if not cwd.endswith("/"):
                 cwd += "/"
 
             if os.path.isfile(cwd + sampleName + ".txt"):
-                file_obj = open(cwd + sampleName + ".txt", "r")
-                info = file_obj.readlines()
-                file_obj.close()
+                info = get_MetaInfo(cwd + sampleName + ".txt")
             else:
-                web = urllib.urlopen(sample.url)
-                info = web.readlines()
-                web.close()
+                info = get_WebInfo(sample.url)
         else:
-            web = urllib.urlopen(sample.url)
-            info = web.readlines()
-            web.close()
+            info = get_WebInfo(sample.url)
+
+        if info is None:
+            continue
 
         for line in info:
             if line.startswith("!Sample_title"):

@@ -55,7 +55,7 @@ def GCF_search():
                         help="specify whether need to remove Roadmap data. Default is 1. Set to 0 to keep Roadmap data from search.")
     parser.add_argument('-m', '--metadata', dest='MetaData', default=None, metavar='',
                         help="specify the GSMs metadata files path")
-    parser.add_argument('-p', '--process', dest='process', default=20, type=20, metavar='',
+    parser.add_argument('-p', '--process', dest='process', default=20, type=int, metavar='',
                         help="specify the number of parallel search processes want to use.")
 
     args = None
@@ -183,7 +183,7 @@ def GCF_match():
                         help="specify whether need to remove Roadmap data. Default is 1. Set to 0 to keep Roadmap data from search.")
     parser.add_argument('-m', '--metadata', dest='MetaData', default=None, metavar='',
                         help="specify the GSMs metadata files path")
-    parser.add_argument('-p', '--process', dest='process', default=20, type=20, metavar='',
+    parser.add_argument('-p', '--process', dest='process', default=20, type=int, metavar='',
                         help="specify the number of parallel search processes want to use.")
 
     args = None
