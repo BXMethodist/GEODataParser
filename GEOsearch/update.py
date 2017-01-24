@@ -3,7 +3,7 @@ from ftplib import FTP
 from setup import get_settings
 from pickleUtils import load_obj, save_obj
 import pandas as pd, urllib, requests, mimetypes
-import gc
+import gc, sqlite3, json
 
 
 def connectToGEO(user='anonymous', ftpAddress='ftp.ncbi.nlm.nih.gov'):
@@ -16,7 +16,7 @@ def connectToGEO(user='anonymous', ftpAddress='ftp.ncbi.nlm.nih.gov'):
     return ftp
 
 
-def updateGSMGSE_Encode_Roadmap(GSMGSE_map, Encode_map, Roadmap_map, GSM_Meta_map):
+def updateGSMGSE_Encode_Roadmap(GSMGSE_map, Encode_map, Roadmap_map, MetaData_path):
     # looking for new GSE, if not in local, update the pkl
     local_GSEs = set()
     local_GSMs = set()
@@ -43,6 +43,12 @@ def updateGSMGSE_Encode_Roadmap(GSMGSE_map, Encode_map, Roadmap_map, GSM_Meta_ma
 
     GSM_need_update = set()
 
+    if MetaData_path is not None:
+        db = sqlite3.connect(MetaData_path)
+        db.text_factory = str
+    else:
+        db = None
+
     for id in seriesID:
         if id not in local_GSEs:
             newGSMs, encode, roadmap = GSE_info(id)
@@ -56,12 +62,18 @@ def updateGSMGSE_Encode_Roadmap(GSMGSE_map, Encode_map, Roadmap_map, GSM_Meta_ma
                 related_GSEs = GSM_info(gsm)
                 GSMGSE_map[gsm] = related_GSEs
                 GSM_need_update.add(gsm)
-                if GSM_Meta_map is not None:
+                if db is not None:
                     info = downloadGSM(gsm)
                     if info is not None:
-                        print gsm
-                        GSM_Meta_map[gsm] = downloadGSM(gsm)
-    return GSMGSE_map, Encode_map, Roadmap_map, GSM_Meta_map, GSM_need_update
+                        try:
+                            metadata = json.dumps(info)
+                        except:
+                            new_info = []
+                            for i in info:
+                                new_info.append(unicode(i, errors='ignore'))
+                            metadata = json.dumps(new_info)
+                        db.execute("insert into GSM values(?, ?)", (gsm, metadata))
+    return GSMGSE_map, Encode_map, Roadmap_map, GSM_need_update
 
 
 def updateGSMSRR(GSMSRR_map, GSMs):
@@ -142,22 +154,16 @@ def update():
 
     MetaData_path = parameters["MetaData"]
 
-    if MetaData_path != "None":
-        GSM_Meta_map = load_obj(parameters["MetaData"])
-    else:
-        GSM_Meta_map = None
+    if MetaData_path == "None":
+        MetaData_path = None
 
-    if not MetaData_path.endswith("/"):
-        MetaData_path += "/"
-
-    GSMGSE_map, Encode_map, Roadmap_map, GSM_Meta_map, GSM_need_update = updateGSMGSE_Encode_Roadmap(GSMGSE_map, Encode_map, Roadmap_map, GSM_Meta_map)
+    GSMGSE_map, Encode_map, Roadmap_map, GSM_need_update = updateGSMGSE_Encode_Roadmap(GSMGSE_map, Encode_map, Roadmap_map, MetaData_path)
 
     GSMSRR_map = updateGSMSRR(GSMSRR_map, GSM_need_update)
 
     save_obj(GSMGSE_map, parameters['GSMGSE_pkl_path'][:-4])
     save_obj(Encode_map, parameters['Encode'][:-4])
     save_obj(Roadmap_map, parameters['Roadmap'][:-4])
-    save_obj(GSM_Meta_map, parameters['MetaData'][:-4])
     save_obj(GSMSRR_map, parameters['GSMtoSRRpkl'][:-4])
 
 

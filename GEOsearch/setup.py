@@ -25,17 +25,11 @@ def setup():
 
     cwd = os.getcwd()
 
-    ##To Do: test download and extract
-
-    ###
-
-
     os.system("wget -P "+cwd+"/pkl/ http://cigwiki.houstonmethodist.org/trackhub/boxia/GCF/pkl/GSMGSE_map.pkl")
     os.system("wget -P "+cwd+"/pkl/ http://cigwiki.houstonmethodist.org/trackhub/boxia/GCF/pkl/ENCODE_gse.pkl")
     os.system("wget -P "+cwd+"/pkl/ http://cigwiki.houstonmethodist.org/trackhub/boxia/GCF/pkl/Roadmap_gse.pkl")
     os.system("wget -P "+cwd+"/pkl/ http://cigwiki.houstonmethodist.org/trackhub/boxia/GCF/pkl/GSMSRR_map.pkl")
-    os.system("wget -P "+cwd+"/ http://cigwiki.houstonmethodist.org/trackhub/boxia/GCF/MetaData.tar.gz")
-    os.system("tar -xvzf "+cwd+"/MetaData.tar.gz")
+    os.system("wget -P "+cwd+"/pkl/ http://cigwiki.houstonmethodist.org/trackhub/boxia/GCF/pkl/geoMetaData.db")
 
     settings = open("GCF_settings.txt", "w")
     settings.write("GSMGSE_pkl_path"+"\t"+cwd+"/pkl/GSMGSE_map.pkl"+"\n")
@@ -43,5 +37,5 @@ def setup():
     settings.write("Roadmap" + "\t" +cwd+"/pkl/Roadmap_gse.pkl" + "\n")
     settings.write("GSMtoSRRpkl" + "\t" +cwd+"/pkl/GSMSRR_map.pkl" + "\n")
     settings.write("email" + "\t" + email + "\n")
-    settings.write("MetaData" + "\t" + cwd+"/MetaData/")
+    settings.write("MetaData" + "\t" + cwd+"/pkl/geoMetaData.db")
     settings.close()
