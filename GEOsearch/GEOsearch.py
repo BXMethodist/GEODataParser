@@ -55,7 +55,7 @@ def SOFTQuickParser(output_surfix, features, features_begin,
     # print len(map)
 
     geoGSMs = set()
-    if geo:
+    if geofile is not None:
         file_obj = open(geofile, "r")
         for line in file_obj.readlines():
             geoGSMs.add(line.strip())
@@ -63,10 +63,12 @@ def SOFTQuickParser(output_surfix, features, features_begin,
     else:
         geoGSMs = search_term_to_GSM(features+features_begin)
 
-        if cwd is not None:
+        if (cwd is not None) and (not geo):
             localGSMs = set([x[:-4] for x in os.listdir(cwd) if x.startswith("GSM")])
             geoGSMs = geoGSMs.union(localGSMs)
     geoGSMs = list(geoGSMs)
+
+    print "total ", len(geoGSMs), " candidate found in search", features
 
     queue = Queue()
     chucksize = len(geoGSMs)/(process-1) if process > 1 else len(geoGSMs)

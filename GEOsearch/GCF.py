@@ -42,8 +42,8 @@ def GCF_search():
     parser.add_argument('-t', '--type', dest='type_seq', metavar='', default='chip-seq', help="type of sequencing specified in the search. Default is 'chip-seq")
     parser.add_argument('-c', '--ignorecase', dest='ignorecase', metavar='', default=1, type=int,
                         help="specify whether case (A vs a) need to be ignored in the search. Default is 1 which means case will be ignored in the search. Set to 0 if don't want to ignore the case. ")
-    parser.add_argument('--hasCandidates', dest='geo', default=0, metavar='',
-                        help="specify whether there will be a pre-search GSM ID list provided. Default is 0. Set to 1 if GSM ID list will be provided.")
+    parser.add_argument('--geo', dest='geo', default=0, type=int, metavar='',
+                        help="specify whether search will be limited to GEO website search result. Default is 0. Set to 1 if want to perform all GEO data search.")
     parser.add_argument('--candidateslist', dest='geo_file', default=None, metavar='',
                         help="specify the file path of GSM ID list if '--hasCandidates' set to 1")
     parser.add_argument('-s','--species', dest='species', default='Homo sapiens', metavar='',
@@ -162,10 +162,10 @@ def GCF_match():
     parser.add_argument('-cs', '--ignorecases', dest='ignorecase2', default=1, type=int, metavar='',
                         help="specify whether case (A vs a) need to be ignored in the second search. Default is 1 which means case will be ignored in the search. Set to 0 if don't want to ignore the case. ")
 
-    parser.add_argument('--hasCandidatesf', dest='geo1', default=0, metavar='',
-                        help="specify whether there will be a pre-search GSM ID list provided for the first search. Default is 0. Set to 1 if GSM ID list will be provided.")
-    parser.add_argument('--hasCandidatess', dest='geo2', default=0, metavar='',
-                        help="specify whether there will be a pre-search GSM ID list provided for the second search. Default is 0. Set to 1 if GSM ID list will be provided.")
+    parser.add_argument('--geo1', dest='geo1', default=0, type=int, metavar='',
+                        help="specify whether search will be limited to GEO website search result for the first feature. Default is 0. Set to 1 if want to perform all GEO data search.")
+    parser.add_argument('--geo2', dest='geo2', default=0, type=int, metavar='',
+                        help="specify whether search will be limited to GEO website search result for the second feature. Default is 0. Set to 1 if want to perform all GEO data search.")
 
 
     parser.add_argument('--candidateslistf', dest='geo_file1', default=None, metavar='',

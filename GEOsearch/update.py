@@ -3,6 +3,7 @@ from ftplib import FTP
 from setup import get_settings
 from pickleUtils import load_obj, save_obj
 import pandas as pd, urllib, requests, mimetypes
+import gc
 
 
 def connectToGEO(user='anonymous', ftpAddress='ftp.ncbi.nlm.nih.gov'):
@@ -15,7 +16,7 @@ def connectToGEO(user='anonymous', ftpAddress='ftp.ncbi.nlm.nih.gov'):
     return ftp
 
 
-def updateGSMGSE_Encode_Roadmap(GSMGSE_map, Encode_map, Roadmap_map, MetaData_path):
+def updateGSMGSE_Encode_Roadmap(GSMGSE_map, Encode_map, Roadmap_map, GSM_Meta_map):
     # looking for new GSE, if not in local, update the pkl
     local_GSEs = set()
     local_GSMs = set()
@@ -55,9 +56,12 @@ def updateGSMGSE_Encode_Roadmap(GSMGSE_map, Encode_map, Roadmap_map, MetaData_pa
                 related_GSEs = GSM_info(gsm)
                 GSMGSE_map[gsm] = related_GSEs
                 GSM_need_update.add(gsm)
-                downloadGSM(gsm, MetaData_path)
-
-    return GSMGSE_map, Encode_map, Roadmap_map, GSM_need_update
+                if GSM_Meta_map is not None:
+                    info = downloadGSM(gsm)
+                    if info is not None:
+                        print gsm
+                        GSM_Meta_map[gsm] = downloadGSM(gsm)
+    return GSMGSE_map, Encode_map, Roadmap_map, GSM_Meta_map, GSM_need_update
 
 
 def updateGSMSRR(GSMSRR_map, GSMs):
@@ -113,15 +117,21 @@ def GSM_info(id):
             gses.add(line[line.find("=")+1:].strip())
     return gses
 
-def downloadGSM(gsmID, MetaData_path):
+def downloadGSM(gsmID):
     ## download GSM meta data from NCBI
     url = "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=" + gsmID + "&targ=self&form=text&view=quick"
     response = requests.get(url)
     content_type = response.headers['content-type']
     extension = mimetypes.guess_extension(content_type)
     if content_type == "geo/text" and extension != ".html":
-        urllib.urlretrieve(url, MetaData_path + gsmID + ".txt")
-    return
+        web = urllib.urlopen(url)
+        info = web.readlines()
+        web.close()
+        del web
+        gc.collect()
+    else:
+        info = None
+    return info
 
 def update():
     parameters = get_settings()
@@ -132,17 +142,23 @@ def update():
 
     MetaData_path = parameters["MetaData"]
 
+    if MetaData_path != "None":
+        GSM_Meta_map = load_obj(parameters["MetaData"])
+    else:
+        GSM_Meta_map = None
+
     if not MetaData_path.endswith("/"):
         MetaData_path += "/"
 
-    GSMGSE_map, Encode_map, Roadmap_map, GSM_need_update = updateGSMGSE_Encode_Roadmap(GSMGSE_map, Encode_map, Roadmap_map, MetaData_path)
+    GSMGSE_map, Encode_map, Roadmap_map, GSM_Meta_map, GSM_need_update = updateGSMGSE_Encode_Roadmap(GSMGSE_map, Encode_map, Roadmap_map, GSM_Meta_map)
 
     GSMSRR_map = updateGSMSRR(GSMSRR_map, GSM_need_update)
 
     save_obj(GSMGSE_map, parameters['GSMGSE_pkl_path'][:-4])
-    save_obj(GSMSRR_map, parameters['GSMtoSRRpkl'][:-4])
     save_obj(Encode_map, parameters['Encode'][:-4])
     save_obj(Roadmap_map, parameters['Roadmap'][:-4])
+    save_obj(GSM_Meta_map, parameters['MetaData'][:-4])
+    save_obj(GSMSRR_map, parameters['GSMtoSRRpkl'][:-4])
 
 
 

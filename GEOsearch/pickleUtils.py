@@ -78,3 +78,4 @@ def roadmap_encode(path="/home/tmhbxx3/scratch/XMLhttp/GSESoftQuick/"):
     save_obj(roadmap, "Roadmap_gse")
     save_obj(encode, "ENCODE_gse")
     return
+

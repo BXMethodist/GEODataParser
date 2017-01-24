@@ -37,7 +37,7 @@ def get_WebInfo(url):
     return info
 
 
-def SOFTQuickRelated(featured_samples, output_type, type_seq, GSEGSM_map, encode_remove ,encodeGSE, cwd, process):
+def SOFTQuickRelated(featured_samples, output_type, type_seq, GSEGSM_map, encode_remove, encodeGSE, cwd, process):
     relatedGSEs = []
 
     for key, value in featured_samples.iteritems():
@@ -59,6 +59,8 @@ def SOFTQuickRelated(featured_samples, output_type, type_seq, GSEGSM_map, encode
             allrelatedGSMs = allrelatedGSMs.union(GSE_info(gse)[0])
 
     allrelatedGSMs = list(allrelatedGSMs)
+
+    print "total ", len(allrelatedGSMs), " samples found for potential input"
 
     chunksize = len(allrelatedGSMs)/(process-1) if process > 1 else len(allrelatedGSMs)
 
