@@ -1,41 +1,15 @@
 
-import csv, re, urllib, os, gc, json, sqlite3
+import csv, re, urllib, os, gc, json, sqlite3, contextlib
 from collections import defaultdict
 from difflib import SequenceMatcher
 from update import GSE_info
 from multiprocessing import Queue, Process
-import psutil, contextlib
-
 from GSM import GSM
-from pickleUtils import load_obj
+from GEOsearch import get_MetaInfo, get_WebInfo
 
 
 def similar(a, b):
     return SequenceMatcher(None, a, b).ratio()
-
-
-def get_MetaInfo(db, sample, count):
-    if db is not None:
-        query = db.execute('select MetaData from GSM where GSM_ID = "' + sample.id + '"').fetchall()
-
-        if len(query) == 0:
-            info = get_WebInfo(sample.url, count)
-        else:
-            info = json.loads(query[0][0])
-
-    else:
-        info = get_WebInfo(sample.url, count)
-    return info
-
-
-def get_WebInfo(url, count):
-    with contextlib.closing(urllib.urlopen(url)) as web:
-        info = web.readlines()
-    web.close()
-    del web
-    if count % 50 == 0:
-        gc.collect()
-    return info
 
 
 def SOFTQuickRelated(featured_samples, output_type, type_seq, GSEGSM_map, encode_remove, encodeGSE, cwd, process):

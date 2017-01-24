@@ -359,7 +359,3 @@ def feature_filter(geoGSMs, queue, features, features_begin, excludedGSM,
     if db is not None:
         db.close()
     return
-
-
-if __name__ == "__main__":
-    SOFTQuickParser("H3K27me3", ["H3K27me3"], [], geo=True, geofile='./testlist.txt', encode_remove=True,encode_pkl='./pkl/ENCODE_gse.pkl', roadmap_pkl='./pkl/Roadmap_gse.pkl', GSMGSE_pkl='./pkl/GSMGSE_map.pkl')
