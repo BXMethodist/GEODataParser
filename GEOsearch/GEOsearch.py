@@ -1,4 +1,4 @@
-import csv, os, re, psutil, urllib, contextlib, gc
+import csv, os, re, urllib, contextlib, sqlite3, gc, json
 from collections import defaultdict
 from GSM import GSM, search_term_to_GSM
 from input_search_utils import SOFTQuickRelated, input_finder, has_features
@@ -6,26 +6,27 @@ from pickleUtils import load_obj
 from multiprocessing import Process, Queue
 
 
-def get_MetaInfo(path):
-    proc = psutil.Process()
-    file_obj = open(path, "r")
-    info = file_obj.readlines()
-    file_obj.close()
-    if len(proc.open_files()) > 3:
-        return None
-    del file_obj
-    # if count % 50 == 0:
-    #     gc.collect()
-    return info
-
-
-def get_WebInfo(url):
+def get_WebInfo(url, count):
     with contextlib.closing(urllib.urlopen(url)) as web:
         info = web.readlines()
     web.close()
     del web
-    # if count % 50 == 0:
-    #     gc.collect()
+    if count % 50 == 0:
+        gc.collect()
+    return info
+
+
+def get_MetaInfo(db, sample, count):
+    if db is not None:
+        query = db.execute('select MetaData from GSM where GSM_ID = "' + sample.id + '"').fetchall()
+
+        if len(query) == 0:
+            info = get_WebInfo(sample.url, count)
+        else:
+            info = json.loads(query[0][0])
+
+    else:
+        info = get_WebInfo(sample.url, count)
     return info
 
 
@@ -173,12 +174,17 @@ def SOFTQuickParser(output_surfix, features, features_begin,
 
 
 def feature_filter(geoGSMs, queue, features, features_begin, excludedGSM,
-                    type_seq, ignorecase, output_type,
-                    cwd):
+                    type_seq, ignorecase, output_type, cwd):
     print os.getpid()
     samples = {}
     Human_Samples = {}
     notFeature = {}
+
+    if cwd is None:
+        db = None
+    else:
+        db = sqlite3.connect(cwd)
+        db.text_factory = str
 
     count = 0
 
@@ -208,16 +214,9 @@ def feature_filter(geoGSMs, queue, features, features_begin, excludedGSM,
         title_found = False
         ab_found = False
 
-        if cwd is not None:
-            if not cwd.endswith("/"):
-                cwd += "/"
+        info = get_MetaInfo(db, sample, count)
 
-            if os.path.isfile(cwd + sampleName + ".txt"):
-                info = get_MetaInfo(cwd + sampleName + ".txt")
-            else:
-                info = get_WebInfo(sample.url)
-        else:
-            info = get_WebInfo(sample.url)
+        count += 1
 
         if info is None:
             continue
@@ -357,7 +356,9 @@ def feature_filter(geoGSMs, queue, features, features_begin, excludedGSM,
         else:
             notFeature[sampleName] = sample
     queue.put((samples, Human_Samples, notFeature))
-
+    if db is not None:
+        db.close()
+    return
 
 
 if __name__ == "__main__":

@@ -1,5 +1,5 @@
 
-import csv, re, urllib, os, gc
+import csv, re, urllib, os, gc, json, sqlite3
 from collections import defaultdict
 from difflib import SequenceMatcher
 from update import GSE_info
@@ -14,26 +14,27 @@ def similar(a, b):
     return SequenceMatcher(None, a, b).ratio()
 
 
-def get_MetaInfo(path):
-    proc = psutil.Process()
-    file_obj = open(path, "r")
-    info = file_obj.readlines()
-    file_obj.close()
-    if len(proc.open_files()) > 3:
-        return None
-    del file_obj
-    # if count % 50 == 0:
-    #     gc.collect()
+def get_MetaInfo(db, sample, count):
+    if db is not None:
+        query = db.execute('select MetaData from GSM where GSM_ID = "' + sample.id + '"').fetchall()
+
+        if len(query) == 0:
+            info = get_WebInfo(sample.url, count)
+        else:
+            info = json.loads(query[0][0])
+
+    else:
+        info = get_WebInfo(sample.url, count)
     return info
 
 
-def get_WebInfo(url):
+def get_WebInfo(url, count):
     with contextlib.closing(urllib.urlopen(url)) as web:
         info = web.readlines()
     web.close()
     del web
-    # if count % 50 == 0:
-    #     gc.collect()
+    if count % 50 == 0:
+        gc.collect()
     return info
 
 
@@ -93,7 +94,14 @@ def related_sample_info(cur_relatedGSMs, queue, output_type, type_seq, cwd):
     relatedSamples = {}
     groupByGSE = defaultdict(set)
 
-    # count = 0
+    count = 0
+
+    if cwd is None:
+        db = None
+    else:
+        db = sqlite3.connect(cwd)
+        db.text_factory = str
+
 
     for filegsm in cur_relatedGSMs:
         characteristics = defaultdict(str)
@@ -114,16 +122,9 @@ def related_sample_info(cur_relatedGSMs, queue, output_type, type_seq, cwd):
 
         sample = GSM(filegsm)
 
-        if cwd is not None:
-            if not cwd.endswith("/"):
-                cwd += "/"
+        info = get_MetaInfo(db, sample, count)
 
-            if os.path.isfile(cwd + filegsm + ".txt"):
-                info = get_MetaInfo(cwd + filegsm + ".txt")
-            else:
-                info = get_WebInfo(sample.url)
-        else:
-            info = get_WebInfo(sample.url)
+        count +=1
 
         if info is None:
             continue
@@ -219,7 +220,8 @@ def related_sample_info(cur_relatedGSMs, queue, output_type, type_seq, cwd):
             for gse in sample.series:
                 groupByGSE[gse].add(sample.id)
     queue.put((relatedSamples, groupByGSE))
-
+    if db is not None:
+        db.close()
     return
 
 
