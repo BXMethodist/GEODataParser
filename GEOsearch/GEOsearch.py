@@ -1,33 +1,9 @@
 import csv, os, re, urllib, contextlib, sqlite3, gc, json
 from collections import defaultdict
 from GSM import GSM, search_term_to_GSM
-from input_search_utils import SOFTQuickRelated, input_finder, has_features
+from input_search_utils import SOFTQuickRelated, input_finder, has_features, get_MetaInfo, get_WebInfo
 from pickleUtils import load_obj
 from multiprocessing import Process, Queue
-
-
-def get_WebInfo(url, count):
-    with contextlib.closing(urllib.urlopen(url)) as web:
-        info = web.readlines()
-    web.close()
-    del web
-    if count % 50 == 0:
-        gc.collect()
-    return info
-
-
-def get_MetaInfo(db, sample, count):
-    if db is not None:
-        query = db.execute('select MetaData from GSM where GSM_ID = "' + sample.id + '"').fetchall()
-
-        if len(query) == 0:
-            info = get_WebInfo(sample.url, count)
-        else:
-            info = json.loads(query[0][0])
-
-    else:
-        info = get_WebInfo(sample.url, count)
-    return info
 
 
 def SOFTQuickParser(output_surfix, features, features_begin,
@@ -65,7 +41,11 @@ def SOFTQuickParser(output_surfix, features, features_begin,
         geoGSMs = search_term_to_GSM(features+features_begin)
 
         if (cwd is not None) and (not geo):
-            localGSMs = set([x[:-4] for x in os.listdir(cwd) if x.startswith("GSM")])
+            db = sqlite3.connect(cwd)
+            db.text_factory = str
+            query = db.execute('SELECT GSM_ID from GSM').fetchall()
+            print len(query), query[0][0]
+            localGSMs = set([x[0] for x in query])
             geoGSMs = geoGSMs.union(localGSMs)
     geoGSMs = list(geoGSMs)
 

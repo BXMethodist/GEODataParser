@@ -5,7 +5,30 @@ from difflib import SequenceMatcher
 from update import GSE_info
 from multiprocessing import Queue, Process
 from GSM import GSM
-from GEOsearch import get_MetaInfo, get_WebInfo
+
+
+def get_WebInfo(url, count):
+    with contextlib.closing(urllib.urlopen(url)) as web:
+        info = web.readlines()
+    web.close()
+    del web
+    if count % 50 == 0:
+        gc.collect()
+    return info
+
+
+def get_MetaInfo(db, sample, count):
+    if db is not None:
+        query = db.execute('select MetaData from GSM where GSM_ID = "' + sample.id + '"').fetchall()
+
+        if len(query) == 0:
+            info = get_WebInfo(sample.url, count)
+        else:
+            info = json.loads(query[0][0])
+
+    else:
+        info = get_WebInfo(sample.url, count)
+    return info
 
 
 def similar(a, b):
