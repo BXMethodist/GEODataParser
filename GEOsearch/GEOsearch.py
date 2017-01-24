@@ -6,7 +6,7 @@ from pickleUtils import load_obj
 from multiprocessing import Process, Queue
 
 
-def get_MetaInfo(path, count):
+def get_MetaInfo(path):
     proc = psutil.Process()
     file_obj = open(path, "r")
     info = file_obj.readlines()
@@ -14,18 +14,18 @@ def get_MetaInfo(path, count):
     if len(proc.open_files()) > 3:
         return None
     del file_obj
-    if count % 50 == 0:
-        gc.collect()
+    # if count % 50 == 0:
+    #     gc.collect()
     return info
 
 
-def get_WebInfo(url, count):
+def get_WebInfo(url):
     with contextlib.closing(urllib.urlopen(url)) as web:
         info = web.readlines()
     web.close()
     del web
-    if count % 50 == 0:
-        gc.collect()
+    # if count % 50 == 0:
+    #     gc.collect()
     return info
 
 
@@ -211,13 +211,11 @@ def feature_filter(geoGSMs, queue, features, features_begin, excludedGSM,
                 cwd += "/"
 
             if os.path.isfile(cwd + sampleName + ".txt"):
-                info = get_MetaInfo(cwd + sampleName + ".txt", count)
+                info = get_MetaInfo(cwd + sampleName + ".txt")
             else:
-                info = get_WebInfo(sample.url, count)
+                info = get_WebInfo(sample.url)
         else:
-            info = get_WebInfo(sample.url, count)
-
-        count +=1
+            info = get_WebInfo(sample.url)
 
         if info is None:
             continue
