@@ -86,7 +86,7 @@ def SOFTQuickRelated(featured_samples, output_type, type_seq, GSEGSM_map, encode
 
 
 def related_sample_info(cur_relatedGSMs, queue, output_type, type_seq, cwd):
-    print os.getpid()
+    print "Process id is ", os.getpid()
 
     relatedSamples = {}
     groupByGSE = defaultdict(set)

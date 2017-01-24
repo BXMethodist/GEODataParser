@@ -44,7 +44,6 @@ def SOFTQuickParser(output_surfix, features, features_begin,
             db = sqlite3.connect(cwd)
             db.text_factory = str
             query = db.execute('SELECT GSM_ID from GSM').fetchall()
-            print len(query), query[0][0]
             localGSMs = set([x[0] for x in query])
             geoGSMs = geoGSMs.union(localGSMs)
     geoGSMs = list(geoGSMs)
@@ -155,7 +154,7 @@ def SOFTQuickParser(output_surfix, features, features_begin,
 
 def feature_filter(geoGSMs, queue, features, features_begin, excludedGSM,
                     type_seq, ignorecase, output_type, cwd):
-    print os.getpid()
+    print "Process id is ", os.getpid()
     samples = {}
     Human_Samples = {}
     notFeature = {}
