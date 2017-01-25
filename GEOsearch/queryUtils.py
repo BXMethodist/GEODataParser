@@ -43,17 +43,18 @@ def GEO_query(names, output_name, GSM_GSE_pkl, GSM_SRR_pkl):
     result_srr_gsm ={}
     result_srr_gse={}
 
-    for srr in table.index.values:
-        if srr in GSM_SRR_map:
-            result_srr_gsm[srr] = GSM_SRR_map[srr]
-            result_srr_gse[srr] = GSM_GSE_map[result_srr_gsm[srr]]
-        else:
-            print srr, " need to be updated"
+    if table is not None:
+        for srr in table.index.values:
+            if srr in GSM_SRR_map:
+                result_srr_gsm[srr] = GSM_SRR_map[srr]
+                result_srr_gse[srr] = GSM_GSE_map[result_srr_gsm[srr]]
+            else:
+                print srr, " need to be updated"
 
-    table['GSM_ID'] = pd.Series(result_srr_gsm)
-    table['GSE_ID'] = pd.Series(result_srr_gse)
+        table['GSM_ID'] = pd.Series(result_srr_gsm)
+        table['GSE_ID'] = pd.Series(result_srr_gse)
 
-    table.to_csv(output_name, sep="\t")
+        table.to_csv(output_name, sep="\t")
 
     failed_file = open(output_name[:-4]+"_failed_id.txt", "w")
 
