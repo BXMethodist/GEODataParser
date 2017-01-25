@@ -479,10 +479,10 @@ def input_finder(output_surffix, HumanSamples, groupByGSE, encodeGSE, relatedSam
     output = open(output1, "w")
     for key, value in FirstSampleToInput.items():
         writer = csv.writer(output)
-        row = [key] + [HumanSamples[key].title]
+        row = [key] + [HumanSamples[key].title.encode('utf-8', 'ignore')]
         # print value
         for id in value:
-            row += [id] + [relatedSamples[id].title]
+            row += [id] + [relatedSamples[id].title.encode('utf-8', 'ignore')]
         writer.writerow(row)
     output.close()
 

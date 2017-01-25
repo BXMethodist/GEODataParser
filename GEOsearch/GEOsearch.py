@@ -91,9 +91,9 @@ def SOFTQuickParser(output_surfix, features, features_begin,
          "Tissue", "Cell Line", "Cell Type", "Disease", "Treatment", "Genotype", "Antibody", "Feature in Title", "Feature in Ab",
          "Feature in Title or Ab"])
     for sample in samples.values():
-        row = [sample.id, sample.series, sample.features, sample.organism, sample.title.encode('ascii','ignore'), sample.platForm, sample.InstrumentID,
-             sample.SRA, sample.libraryStrategy, sample.tissue.encode('ascii','ignore'), sample.cellLine.encode('ascii','ignore'), sample.cellType.encode('ascii','ignore'),
-             sample.disease.encode('ascii','ignore'), sample.treatment, sample.genotype, sample.antibody, sample.title_found, sample.ab_found,
+        row = [sample.id, sample.series, sample.features, sample.organism, sample.title.encode('utf-8','ignore'), sample.platForm, sample.InstrumentID,
+             sample.SRA, sample.libraryStrategy, sample.tissue.encode('utf-8','ignore'), sample.cellLine.encode('utf-8','ignore'), sample.cellType.encode('utf-8','ignore'),
+             sample.disease.encode('utf-8','ignore'), sample.treatment, sample.genotype, sample.antibody, sample.title_found, sample.ab_found,
              sample.title_ab]
         writer.writerow(row)
     csv_file.close()
@@ -125,9 +125,9 @@ def SOFTQuickParser(output_surfix, features, features_begin,
             potential_input_id = potential_input_id[:-1]
             potential_input_title = potential_input_title[:-1]
 
-        row = [sample.id, sample.series, sample.features, potential_input_id, potential_input_title.encode('ascii','ignore'), sample.organism, sample.title.encode('utf-8'),
-             sample.platForm, sample.InstrumentID, sample.SRA, sample.libraryStrategy, sample.tissue.encode('ascii','ignore'),
-             sample.cellLine.encode('ascii','ignore'), sample.cellType.encode('ascii','ignore'), sample.disease.encode('ascii','ignore'), sample.treatment, sample.genotype, sample.antibody,
+        row = [sample.id, sample.series, sample.features, potential_input_id, potential_input_title.encode('utf-8','ignore'), sample.organism, sample.title.encode('utf-8'),
+             sample.platForm, sample.InstrumentID, sample.SRA, sample.libraryStrategy, sample.tissue.encode('utf-8','ignore'),
+             sample.cellLine.encode('utf-8','ignore'), sample.cellType.encode('utf-8','ignore'), sample.disease.encode('utf-8','ignore'), sample.treatment, sample.genotype, sample.antibody,
              sample.title_found, sample.ab_found, sample.title_ab]
         writer.writerow(row)
     csv_file.close()

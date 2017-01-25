@@ -91,10 +91,6 @@ def GCF_search():
         geo = args.geo
         geo_file = args.geo_file
 
-        if geo and geo_file is None:
-            print "Please provide the file location for candidates GSM list."
-            return 1
-
         species = args.species
         encode_remove = args.encode_remove
         roadmap_remove = args.roadmap_remove
@@ -232,13 +228,6 @@ def GCF_match():
 
         geo_file1 = args.geo_file1
         geo_file2 = args.geo_file2
-
-        if geo1 and geo_file1 is None:
-            print "Please provide the file location for the first candidates GSM list."
-            return 1
-        if geo2 and geo_file2 is None:
-            print "Please provide the file location for the second candidates GSM list."
-            return 1
 
         species = args.species
 
