@@ -34,6 +34,7 @@ def GCF_search():
                         help="list of feature key words need to used to looking for the NGS sequencing samples, "
                              "different key words need to be separated by ','")
     parser.add_argument('output_prefix', default=None, help="specify the output file prefix.")
+    parser.add_argument('output_path', default=None, help="specify the output file location.")
 
     ## optional parameters
     parser.add_argument('-b', dest='keywords_begin', metavar='', default='',
@@ -79,7 +80,8 @@ def GCF_search():
         GSMGSE_pkl = settings['GSMGSE_pkl_path']
 
         keywords = args.feature_key_words.split(",")
-        output_path = args.output_prefix
+        output_prefix = args.output_prefix
+        output_path = args.output_path
 
         if args.keywords_begin == '':
             keywords_begin = []
@@ -106,7 +108,7 @@ def GCF_search():
             encode_remove = True
             roadmap_remove = True
 
-        SOFTQuickParser(output_path, keywords, keywords_begin, type_seq=type_seq, ignorecase=ignorcase,
+        SOFTQuickParser(output_prefix, output_path, keywords, keywords_begin, type_seq=type_seq, ignorecase=ignorcase,
                         geo=geo, geofile=geo_file, output_type=species, encode_remove=encode_remove,
                         roadmap_remove=roadmap_remove, encode_pkl=encode_pkl, roadmap_pkl=roadmap_pkl,
                         GSMGSE_pkl=GSMGSE_pkl, cwd=cwd, process=process)
@@ -139,6 +141,7 @@ def GCF_match():
 
     parser.add_argument('output_prefix1', default=None, help="specify the first output file name prefix.")
     parser.add_argument('output_prefix2', default=None, help="specify the second output file name prefix.")
+    parser.add_argument('output_path', default=None, help="specify the output file location.")
 
     ## optional parameters
     parser.add_argument('-bf', dest='keywords_begin1', default='', metavar='',
@@ -205,8 +208,10 @@ def GCF_match():
         keywords1 = args.first_feature_key_words.split(",")
         keywords2 = args.second_feature_key_words.split(",")
 
-        output_path1 = args.output_prefix1
-        output_path2 = args.output_prefix2
+        output_prefix1 = args.output_prefix1
+        output_prefix2 = args.output_prefix2
+
+        output_path = args.output_path
 
         if args.keywords_begin1 == '':
             keywords_begin1 = []
@@ -246,7 +251,7 @@ def GCF_match():
             roadmap_remove = True
 
 
-        Related_Sample_Search(output_path1, output_path2, keywords1, keywords_begin1, keywords2,
+        Related_Sample_Search(output_prefix1, output_prefix2, output_path, keywords1, keywords_begin1, keywords2,
                               keywords_begin2,
                               first_type_seq=type_seq1, second_type_seq=type_seq2,
                               first_ignorecase=ignorcase1, second_ignorecase=ignorcase2,

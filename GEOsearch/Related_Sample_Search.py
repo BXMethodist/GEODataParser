@@ -3,18 +3,18 @@ from collections import defaultdict
 from input_search_utils import keyword, Similarity, Character_Similarity
 
 
-def Related_Sample_Search(output_surfix1, output_surfix2,  first_features, first_features_begin, second_features, second_begin_features,
+def Related_Sample_Search(output_surfix1, output_surfix2, output_path, first_features, first_features_begin, second_features, second_begin_features,
                     first_type_seq="chip-seq", second_type_seq="chip-seq", first_ignorecase=True, second_ignorecase=True,
                     first_geo=False, first_geofile=None, second_geo=False, second_geofile=None, output_type="Homo sapiens",
                     encode_remove=False, roadmap_remove=False, encode_pkl=None, roadmap_pkl=None, GSMGSE_pkl=None, cwd=None
                           , process=20):
 
-    first_samples = SOFTQuickParser(output_surfix1, first_features, first_features_begin, type_seq=first_type_seq,
+    first_samples = SOFTQuickParser(output_surfix1, output_path, first_features, first_features_begin, type_seq=first_type_seq,
                                     ignorecase=first_ignorecase, geo=first_geo, geofile=first_geofile,
                                     output_type=output_type, encode_remove=encode_remove, roadmap_remove=roadmap_remove,
                                     encode_pkl=encode_pkl, roadmap_pkl=roadmap_pkl, GSMGSE_pkl=GSMGSE_pkl, cwd=cwd, process=process)
 
-    second_samples = SOFTQuickParser(output_surfix2, second_features, second_begin_features, type_seq=second_type_seq,
+    second_samples = SOFTQuickParser(output_surfix2, output_path, second_features, second_begin_features, type_seq=second_type_seq,
                                      ignorecase=second_ignorecase, geo=second_geo, geofile=second_geofile,
                                      output_type=output_type, encode_remove=encode_remove, roadmap_remove=roadmap_remove,
                                      encode_pkl=encode_pkl, roadmap_pkl=roadmap_pkl, GSMGSE_pkl=GSMGSE_pkl, cwd=cwd, process=process)
@@ -156,7 +156,10 @@ def Related_Sample_Search(output_surfix1, output_surfix2,  first_features, first
 
     #### save file
     import csv
-    output = open(output_surfix1+output_surfix2+".txt", "w")
+    if not output_path.endswith("/"):
+        output_path += "/"
+
+    output = open(output_path + output_surfix1 + "_vs_" + output_surfix2 + ".txt", "w")
     writer = csv.writer(output)
     writer.writerow(["sample1_id", "sample1_title", "sample1_descriptions", "sample1_series_id", "sample2_id", "sample2_title", "sample2_descriptions", "sample2_series_id"])
     for pair in new_pairs:
@@ -181,9 +184,4 @@ def Related_Sample_Search(output_surfix1, output_surfix2,  first_features, first
     output.close()
     return pairs
 
-if __name__ == "__main__":
-    Related_Sample_Search("H3K4me3", "H3K27me3", ["h3k4me3", "k4me3", "k4m3", "h3k4m3"],[],
-                          ["h3k27me3", "k27me3", "k27m3","h3k27m3"], [],
-                          first_geo=False, first_geofile="uniqueGSM_GEOsearch.txt",
-                          second_geo=False, second_geofile="unique_H3K27me3.txt", encode_remove=True, roadmap_remove=True)
 

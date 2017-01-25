@@ -6,7 +6,7 @@ from pickleUtils import load_obj
 from multiprocessing import Process, Queue
 
 
-def SOFTQuickParser(output_surfix, features, features_begin,
+def SOFTQuickParser(output_surfix, output_path, features, features_begin,
                     type_seq="chip-seq", ignorecase=True, geo=False, geofile=None, output_type="Homo sapiens",
                     encode_remove=True, roadmap_remove=True, encode_pkl=None, roadmap_pkl=None, GSMGSE_pkl=None,
                     cwd=None, process=20):
@@ -75,14 +75,16 @@ def SOFTQuickParser(output_surfix, features, features_begin,
     groupByGSE, encodeGSE, relatedSamples = SOFTQuickRelated(Human_Samples, output_type, type_seq,
                                                              GSEGSM_map, encode_remove, encodeGSE, cwd, process)
 
-    first_category, third_category = input_finder(output_surfix, Human_Samples, groupByGSE, encodeGSE, relatedSamples,
+    first_category, third_category = input_finder(output_surfix, output_path, Human_Samples, groupByGSE, encodeGSE, relatedSamples,
                                                   features, features_begin, ignorecase, output_type)
 
     #### output results to csv
     output_type = output_type.replace(" ", "_")
 
-    outputHuman = "./"+"GEOsearch"+ output_type +"With" + output_surfix + ".csv"
-    outputSample = "./"+"GEOsearch"+"sampleWith" + output_surfix + ".csv"
+    if not output_path.endswith("/"):
+        output_path+="/"
+    outputHuman = output_path+"GEOsearch"+ output_type +"With" + output_surfix + ".csv"
+    outputSample = output_path+"GEOsearch"+"sampleWith" + output_surfix + ".csv"
 
     csv_file = open(outputSample, "wb")
     writer = csv.writer(csv_file)

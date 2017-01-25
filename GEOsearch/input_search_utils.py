@@ -305,7 +305,7 @@ def Character_Similarity(sample1, sample2):
     return score
 
 
-def input_finder(output_surffix, HumanSamples, groupByGSE, encodeGSE, relatedSamples,
+def input_finder(output_surffix, output_path, HumanSamples, groupByGSE, encodeGSE, relatedSamples,
                  features, features_begin, ignorecase, output_type):
     FirstSampleToInput = defaultdict(set)
 
@@ -473,8 +473,8 @@ def input_finder(output_surffix, HumanSamples, groupByGSE, encodeGSE, relatedSam
 
     # print not_found
     output_type = output_type.replace(" ", "_")
-    output1 = "./First_" + output_surffix + "_" + output_type + "_Sample_To_Input.csv"
-    output3 = "./Third_" + output_surffix + "_" + output_type +"_Sample_To_Input.csv"
+    output1 = output_path + "First_" + output_surffix + "_" + output_type + "_Sample_To_Input.csv"
+    output3 = output_path + "Third_" + output_surffix + "_" + output_type +"_Sample_To_Input.csv"
 
     output = open(output1, "w")
     for key, value in FirstSampleToInput.items():
