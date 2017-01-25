@@ -44,7 +44,7 @@ def SOFTQuickParser(output_surfix, features, features_begin,
             db = sqlite3.connect(cwd)
             db.text_factory = str
             query = db.execute('SELECT GSM_ID from GSM').fetchall()
-            localGSMs = set([x[0] for x in query])
+            localGSMs = set([x[0] for x in query[0:1000]])
             geoGSMs = geoGSMs.union(localGSMs)
     geoGSMs = list(geoGSMs)
 
@@ -62,12 +62,11 @@ def SOFTQuickParser(output_surfix, features, features_begin,
 
     samples = {}
     Human_Samples = {}
-    notFeature = {}
+
     for i in range(process):
-        cur_samples, cur_Human_Samples, cur_notFeature = queue.get()
+        cur_samples, cur_Human_Samples = queue.get()
         samples.update(cur_samples)
         Human_Samples.update(cur_Human_Samples)
-        notFeature.update(cur_notFeature)
     for p in processes:
         p.join()
 
@@ -84,7 +83,6 @@ def SOFTQuickParser(output_surfix, features, features_begin,
 
     outputHuman = "./"+"GEOsearch"+ output_type +"With" + output_surfix + ".csv"
     outputSample = "./"+"GEOsearch"+"sampleWith" + output_surfix + ".csv"
-    outputNoFeature = "./"+"GEOsearch"+"noWith" + output_surfix+ ".csv"
 
     csv_file = open(outputSample, "wb")
     writer = csv.writer(csv_file)
@@ -93,26 +91,11 @@ def SOFTQuickParser(output_surfix, features, features_begin,
          "Tissue", "Cell Line", "Cell Type", "Disease", "Treatment", "Genotype", "Antibody", "Feature in Title", "Feature in Ab",
          "Feature in Title or Ab"])
     for sample in samples.values():
-        writer.writerow(
-            [sample.id, sample.series, sample.features, sample.organism, sample.title, sample.platForm, sample.InstrumentID,
-             sample.SRA, sample.libraryStrategy, sample.tissue, sample.cellLine, sample.cellType,
-             sample.disease, sample.treatment, sample.genotype, sample.antibody, sample.title_found, sample.ab_found,
-             sample.title_ab])
-    csv_file.close()
-
-
-    csv_file = open(outputNoFeature, "wb")
-    writer = csv.writer(csv_file)
-    writer.writerow(
-        ['Sample_ID', "Series_ID", output_surfix + "_description", "Organism", "Title", "GPL_ID", "Instrument Model", "SRA_ID", "Library Strategy",
-         "Tissue", "Cell Line", "Cell Type", "Disease", "Treatment", "Genotype", "Antibody", "Feature in Title", "Feature in Ab",
-         "Feature in Title or Ab"])
-    for sample in notFeature.values():
-        writer.writerow(
-            [sample.id, sample.series, sample.features, sample.organism, sample.title, sample.platForm, sample.InstrumentID,
-             sample.SRA, sample.libraryStrategy, sample.tissue, sample.cellLine, sample.cellType,
-             sample.disease, sample.treatment, sample.genotype, sample.antibody, sample.title_found, sample.ab_found,
-             sample.title_ab])
+        row = [sample.id, sample.series, sample.features, sample.organism, sample.title.encode('utf-8'), sample.platForm, sample.InstrumentID,
+             sample.SRA, sample.libraryStrategy, sample.tissue.encode('utf-8'), sample.cellLine.encode('utf-8'), sample.cellType.encode('utf-8'),
+             sample.disease.encode('utf-8'), sample.treatment.encode('utf-8'), sample.genotype.encode('utf-8'), sample.antibody, sample.title_found, sample.ab_found,
+             sample.title_ab]
+        writer.writerow(row)
     csv_file.close()
 
 
@@ -142,11 +125,11 @@ def SOFTQuickParser(output_surfix, features, features_begin,
             potential_input_id = potential_input_id[:-1]
             potential_input_title = potential_input_title[:-1]
 
-        writer.writerow(
-            [sample.id, sample.series, sample.features, potential_input_id, potential_input_title, sample.organism, sample.title,
-             sample.platForm, sample.InstrumentID, sample.SRA, sample.libraryStrategy, sample.tissue,
-             sample.cellLine, sample.cellType, sample.disease, sample.treatment, sample.genotype, sample.antibody,
-             sample.title_found, sample.ab_found, sample.title_ab])
+        row = [sample.id, sample.series, sample.features, potential_input_id, potential_input_title.encode('utf-8'), sample.organism, sample.title.encode('utf-8'),
+             sample.platForm, sample.InstrumentID, sample.SRA, sample.libraryStrategy, sample.tissue.encode('utf-8'),
+             sample.cellLine.encode('utf-8'), sample.cellType.encode('utf-8'), sample.disease.encode('utf-8'), sample.treatment.encode('utf-8'), sample.genotype.encode('utf-8'), sample.antibody,
+             sample.title_found, sample.ab_found, sample.title_ab]
+        writer.writerow(row)
     csv_file.close()
 
     return Human_Samples
@@ -157,13 +140,11 @@ def feature_filter(geoGSMs, queue, features, features_begin, excludedGSM,
     print "Process id is ", os.getpid()
     samples = {}
     Human_Samples = {}
-    notFeature = {}
 
     if cwd is None:
         db = None
     else:
         db = sqlite3.connect(cwd)
-        db.text_factory = str
 
     count = 0
 
@@ -332,9 +313,8 @@ def feature_filter(geoGSMs, queue, features, features_begin, excludedGSM,
 
         if len(target_feature) != 0 and sample.id not in excludedGSM:
             samples[sampleName] = sample
-        else:
-            notFeature[sampleName] = sample
-    queue.put((samples, Human_Samples, notFeature))
+
+    queue.put((samples, Human_Samples))
     if db is not None:
         db.close()
     return

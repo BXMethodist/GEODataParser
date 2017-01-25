@@ -45,7 +45,6 @@ def updateGSMGSE_Encode_Roadmap(GSMGSE_map, Encode_map, Roadmap_map, MetaData_pa
 
     if MetaData_path is not None:
         db = sqlite3.connect(MetaData_path)
-        db.text_factory = str
     else:
         db = None
 

@@ -19,13 +19,19 @@ def get_WebInfo(url, count):
 
 def get_MetaInfo(db, sample, count):
     if db is not None:
-        query = db.execute('select MetaData from GSM where GSM_ID = "' + sample.id + '"').fetchall()
+        query = db.execute('select GSM_ID, MetaData from GSM where GSM_ID = "' + sample.id + '"').fetchall()
 
         if len(query) == 0:
             info = get_WebInfo(sample.url, count)
         else:
-            info = json.loads(query[0][0])
-
+            try:
+                info = json.loads(query[0][1])
+            except:
+                print "sample id is", sample.id
+                print "This sample has problem !!!!!!", query[0][0]
+                print "\t"
+                print "\t"
+                info = get_WebInfo(sample.url, count)
     else:
         info = get_WebInfo(sample.url, count)
     return info
@@ -97,8 +103,6 @@ def related_sample_info(cur_relatedGSMs, queue, output_type, type_seq, cwd):
         db = None
     else:
         db = sqlite3.connect(cwd)
-        db.text_factory = str
-
 
     for filegsm in cur_relatedGSMs:
         characteristics = defaultdict(str)
@@ -510,3 +514,4 @@ def has_features(message, features, features_begin, ignorecase):
             if re.match(feature, message):
                 return True
     return False
+
