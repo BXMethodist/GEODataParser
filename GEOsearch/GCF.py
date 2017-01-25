@@ -74,6 +74,11 @@ def GCF_search():
             return 1
 
     if args is not None:
+        if os.path.exists(args.output_path):
+            pass
+        else:
+            "Output path is not exist"
+
         settings = get_settings()
         encode_pkl = settings['Encode']
         roadmap_pkl = settings['Roadmap']
@@ -200,6 +205,11 @@ def GCF_match():
             return 1
 
     if args is not None:
+        if os.path.exists(args.output_path):
+            pass
+        else:
+            "Output path is not exist"
+
         settings = get_settings()
         encode_pkl = settings['Encode']
         roadmap_pkl = settings['Roadmap']
@@ -300,6 +310,11 @@ def GCF_query():
             return 1
 
     if args is not None:
+        if os.path.exists(args.output_path[:args.output_path.rfind("/")]):
+            pass
+        else:
+            "Output path is not exist"
+
         GEO_ids = args.GEO_IDs
         if os.path.exists(GEO_ids) and os.path.isfile(GEO_ids):
             list_names_obj = open(GEO_ids, "r")

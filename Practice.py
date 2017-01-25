@@ -1,20 +1,7 @@
+import numpy as np, pandas as pd
 
+a = np.arange(100)
 
-f1 = open("./uniqueGSM_GEOsearch.txt", "r")
+df = pd.DataFrame(a)
 
-set1= set()
-
-for line in f1.readlines():
-    set1.add(line.strip())
-
-f2 = open("./unique_result.txt", "r")
-
-set2 = set()
-
-for line in f2.readlines():
-    set2.add(line.strip())
-
-
-for i in set1:
-    if i not in set2:
-        print i
+df.to_csv("./123/123.csv")
