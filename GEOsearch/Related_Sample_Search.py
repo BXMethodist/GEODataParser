@@ -166,19 +166,19 @@ def Related_Sample_Search(output_surfix1, output_surfix2, output_path, first_fea
         key, value = pair
         if key in first_samples:
             try:
-                writer.writerow([key, first_samples[key].title, first_samples[key].features, first_samples[key].series,
-                                 value, second_samples[value].title, second_samples[value].features, second_samples[value].series])
+                writer.writerow([key, first_samples[key].title.encode('utf-8','ignore'), first_samples[key].features, first_samples[key].series,
+                                 value, second_samples[value].title.encode('utf-8','ignore'), second_samples[value].features, second_samples[value].series])
             except:
-                writer.writerow([value, first_samples[value].title, first_samples[value].features, first_samples[value].series,
-                                 key, second_samples[key].title, second_samples[key].features, second_samples[key].series,])
+                writer.writerow([value, first_samples[value].title.encode('utf-8','ignore'), first_samples[value].features, first_samples[value].series,
+                                 key, second_samples[key].title.encode('utf-8','ignore'), second_samples[key].features, second_samples[key].series,])
         elif key in second_samples:
             try:
-                writer.writerow([value, first_samples[value].title, first_samples[value].features, first_samples[value].series,
-                                 key, second_samples[key].title, second_samples[key].features, second_samples[key].series,
+                writer.writerow([value, first_samples[value].title.encode('utf-8','ignore'), first_samples[value].features, first_samples[value].series,
+                                 key, second_samples[key].title.encode('utf-8','ignore'), second_samples[key].features, second_samples[key].series,
                      ])
             except:
-                writer.writerow([key, first_samples[key].title, first_samples[key].features, first_samples[key].series,
-                     value, second_samples[value].title, second_samples[value].features, second_samples[value].series])
+                writer.writerow([key, first_samples[key].title.encode('utf-8','ignore'), first_samples[key].features, first_samples[key].series,
+                     value, second_samples[value].title.encode('utf-8','ignore'), second_samples[value].features, second_samples[value].series])
         else:
             print key
     output.close()
