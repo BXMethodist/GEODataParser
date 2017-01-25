@@ -22,7 +22,7 @@ def GCF_search():
     '''
     if (len(sys.argv) < 3) and ('-h' not in sys.argv) and ('--help' not in sys.argv):
         # at least one parameter need to be specified, will print help message if no parameter is specified
-        print "\nusage:\n\npython GCF.py search [optional arguments] <features>\n\nfor more help, please try: python GCF.py search -h\n"
+        print "\nusage:\n\npython GCF.py search [optional arguments] <features> <output_prefix> <output_path>\n\nfor more help, please try: python GCF.py search -h\n"
         return 1
 
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
@@ -130,7 +130,7 @@ def GCF_match():
     '''
     if (len(sys.argv) < 3) and ('-h' not in sys.argv) and ('--help' not in sys.argv):
         # at least one parameter need to be specified, will print help message if no parameter is specified
-        print "\nusage:\n\npython GCF.py match [optional arguments] <first features> <second features>\n\nfor more help, please try: python GCF.py match -h\n"
+        print "\nusage:\n\npython GCF.py match [optional arguments] <first features> <second features> <output_prefix1> <output_prefix2> <output_directory>\n\nfor more help, please try: python GCF.py match -h\n"
         return 1
 
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
@@ -282,7 +282,7 @@ def GCF_query():
     '''
     if (len(sys.argv) < 3) and ('-h' not in sys.argv) and ('--help' not in sys.argv):
         # at least one parameter need to be specified, will print help message if no parameter is specified
-        print "\nusage:\n\npython GCF.py query [optional arguments] <ID list>\n\nfor more help, please try: python GCF.py query -h\n"
+        print "\nusage:\n\npython GCF.py query [optional arguments] <ID list> <outputpath>\n\nfor more help, please try: python GCF.py query -h\n"
         return 1
 
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
