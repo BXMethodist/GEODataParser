@@ -1,7 +1,8 @@
-import numpy as np, pandas as pd
+import os
 
-a = np.arange(100)
+output = "./123.txt"
 
-df = pd.DataFrame(a)
-
-df.to_csv("./123/123.csv")
+if os.path.exists(output[:output.rfind("/")]):
+    pass
+else:
+    print "Output path is not exist"
