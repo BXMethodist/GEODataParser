@@ -127,15 +127,14 @@ def SOFTQuickParser(output_surfix, output_path, features, features_begin,
             potential_input_id = potential_input_id[:-1]
             potential_input_title = potential_input_title[:-1]
 
-        row = [sample.id, sample.series, sample.features, potential_input_id, potential_input_title.encode('ascii','ignore'), sample.organism, sample.title.encode('ascii'),
-             sample.platForm.encode('ascii','ignore'), sample.InstrumentID.encode('ascii','ignore'), sample.SRA, sample.libraryStrategy.encode('ascii','ignore'), sample.tissue.encode('ascii','ignore'),
-             sample.cellLine.encode('ascii','ignore'), sample.cellType.encode('ascii','ignore'), sample.disease.encode('ascii','ignore'), sample.treatment, sample.genotype, sample.antibody,
+        row = [sample.id, sample.series, sample.features, potential_input_id, potential_input_title, sample.organism, sample.title,
+             sample.platForm, sample.InstrumentID, sample.SRA, sample.libraryStrategy, sample.tissue,
+             sample.cellLine, sample.cellType, sample.disease, sample.treatment, sample.genotype, sample.antibody,
              sample.title_found, sample.ab_found, sample.title_ab]
         table.append(row)
 
     df = pd.DataFrame(table, columns=headers)
     df.to_csv(outputHuman, sep=',', encoding='utf-8')
-    df.to_excel(outputHuman, encoding='utf-8')
 
     return Human_Samples
 

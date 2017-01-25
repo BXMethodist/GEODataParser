@@ -169,19 +169,19 @@ def Related_Sample_Search(output_surfix1, output_surfix2, output_path, first_fea
         key, value = pair
         if key in first_samples:
             try:
-                table.append([key, first_samples[key].title.encode('ascii','ignore'), first_samples[key].features, first_samples[key].series,
-                                 value, second_samples[value].title.encode('ascii','ignore'), second_samples[value].features, second_samples[value].series])
+                table.append([key, first_samples[key].title, first_samples[key].features, first_samples[key].series,
+                                 value, second_samples[value].title, second_samples[value].features, second_samples[value].series])
             except:
-                table.append([value, first_samples[value].title.encode('ascii','ignore'), first_samples[value].features, first_samples[value].series,
-                                 key, second_samples[key].title.encode('ascii','ignore'), second_samples[key].features, second_samples[key].series,])
+                table.append([value, first_samples[value].title, first_samples[value].features, first_samples[value].series,
+                                 key, second_samples[key].title, second_samples[key].features, second_samples[key].series,])
         elif key in second_samples:
             try:
-                table.append([value, first_samples[value].title.encode('ascii','ignore'), first_samples[value].features, first_samples[value].series,
-                                 key, second_samples[key].title.encode('ascii','ignore'), second_samples[key].features, second_samples[key].series,
+                table.append([value, first_samples[value].title, first_samples[value].features, first_samples[value].series,
+                                 key, second_samples[key].title, second_samples[key].features, second_samples[key].series,
                      ])
             except:
-                table.append([key, first_samples[key].title.encode('ascii','ignore'), first_samples[key].features, first_samples[key].series,
-                     value, second_samples[value].title.encode('ascii','ignore'), second_samples[value].features, second_samples[value].series])
+                table.append([key, first_samples[key].title, first_samples[key].features, first_samples[key].series,
+                     value, second_samples[value].title, second_samples[value].features, second_samples[value].series])
         else:
             print key
 

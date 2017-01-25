@@ -479,9 +479,9 @@ def input_finder(output_surffix, output_path, HumanSamples, groupByGSE, encodeGS
 
     table = []
     for key, value in FirstSampleToInput.items():
-        row = [key] + [HumanSamples[key].title]
+        row = [key] + [HumanSamples[key].title] + [HumanSamples[key].antibody]
         for id in value:
-            row += [id] + [relatedSamples[id]]
+            row += [id] + [relatedSamples[id].title] + [relatedSamples[id].antibody]
         table.append(row)
 
     df = pd.DataFrame(table, columns=None)
