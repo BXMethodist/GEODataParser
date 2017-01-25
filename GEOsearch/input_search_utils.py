@@ -1,5 +1,5 @@
 
-import csv, re, urllib, os, gc, json, sqlite3, contextlib
+import csv, re, urllib, os, gc, json, sqlite3, contextlib, pandas as pd
 from collections import defaultdict
 from difflib import SequenceMatcher
 from update import GSE_info
@@ -103,7 +103,7 @@ def related_sample_info(cur_relatedGSMs, queue, output_type, type_seq, cwd):
         db = None
     else:
         db = sqlite3.connect(cwd)
-        db.text_factory = str
+        # db.text_factory = str
 
     for filegsm in cur_relatedGSMs:
         characteristics = defaultdict(str)
@@ -477,25 +477,25 @@ def input_finder(output_surffix, output_path, HumanSamples, groupByGSE, encodeGS
     output1 = output_path + "First_" + output_surffix + "_" + output_type + "_Sample_To_Input.csv"
     output3 = output_path + "Third_" + output_surffix + "_" + output_type +"_Sample_To_Input.csv"
 
-    output = open(output1, "w")
+    table = []
     for key, value in FirstSampleToInput.items():
-        writer = csv.writer(output)
-        row = [key] + [HumanSamples[key].title.encode('ascii', 'ignore')]
-        # print value
+        row = [key] + [HumanSamples[key].title]
         for id in value:
-            row += [id] + [relatedSamples[id].title.encode('ascii', 'ignore')]
-        writer.writerow(row)
-    output.close()
+            row += [id] + [relatedSamples[id]]
+        table.append(row)
 
-    output = open(output3, "w")
+    df = pd.DataFrame(table, columns=None)
+    df.to_csv(output1, sep=',', encoding='utf-8')
+
+    table = []
+
     for key, value in ThirdSampleToInput.items():
-        writer = csv.writer(output)
         row = [key] + [HumanSamples[key].antibody]
-        # print value
         for id in value:
             row += [id] + [relatedSamples[id].antibody]
-        writer.writerow(row)
-    output.close()
+        table.append(row)
+    df = pd.DataFrame(table, columns=None)
+    df.to_csv(output3, sep=',', encoding='utf-8')
 
     return FirstSampleToInput, ThirdSampleToInput
 

@@ -1,4 +1,4 @@
-import os, re, urllib, contextlib, sqlite3, gc, json,csv
+import os, re, urllib, contextlib, sqlite3, gc, json, csv, pandas as pd
 from collections import defaultdict
 from GSM import GSM, search_term_to_GSM
 from input_search_utils import SOFTQuickRelated, input_finder, has_features, get_MetaInfo, get_WebInfo
@@ -86,28 +86,28 @@ def SOFTQuickParser(output_surfix, output_path, features, features_begin,
     outputHuman = output_path+"GEOsearch"+ output_type +"With" + output_surfix + ".csv"
     outputSample = output_path+"GEOsearch"+"sampleWith" + output_surfix + ".csv"
 
-    csv_file = open(outputSample, "wb")
-    writer = csv.writer(csv_file)
-    writer.writerow(
-        ['Sample_ID', "Series_ID", output_surfix + "_description", "Organism", "Title", "GPL_ID", "Instrument Model", "SRA_ID", "Library Strategy",
-         "Tissue", "Cell Line", "Cell Type", "Disease", "Treatment", "Genotype", "Antibody", "Feature in Title", "Feature in Ab",
-         "Feature in Title or Ab"])
+
+    table = []
+    headers = ['Sample_ID', "Series_ID", output_surfix + "_description", "Organism", "Title", "GPL_ID",
+                  "Instrument Model", "SRA_ID", "Library Strategy", "Tissue", "Cell Line", "Cell Type",
+                  "Disease", "Treatment", "Genotype", "Antibody", "Feature in Title", "Feature in Ab",
+                  "Feature in Title or Ab"]
+
     for sample in samples.values():
-        row = [sample.id, sample.series, sample.features, sample.organism, sample.title.encode('ascii','ignore'), sample.platForm.encode('ascii','ignore'), sample.InstrumentID.encode('ascii','ignore'),
-             sample.SRA, sample.libraryStrategy.encode('ascii','ignore'), sample.tissue.encode('ascii','ignore'), sample.cellLine.encode('ascii','ignore'), sample.cellType.encode('ascii','ignore'),
-             sample.disease.encode('ascii','ignore'), sample.treatment, sample.genotype, sample.antibody, sample.title_found, sample.ab_found,
+        row = [sample.id, sample.series, sample.features, sample.organism, sample.title, sample.platForm, sample.InstrumentID,
+             sample.SRA, sample.libraryStrategy, sample.tissue, sample.cellLine, sample.cellType,
+             sample.disease, sample.treatment, sample.genotype, sample.antibody, sample.title_found, sample.ab_found,
              sample.title_ab]
-        writer.writerow(row)
-    csv_file.close()
+        table.append(row)
+
+    df = pd.DataFrame(table, columns=headers)
+    df.to_csv(outputSample, sep=',', encoding='utf-8')
 
 
-    csv_file = open(outputHuman, "wb")
-    writer = csv.writer(csv_file)
-    writer.writerow(
-        ['Sample_ID', "Series_ID", output_surfix + "_description", "Input_ID", "Input_Description", "Organism", "Title",
-         "GPL_ID", "Instrument Model", "SRA_ID", "Library Strategy",
-         "Tissue", "Cell Line", "Cell Type", "Disease", "Treatment", "Genotype", "Antibody", "Feature in Title",
-         "Feature in Ab", "Feature in Title or Ab"])
+    table = []
+    headers = ['Sample_ID', "Series_ID", output_surfix + "_description", "Input_ID", "Input_Description", "Organism",
+               "Title", "GPL_ID", "Instrument Model", "SRA_ID", "Library Strategy", "Tissue", "Cell Line", "Cell Type",
+               "Disease", "Treatment", "Genotype", "Antibody", "Feature in Title", "Feature in Ab", "Feature in Title or Ab"]
 
     for sample in Human_Samples.values():
         potential_input_id = ""
@@ -131,8 +131,11 @@ def SOFTQuickParser(output_surfix, output_path, features, features_begin,
              sample.platForm.encode('ascii','ignore'), sample.InstrumentID.encode('ascii','ignore'), sample.SRA, sample.libraryStrategy.encode('ascii','ignore'), sample.tissue.encode('ascii','ignore'),
              sample.cellLine.encode('ascii','ignore'), sample.cellType.encode('ascii','ignore'), sample.disease.encode('ascii','ignore'), sample.treatment, sample.genotype, sample.antibody,
              sample.title_found, sample.ab_found, sample.title_ab]
-        writer.writerow(row)
-    csv_file.close()
+        table.append(row)
+
+    df = pd.DataFrame(table, columns=headers)
+    df.to_csv(outputHuman, sep=',', encoding='utf-8')
+    df.to_excel(outputHuman, encoding='utf-8')
 
     return Human_Samples
 
@@ -147,7 +150,7 @@ def feature_filter(geoGSMs, queue, features, features_begin, excludedGSM,
         db = None
     else:
         db = sqlite3.connect(cwd)
-        db.text_factory = str
+        # db.text_factory = str
 
     count = 0
 

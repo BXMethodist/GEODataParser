@@ -1,6 +1,7 @@
 from GEOsearch import SOFTQuickParser
 from collections import defaultdict
 from input_search_utils import keyword, Similarity, Character_Similarity
+import pandas as pd
 
 
 def Related_Sample_Search(output_surfix1, output_surfix2, output_path, first_features, first_features_begin, second_features, second_begin_features,
@@ -155,33 +156,38 @@ def Related_Sample_Search(output_surfix1, output_surfix2, output_path, first_fea
                 new_pairs.add((key, value))
 
     #### save file
-    import csv
     if not output_path.endswith("/"):
         output_path += "/"
 
-    output = open(output_path + output_surfix1 + "_vs_" + output_surfix2 + ".txt", "w")
-    writer = csv.writer(output)
-    writer.writerow(["sample1_id", "sample1_title", "sample1_descriptions", "sample1_series_id", "sample2_id", "sample2_title", "sample2_descriptions", "sample2_series_id"])
+    output = open(output_path + output_surfix1 + "_vs_" + output_surfix2 + ".csv", "w")
+
+    table = []
+    headers = ["sample1_id", "sample1_title", "sample1_descriptions", "sample1_series_id",
+               "sample2_id", "sample2_title", "sample2_descriptions", "sample2_series_id"]
+
     for pair in new_pairs:
         key, value = pair
         if key in first_samples:
             try:
-                writer.writerow([key, first_samples[key].title.encode('ascii','ignore'), first_samples[key].features, first_samples[key].series,
+                table.append([key, first_samples[key].title.encode('ascii','ignore'), first_samples[key].features, first_samples[key].series,
                                  value, second_samples[value].title.encode('ascii','ignore'), second_samples[value].features, second_samples[value].series])
             except:
-                writer.writerow([value, first_samples[value].title.encode('ascii','ignore'), first_samples[value].features, first_samples[value].series,
+                table.append([value, first_samples[value].title.encode('ascii','ignore'), first_samples[value].features, first_samples[value].series,
                                  key, second_samples[key].title.encode('ascii','ignore'), second_samples[key].features, second_samples[key].series,])
         elif key in second_samples:
             try:
-                writer.writerow([value, first_samples[value].title.encode('ascii','ignore'), first_samples[value].features, first_samples[value].series,
+                table.append([value, first_samples[value].title.encode('ascii','ignore'), first_samples[value].features, first_samples[value].series,
                                  key, second_samples[key].title.encode('ascii','ignore'), second_samples[key].features, second_samples[key].series,
                      ])
             except:
-                writer.writerow([key, first_samples[key].title.encode('ascii','ignore'), first_samples[key].features, first_samples[key].series,
+                table.append([key, first_samples[key].title.encode('ascii','ignore'), first_samples[key].features, first_samples[key].series,
                      value, second_samples[value].title.encode('ascii','ignore'), second_samples[value].features, second_samples[value].series])
         else:
             print key
-    output.close()
+
+    df = pd.DataFrame(table, columns=headers)
+    df.to_csv(output, sep=',', encoding='utf-8')
+
     return pairs
 
 
