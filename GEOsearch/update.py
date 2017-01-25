@@ -72,6 +72,8 @@ def updateGSMGSE_Encode_Roadmap(GSMGSE_map, Encode_map, Roadmap_map, MetaData_pa
                                 new_info.append(unicode(i, errors='ignore'))
                             metadata = json.dumps(new_info)
                         db.execute("insert into GSM values(?, ?)", (gsm, metadata))
+    db.commit()
+    db.close()
     return GSMGSE_map, Encode_map, Roadmap_map, GSM_need_update
 
 
