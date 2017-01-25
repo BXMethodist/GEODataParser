@@ -78,6 +78,7 @@ def GCF_search():
             pass
         else:
             print "Output path is not exist"
+            return 1
 
         settings = get_settings()
         encode_pkl = settings['Encode']
@@ -209,6 +210,7 @@ def GCF_match():
             pass
         else:
             print "Output path is not exist"
+            return 1
 
         settings = get_settings()
         encode_pkl = settings['Encode']
@@ -310,7 +312,7 @@ def GCF_query():
             return 1
 
     if args is not None:
-        if os.path.exists(args.output_path[:args.output_path.rfind("/")]):
+        if args.output_path.rfind("/") == -1 or os.path.exists(args.output_path[:args.output_path.rfind("/")]):
             pass
         else:
             print "Output path is not exist"
@@ -318,9 +320,13 @@ def GCF_query():
         GEO_ids = args.GEO_IDs
         if os.path.exists(GEO_ids) and os.path.isfile(GEO_ids):
             list_names_obj = open(GEO_ids, "r")
-            list_names = [x.strip() for x in list_names_obj.readlines()]
+            list_names = []
+            for line in list_names_obj.readlines():
+                line = line.strip().split(",")
+                for l in line:
+                    list_names.append(l)
             list_names_obj.close()
-            id_list = list_names
+            id_list = list(set(list_names))
         else:
             id_list = GEO_ids.split(",")
 

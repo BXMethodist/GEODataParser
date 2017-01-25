@@ -11,3 +11,7 @@ cd /home/tmhbxx3/scratch/GCF_OL
 
 module load python/2.7.11
 
+
+
+python /home/tmhbxx3/scratch/GCF_OL/GCF.py query /home/tmhbxx3/scratch/GCF_OL/H3K27me3_sample.txt /archive/tmhdxz9/work/h3k27me3/geo/H3K27me3_sample.csv
+python /home/tmhbxx3/scratch/GCF_OL/GCF.py query /home/tmhbxx3/scratch/GCF_OL/H3K27me3_input.txt /archive/tmhdxz9/work/h3k27me3/geo/H3K27me3_input.csv

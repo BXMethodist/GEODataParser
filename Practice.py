@@ -1,8 +1,4 @@
-import os
 
-output = "./123.txt"
 
-if os.path.exists(output[:output.rfind("/")]):
-    pass
-else:
-    print "Output path is not exist"
+# print unicode('上午', 'utf8')
+# print '上午'.decode('utf8')

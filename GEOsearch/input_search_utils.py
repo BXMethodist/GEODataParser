@@ -103,6 +103,7 @@ def related_sample_info(cur_relatedGSMs, queue, output_type, type_seq, cwd):
         db = None
     else:
         db = sqlite3.connect(cwd)
+        db.text_factory = str
 
     for filegsm in cur_relatedGSMs:
         characteristics = defaultdict(str)
@@ -479,10 +480,10 @@ def input_finder(output_surffix, output_path, HumanSamples, groupByGSE, encodeGS
     output = open(output1, "w")
     for key, value in FirstSampleToInput.items():
         writer = csv.writer(output)
-        row = [key] + [HumanSamples[key].title.encode('utf-8', 'ignore')]
+        row = [key] + [HumanSamples[key].title.encode('ascii', 'ignore')]
         # print value
         for id in value:
-            row += [id] + [relatedSamples[id].title.encode('utf-8', 'ignore')]
+            row += [id] + [relatedSamples[id].title.encode('ascii', 'ignore')]
         writer.writerow(row)
     output.close()
 
