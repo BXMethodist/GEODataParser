@@ -331,6 +331,13 @@ def has_antibody(sample, keyword):
     return False
 
 
+def equal_antibody(sample, keyword):
+    for v in sample.antibody.values():
+        if v == keyword:
+            return True
+    return False
+
+
 def input_finder(output_surffix, output_path, HumanSamples, groupByGSE, encodeGSE, relatedSamples,
                  features, features_begin, ignorecase, output_type):
     FirstSampleToInput = defaultdict(set)
@@ -448,8 +455,8 @@ def input_finder(output_surffix, output_path, HumanSamples, groupByGSE, encodeGS
                         bestMatchID = set()
                         bestMatchID.add(relatedSamples[relatedSample].id)
                 elif (relatedSamples[relatedSample].title.lower().find("control") != -1
-                      and (has_antibody(relatedSamples[relatedSample], "H3")
-                           or has_antibody(relatedSamples[relatedSample], "none"))) \
+                      and (equal_antibody(relatedSamples[relatedSample], "H3")
+                           or equal_antibody(relatedSamples[relatedSample], "none"))) \
                         and sample.cellLine == relatedSamples[relatedSample].cellLine:
                     score = Similarity(sample.title, feature_key_word, relatedSamples[relatedSample].title,
                                        "control")
