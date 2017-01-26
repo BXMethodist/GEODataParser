@@ -306,6 +306,31 @@ def Character_Similarity(sample1, sample2):
     return score
 
 
+def has_features(message, features, features_begin, ignorecase):
+    if ignorecase:
+        for feature in features:
+            if re.search(feature, message, flags=re.IGNORECASE):
+                return True
+        for feature in features_begin:
+            if re.match(feature, message, flags=re.IGNORECASE):
+                return True
+    else:
+        for feature in features:
+            if re.search(feature, message):
+                return True
+        for feature in features_begin:
+            if re.match(feature, message):
+                return True
+    return False
+
+
+def has_antibody(sample, keyword):
+    for v in sample.antibody.values():
+        if v.find(keyword) != -1:
+            return True
+    return False
+
+
 def input_finder(output_surffix, output_path, HumanSamples, groupByGSE, encodeGSE, relatedSamples,
                  features, features_begin, ignorecase, output_type):
     FirstSampleToInput = defaultdict(set)
@@ -350,7 +375,8 @@ def input_finder(output_surffix, output_path, HumanSamples, groupByGSE, encodeGS
         for gse in targetGSEs:
             for relatedSample in groupByGSE[gse]:
                 score = None
-                if relatedSamples[relatedSample].title.lower().find("input") != -1\
+                if (relatedSamples[relatedSample].title.lower().find("input") != -1
+                    or has_antibody(relatedSamples[relatedSample], "input")) \
                         and sample.cellLine == relatedSamples[relatedSample].cellLine:
                     score = Similarity(sample.title, feature_key_word, relatedSamples[relatedSample].title,
                                        "input")
@@ -376,7 +402,8 @@ def input_finder(output_surffix, output_path, HumanSamples, groupByGSE, encodeGS
                         bestMatchID = set()
                         bestMatchID.add(relatedSamples[relatedSample].id)
 
-                elif relatedSamples[relatedSample].title.lower().find("wce") != -1 \
+                elif (relatedSamples[relatedSample].title.lower().find("wce") != -1
+                      or has_antibody(relatedSamples[relatedSample], "wce")) \
                         and sample.cellLine == relatedSamples[relatedSample].cellLine:
                     score = Similarity(sample.title, feature_key_word, relatedSamples[relatedSample].title,
                                        "wce")
@@ -402,7 +429,8 @@ def input_finder(output_surffix, output_path, HumanSamples, groupByGSE, encodeGS
                         bestMatchID = set()
                         bestMatchID.add(relatedSamples[relatedSample].id)
 
-                elif relatedSamples[relatedSample].title.lower().find("IgG") != -1 \
+                elif (relatedSamples[relatedSample].title.lower().find("IgG") != -1
+                      or has_antibody(relatedSamples[relatedSample], "IgG")) \
                         and sample.cellLine == relatedSamples[relatedSample].cellLine:
                     score = Similarity(sample.title, feature_key_word, relatedSamples[relatedSample].title,
                                        "IgG")
@@ -419,7 +447,9 @@ def input_finder(output_surffix, output_path, HumanSamples, groupByGSE, encodeGS
                         bestSimilarity = score
                         bestMatchID = set()
                         bestMatchID.add(relatedSamples[relatedSample].id)
-                elif relatedSamples[relatedSample].title.lower().find("control") != -1 \
+                elif (relatedSamples[relatedSample].title.lower().find("control") != -1
+                      and (has_antibody(relatedSamples[relatedSample], "H3")
+                           or has_antibody(relatedSamples[relatedSample], "none"))) \
                         and sample.cellLine == relatedSamples[relatedSample].cellLine:
                     score = Similarity(sample.title, feature_key_word, relatedSamples[relatedSample].title,
                                        "control")
@@ -499,20 +529,5 @@ def input_finder(output_surffix, output_path, HumanSamples, groupByGSE, encodeGS
 
     return FirstSampleToInput, ThirdSampleToInput
 
-def has_features(message, features, features_begin, ignorecase):
-    if ignorecase:
-        for feature in features:
-            if re.search(feature, message, flags=re.IGNORECASE):
-                return True
-        for feature in features_begin:
-            if re.match(feature, message, flags=re.IGNORECASE):
-                return True
-    else:
-        for feature in features:
-            if re.search(feature, message):
-                return True
-        for feature in features_begin:
-            if re.match(feature, message):
-                return True
-    return False
+
 
