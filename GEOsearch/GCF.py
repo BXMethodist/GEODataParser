@@ -26,7 +26,7 @@ def GCF_search():
         return 1
 
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-                                     usage="\n\npython GCF.py search [optional arguments] <features>\n\n",
+                                     usage="\n\npython GCF.py search [optional arguments] <features> <output_prefix> <output_path>\n\n",
                                      description='',epilog="Chen lab, Houston Methodist")
     parser.add_argument('command', default=None, help="set as 'search' to looking for samples with key words")
 
@@ -134,7 +134,7 @@ def GCF_match():
         return 1
 
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-                                     usage="\n\npython GCF.py match [optional arguments] <first features> <second features>\n\n",
+                                     usage="\n\npython GCF.py match [optional arguments] <first features> <second features> <output_prefix1> <output_prefix2> <output_directory>\n\n",
                                      description='',epilog="Chen lab, Houston Methodist")
     parser.add_argument('command', default=None, help="set as 'match' to match samples with different key words within same study")
 
@@ -286,7 +286,7 @@ def GCF_query():
         return 1
 
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-                                     usage="\n\npython GCF.py query [optional arguments] <ID list>\n\n",
+                                     usage="\n\npython GCF.py query [optional arguments] <ID list> <outputpath>\n\n",
                                      description='',epilog="Chen lab, Houston Methodist")
     parser.add_argument('command', default=None, help="set as 'query' to looking for samples' NGS sequencing information")
 
