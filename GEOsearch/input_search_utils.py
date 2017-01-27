@@ -64,11 +64,11 @@ def SOFTQuickRelated(featured_samples, output_type, type_seq, GSEGSM_map, encode
 
     allrelatedGSMs = list(allrelatedGSMs)
 
-    print "total ", len(allrelatedGSMs), " samples found for potential input"
+    # print "total ", len(allrelatedGSMs), " samples found for potential input"
 
     chunksize = len(allrelatedGSMs)/(process-1) if process > 1 else len(allrelatedGSMs)
 
-    print "chunksize is ", chunksize
+    # print "chunksize is ", chunksize
 
     queue = Queue()
     processes = []
@@ -92,7 +92,7 @@ def SOFTQuickRelated(featured_samples, output_type, type_seq, GSEGSM_map, encode
 
 
 def related_sample_info(cur_relatedGSMs, queue, output_type, type_seq, cwd):
-    print "Process id is ", os.getpid()
+    # print "Process id is ", os.getpid()
 
     relatedSamples = {}
     groupByGSE = defaultdict(set)
@@ -354,7 +354,7 @@ def input_finder(output_surffix, output_path, HumanSamples, groupByGSE, encodeGS
         else:
             noneTitle.add(key)
 
-    print "title and none title", len(titleCandidates), len(noneTitle)
+    # print "title and none title", len(titleCandidates), len(noneTitle)
     not_found = 0
     # get their related samples
     for candidate in titleCandidates:

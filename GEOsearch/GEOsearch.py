@@ -48,7 +48,7 @@ def SOFTQuickParser(output_surfix, output_path, features, features_begin,
             geoGSMs = geoGSMs.union(localGSMs)
     geoGSMs = list(geoGSMs)
 
-    print "total ", len(geoGSMs), " candidate found in search", features
+    # print "total ", len(geoGSMs), " candidate found in search", features
 
     queue = Queue()
     chucksize = len(geoGSMs)/(process-1) if process > 1 else len(geoGSMs)
@@ -70,7 +70,7 @@ def SOFTQuickParser(output_surfix, output_path, features, features_begin,
     for p in processes:
         p.join()
 
-    print "total ", output_type, " sample found", len(Human_Samples)
+    # print "total ", output_type, " sample found", len(Human_Samples)
 
     groupByGSE, encodeGSE, relatedSamples = SOFTQuickRelated(Human_Samples, output_type, type_seq,
                                                              GSEGSM_map, encode_remove, encodeGSE, cwd, process)
@@ -141,7 +141,7 @@ def SOFTQuickParser(output_surfix, output_path, features, features_begin,
 
 def feature_filter(geoGSMs, queue, features, features_begin, excludedGSM,
                     type_seq, ignorecase, output_type, cwd):
-    print "Process id is ", os.getpid()
+    # print "Process id is ", os.getpid()
     samples = {}
     Human_Samples = {}
 
@@ -318,8 +318,8 @@ def feature_filter(geoGSMs, queue, features, features_begin, excludedGSM,
 
         if len(target_feature) != 0 and sample.id not in excludedGSM:
             samples[sampleName] = sample
-        # elif sample.id not in excludedGSM:
-        #     print sample.id, sample.title
+        elif sample.id not in excludedGSM:
+            print sample.id, sample.title
 
     queue.put((samples, Human_Samples))
     if db is not None:
