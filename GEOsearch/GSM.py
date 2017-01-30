@@ -17,7 +17,7 @@ def search_term_to_GSM(terms):
         ids = ",".join(result_ids[i:i+500])
         gsm_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=gds&version=2.0&id=" + ids
         try:
-            f = urllib2.urlopen(gsm_url, timeout=30)
+            f = urllib2.urlopen(gsm_url, timeout=60)
             content = f.read()
             result_gsms = result_gsms.union(re.findall('\sGSM[0-9]+\s', content))
         except:
@@ -26,6 +26,8 @@ def search_term_to_GSM(terms):
 
     for gsm in result_gsms:
         gsms.add(gsm.strip())
+
+    print gsms
     return gsms
 
 
