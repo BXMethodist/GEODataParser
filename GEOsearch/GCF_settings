@@ -1,6 +1,6 @@
-GSMGSE_pkl_path ./pkl/GSMGSE_map.pkl
-Encode  ./pkl/ENCODE_gse.pkl
-Roadmap ./pkl/Roadmap_gse.pkl
-GSMtoSRRpkl ./pkl/GSMSRR_map.pkl
+GSMGSE_pkl_path /Users/boxia/Desktop/PycharmProjects/GEODataParser/GEOsearch/pkl/GSMGSE_map.pkl
+Encode  /Users/boxia/Desktop/PycharmProjects/GEODataParser/GEOsearch/pkl/ENCODE_gse.pkl
+Roadmap /Users/boxia/Desktop/PycharmProjects/GEODataParser/GEOsearch/pkl/Roadmap_gse.pkl
+GSMtoSRRpkl /Users/boxia/Desktop/PycharmProjects/GEODataParser/GEOsearch/pkl/GSMSRR_map.pkl
 email   bxia@houstonmethodist.org
-MetaData    ./pkl/geoMetaData.db
+MetaData    /Users/boxia/Desktop/PycharmProjects/GEODataParser/GEOsearch/pkl/geoMetaData.db

@@ -75,12 +75,6 @@ def GCF_search():
             return 1
 
     if args is not None:
-        if os.path.exists(args.output_path):
-            pass
-        else:
-            print "Output path is not exist"
-            return 1
-
         settings = get_settings()
         encode_pkl = settings['Encode']
         roadmap_pkl = settings['Roadmap']
@@ -216,12 +210,6 @@ def GCF_match():
             return 1
 
     if args is not None:
-        if os.path.exists(args.output_path):
-            pass
-        else:
-            print "Output path is not exist"
-            return 1
-
         settings = get_settings()
         encode_pkl = settings['Encode']
         roadmap_pkl = settings['Roadmap']
