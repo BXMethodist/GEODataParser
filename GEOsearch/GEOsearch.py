@@ -1,4 +1,4 @@
-import os, re, urllib, contextlib, sqlite3, gc, json, csv, pandas as pd
+import re, sqlite3, pandas as pd
 from collections import defaultdict
 from GSM import GSM, search_term_to_GSM
 from input_search_utils import SOFTQuickRelated, input_finder, has_features, get_MetaInfo, get_WebInfo

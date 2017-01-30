@@ -2,7 +2,7 @@
 from ftplib import FTP
 from setup import get_settings
 from pickleUtils import load_obj, save_obj
-import pandas as pd, urllib, requests, mimetypes
+import pandas as pd, urllib2, requests, mimetypes
 import gc, sqlite3, json
 
 
@@ -101,7 +101,7 @@ def GSE_info(id):
     roadmap = False
     gsms = set()
 
-    web = urllib.urlopen(url)
+    web = urllib2.urlopen(url)
     info = web.readlines()
     web.close()
 
@@ -120,7 +120,7 @@ def GSE_info(id):
 def GSM_info(id):
     url = "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=" + id + "&targ=self&form=text&view=quick"
 
-    web = urllib.urlopen(url)
+    web = urllib2.urlopen(url)
     info = web.readlines()
     web.close()
 
@@ -137,7 +137,7 @@ def downloadGSM(gsmID):
     content_type = response.headers['content-type']
     extension = mimetypes.guess_extension(content_type)
     if content_type == "geo/text" and extension != ".html":
-        web = urllib.urlopen(url)
+        web = urllib2.urlopen(url)
         info = web.readlines()
         web.close()
         del web

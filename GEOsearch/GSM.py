@@ -1,4 +1,4 @@
-import urllib, re
+import urllib2, re
 from collections import defaultdict
 import psutil
 
@@ -16,9 +16,12 @@ def search_term_to_GSM(terms):
     for i in range(0, len(result_ids), 500):
         ids = ",".join(result_ids[i:i+500])
         gsm_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=gds&version=2.0&id=" + ids
-        f = urllib.urlopen(gsm_url)
-        content = f.read()
-        result_gsms = result_gsms.union(re.findall('\sGSM[0-9]+\s', content))
+        try:
+            f = urllib2.urlopen(gsm_url, timeout=30)
+            content = f.read()
+            result_gsms = result_gsms.union(re.findall('\sGSM[0-9]+\s', content))
+        except:
+            continue
     gsms = set()
 
     for gsm in result_gsms:
@@ -27,7 +30,10 @@ def search_term_to_GSM(terms):
 
 
 def readid(url):
-    f = urllib.urlopen(url)
+    try:
+        f = urllib2.urlopen(url, timeout=30)
+    except:
+        return set()
 
     content = f.read()
     content = content[content.find("<IdList>") + 8:content.find("</IdList>")-1]

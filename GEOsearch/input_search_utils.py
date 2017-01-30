@@ -1,5 +1,5 @@
 
-import csv, re, urllib, os, gc, json, sqlite3, contextlib, pandas as pd
+import re, urllib2, gc, json, sqlite3, contextlib, pandas as pd
 from collections import defaultdict
 from difflib import SequenceMatcher
 from update import GSE_info
@@ -8,7 +8,7 @@ from GSM import GSM
 
 
 def get_WebInfo(url, count):
-    with contextlib.closing(urllib.urlopen(url)) as web:
+    with contextlib.closing(urllib2.urlopen(url)) as web:
         info = web.readlines()
     web.close()
     del web

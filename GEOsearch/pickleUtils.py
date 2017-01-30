@@ -1,8 +1,4 @@
-import pickle, os
-import sqlite3
-from collections import defaultdict
-from ftplib import FTP
-import pandas as pd
+import pickle
 
 def save_obj(obj, name):
     with open(name + '.pkl', 'wb') as f:
