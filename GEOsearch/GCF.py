@@ -33,9 +33,6 @@ def GCF_search():
     parser.add_argument('feature_key_words', default=None,
                         help="list of feature key words need to used to looking for the NGS sequencing samples, "
                              "different key words need to be separated by ','")
-    parser.add_argument('output_prefix', default=None, help="specify the output file prefix.")
-    parser.add_argument('output_path', default=None, help="specify the output file location.")
-
     ## optional parameters
     parser.add_argument('-b', dest='keywords_begin', metavar='', default='',
                         help="list of key words in features need to be used to occur in the beginning of a word, "
@@ -58,6 +55,10 @@ def GCF_search():
                         help="specify the GSMs metadata files path")
     parser.add_argument('-p', '--process', dest='process', default=20, type=int, metavar='',
                         help="specify the number of parallel search processes want to use.")
+    parser.add_argument('-f', '--output_prefix', dest='output_prefix', default=None, metavar='',
+                        help="specify the output file prefix.")
+    parser.add_argument('-o', '--output_path', dest='output_path', default=None, metavar='',
+                        help="specify the output file location.")
 
     args = None
 
@@ -86,8 +87,15 @@ def GCF_search():
         GSMGSE_pkl = settings['GSMGSE_pkl_path']
 
         keywords = args.feature_key_words.split(",")
+
         output_prefix = args.output_prefix
+        if output_prefix is None:
+            output_prefix = keywords[0]
+
         output_path = args.output_path
+        if output_path is None:
+            output_path = './GEOsearch_output/'
+            os.system("mkdir GEOsearch_output")
 
         if args.keywords_begin == '':
             keywords_begin = []
@@ -145,10 +153,6 @@ def GCF_match():
                         help="list of second feature key words need to used to looking for the second set of NGS sequencing samples, "
                              "different key words need to be separated by ','")
 
-    parser.add_argument('output_prefix1', default=None, help="specify the first output file name prefix.")
-    parser.add_argument('output_prefix2', default=None, help="specify the second output file name prefix.")
-    parser.add_argument('output_path', default=None, help="specify the output file location.")
-
     ## optional parameters
     parser.add_argument('-bf', dest='keywords_begin1', default='', metavar='',
                         help="list of key words in first features need to be used to occur in the beginning of a word, "
@@ -190,6 +194,12 @@ def GCF_match():
                         help="specify the GSMs metadata files path")
     parser.add_argument('-p', '--process', dest='process', default=20, type=int, metavar='',
                         help="specify the number of parallel search processes want to use.")
+    parser.add_argument('-ff', '--output_prefix1', dest='output_prefix1', default=None, metavar='',
+                        help="specify the first output file name prefix.")
+    parser.add_argument('-fs', '--output_prefix2', dest='output_prefix2', default=None, metavar='',
+                        help="specify the second output file name prefix.")
+    parser.add_argument('-o', '--output_path', dest='output_path', default=None, metavar='',
+                        help="specify the output file location.")
 
     args = None
 
@@ -221,9 +231,17 @@ def GCF_match():
         keywords2 = args.second_feature_key_words.split(",")
 
         output_prefix1 = args.output_prefix1
+        if output_prefix1 is None:
+            output_prefix1 = keywords1[0]
+
         output_prefix2 = args.output_prefix2
+        if output_prefix2 is None:
+            output_prefix2 = keywords2[0]
 
         output_path = args.output_path
+        if output_path is None:
+            output_path = './GEOsearch_output/'
+            os.system("mkdir GEOsearch_output")
 
         if args.keywords_begin1 == '':
             keywords_begin1 = []
@@ -295,7 +313,9 @@ def GCF_query():
                              "it could be a list of IDs separated by ',', or a file containing a list of IDs,"
                              " accepted IDs: GSM, GSE, SRR, SRP, SRX, SAMN, SRP, ",
                         )
-    parser.add_argument('output_path', default=None, help="specify the output file name and path.")
+
+    parser.add_argument('-o', '--output_path', dest='output_path', default=None, metavar='',
+                        help="specify the output file name and path.")
 
     args = None
 
@@ -312,10 +332,10 @@ def GCF_query():
             return 1
 
     if args is not None:
-        if args.output_path.rfind("/") == -1 or os.path.exists(args.output_path[:args.output_path.rfind("/")]):
-            pass
-        else:
-            print "Output path is not exist"
+        output_path = args.output_path
+
+        if output_path is None:
+            output_path = os.getcwd()+"./GEO_query.txt"
 
         GEO_ids = args.GEO_IDs
         if os.path.exists(GEO_ids) and os.path.isfile(GEO_ids):
@@ -334,7 +354,7 @@ def GCF_query():
         GSMGSE_pkl = settings['GSMGSE_pkl_path']
         GSM_SRR_pkl = settings['GSMtoSRRpkl']
 
-        GEO_query(id_list, args.output_path, GSMGSE_pkl, GSM_SRR_pkl)
+        GEO_query(id_list, output_path, GSMGSE_pkl, GSM_SRR_pkl)
         return
 
     return 1
