@@ -17,13 +17,7 @@ def setup():
                                      usage="\n\npython setup.py <command>\n\n",
                                      description='', epilog="Chen lab, Houston Methodist")
 
-    parser.add_argument('email', default=None, help="email is required to connect to NCBI ftp site")
-
-    args = parser.parse_args()
-
-    email = args.email
-
-    cwd = os.getcwd()
+    cwd = os.path.dirname(os.path.realpath(__file__))
 
     os.system("wget -P "+cwd+"/pkl/ http://cigwiki.houstonmethodist.org/trackhub/boxia/GCF/pkl/GSMGSE_map.pkl")
     os.system("wget -P "+cwd+"/pkl/ http://cigwiki.houstonmethodist.org/trackhub/boxia/GCF/pkl/ENCODE_gse.pkl")
@@ -36,6 +30,6 @@ def setup():
     settings.write("Encode" + "\t" +cwd+"/pkl/ENCODE_gse.pkl" + "\n")
     settings.write("Roadmap" + "\t" +cwd+"/pkl/Roadmap_gse.pkl" + "\n")
     settings.write("GSMtoSRRpkl" + "\t" +cwd+"/pkl/GSMSRR_map.pkl" + "\n")
-    settings.write("email" + "\t" + email + "\n")
+    settings.write("email" + "\t" + "bxia@houstonmethodist.org" + "\n")
     settings.write("MetaData" + "\t" + cwd+"/pkl/geoMetaData.db")
     settings.close()
