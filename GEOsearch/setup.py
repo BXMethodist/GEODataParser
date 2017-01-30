@@ -3,7 +3,8 @@ import os
 
 def get_settings():
     settings = {}
-    settings_file = open('GCF_settings', "r")
+    cwd = os.path.dirname(os.path.realpath(__file__))
+    settings_file = open(cwd+'/GCF_settings', "r")
     for line in settings_file.readlines():
         info = line.split()
         settings[info[0]] = info[1].strip()
@@ -25,7 +26,7 @@ def setup():
     os.system("wget -P "+cwd+"/pkl/ http://cigwiki.houstonmethodist.org/trackhub/boxia/GCF/pkl/GSMSRR_map.pkl")
     os.system("wget -P "+cwd+"/pkl/ http://cigwiki.houstonmethodist.org/trackhub/boxia/GCF/pkl/geoMetaData.db")
 
-    settings = open("GCF_settings.txt", "w")
+    settings = open(cwd + "/GCF_settings.txt", "w")
     settings.write("GSMGSE_pkl_path"+"\t"+cwd+"/pkl/GSMGSE_map.pkl"+"\n")
     settings.write("Encode" + "\t" +cwd+"/pkl/ENCODE_gse.pkl" + "\n")
     settings.write("Roadmap" + "\t" +cwd+"/pkl/Roadmap_gse.pkl" + "\n")
