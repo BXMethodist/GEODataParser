@@ -71,12 +71,14 @@ def SOFTQuickParser(output_surfix, output_path, features, features_begin,
         p.join()
 
     # print "total ", output_type, " sample found", len(Human_Samples)
+    if type_seq == 'chip-seq':
+        groupByGSE, encodeGSE, relatedSamples = SOFTQuickRelated(Human_Samples, output_type, type_seq,
+                                                                 GSEGSM_map, encode_remove, encodeGSE, cwd, process)
 
-    groupByGSE, encodeGSE, relatedSamples = SOFTQuickRelated(Human_Samples, output_type, type_seq,
-                                                             GSEGSM_map, encode_remove, encodeGSE, cwd, process)
-
-    first_category, third_category = input_finder(output_surfix, output_path, Human_Samples, groupByGSE, encodeGSE, relatedSamples,
-                                                  features, features_begin, ignorecase, output_type)
+        first_category, third_category = input_finder(output_surfix, output_path, Human_Samples, groupByGSE, encodeGSE, relatedSamples,
+                                                      features, features_begin, ignorecase, output_type)
+    else:
+        first_category, third_category = defaultdict(set), defaultdict(set)
 
     #### output results to csv
     output_type = output_type.replace(" ", "_")
@@ -318,8 +320,8 @@ def feature_filter(geoGSMs, queue, features, features_begin, excludedGSM,
 
         if len(target_feature) != 0 and sample.id not in excludedGSM:
             samples[sampleName] = sample
-        elif sample.id not in excludedGSM:
-            print sample.id, sample.title
+        # elif sample.id not in excludedGSM:
+        #     print sample.id, sample.title
 
     queue.put((samples, Human_Samples))
     if db is not None:

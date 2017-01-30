@@ -294,6 +294,7 @@ def keyword(message, features, features_begin, ignorecase):
             if re.match(feature, message):
                 return feature
 
+
 def Character_Similarity(sample1, sample2):
     title1 = re.sub("\d", "", sample1.title)
     title2 = re.sub("\d", "", sample2.title)
