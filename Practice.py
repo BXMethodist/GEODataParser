@@ -1,8 +1,10 @@
 
 
 
-if (0
-                      and (1
-                           or 0)) \
-                        and 1:
-    print 'lala'
+import re
+
+a = "lalalarep1"
+
+a = re.sub(r'rep[0-9]*', '', a)
+
+print a

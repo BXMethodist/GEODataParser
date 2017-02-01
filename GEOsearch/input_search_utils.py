@@ -271,6 +271,9 @@ def Similarity(title1, keyword1, title2, keyword2):
     title1 = title1.replace(keyword1, "").lower().replace("chip-seq", "")
     title2 = title2.replace(keyword2, "").lower().replace("chip-seq", "")
 
+    title1 = re.sub(r'rep[0-9]*', '', title1)
+    title2 = re.sub(r'rep[0-9]*', '', title2)
+
     score_replace = SequenceMatcher(None, title1, title2).ratio()
 
     return max(score, score_replace)

@@ -25,7 +25,6 @@ def search_term_to_GSM(terms):
     for gsm in result_gsms:
         gsms.add(gsm.strip())
 
-    print gsms
     return gsms
 
 
