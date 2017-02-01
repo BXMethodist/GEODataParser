@@ -268,7 +268,7 @@ def feature_filter(geoGSMs, queue, features, features_begin, excludedGSM,
                                  flags=re.IGNORECASE):
                 treatment[key] = value
 
-            if key.lower() in ["tissue", "body part", "body site"]:
+            if key.lower() in ["tissue", "body part", "body site", "tissue type"]:
                 tissue = value
 
             if key.lower() in ["cancer type", "tumor type", "tumor region", "disease", "disease state",

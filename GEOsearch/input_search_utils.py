@@ -180,6 +180,7 @@ def related_sample_info(cur_relatedGSMs, queue, output_type, type_seq, cwd):
 
         cellLine = ""
         cellType = ""
+        tissue = ""
 
         for key, value in characteristics.items():
             if key.lower() in ["chip antibody", "chip", "antigen", "antibody", "antibodies", "chip antibodies",
@@ -207,9 +208,13 @@ def related_sample_info(cur_relatedGSMs, queue, output_type, type_seq, cwd):
             if key.lower() in ["cell_type", "cell-type", "cell type", "cell lineage"]:
                 cellType += value
 
+            if key.lower() in ["tissue", "body part", "body site", "tissue type"]:
+                tissue += value
+
         sample.antibody = antibody
         sample.cellLine = cellLine
         sample.cellType = cellType
+        sample.tissue = tissue
 
         sample.title_found = title_found
         sample.ab_found = ab_found
@@ -261,10 +266,14 @@ def spliterFinder(title, keyword):
 
 
 def Similarity(title1, keyword1, title2, keyword2):
-    title1 = title1.lower().replace(keyword1.lower(), "")
-    title2 = title2.lower().replace(keyword2.lower(), "")
+    score = SequenceMatcher(None, title1, title2).ratio()
 
-    return SequenceMatcher(None, title1, title2).ratio()
+    title1 = title1.replace(keyword1, "").lower().replace("chip-seq", "")
+    title2 = title2.replace(keyword2, "").lower().replace("chip-seq", "")
+
+    score_replace = SequenceMatcher(None, title1, title2).ratio()
+
+    return max(score, score_replace)
 
 def keyword(message, features, features_begin, ignorecase):
     if ignorecase:
@@ -339,6 +348,26 @@ def equal_antibody(sample, keyword):
     return False
 
 
+def isInput(sample):
+    capital_keywords = ['input','wce']
+    none_capital_keywords = ['IgG', '_H3_']
+
+    for c in capital_keywords:
+        if sample.title.lower().find(c) != -1:
+            return True, c
+        if has_antibody(sample, c):
+            return True, c
+
+    for n in none_capital_keywords:
+        if sample.title.find(n) != -1:
+            return True, n
+        if n == '_H3_' and equal_antibody(sample, 'H3'):
+            return True, n
+        elif has_antibody(sample, n):
+            return True, n
+    return False, ""
+
+
 def input_finder(output_surffix, output_path, HumanSamples, groupByGSE, encodeGSE, relatedSamples,
                  features, features_begin, ignorecase, output_type):
     FirstSampleToInput = defaultdict(set)
@@ -378,97 +407,23 @@ def input_finder(output_surffix, output_path, HumanSamples, groupByGSE, encodeGS
         bestMatchID = set()
         bestSimilarity = float("-inf")
 
-        related_keyword = None
-
         for gse in targetGSEs:
             for relatedSample in groupByGSE[gse]:
                 score = None
-                if (relatedSamples[relatedSample].title.lower().find("input") != -1
-                    or has_antibody(relatedSamples[relatedSample], "input")) \
-                        and sample.cellLine == relatedSamples[relatedSample].cellLine:
-                    score = Similarity(sample.title, feature_key_word, relatedSamples[relatedSample].title,
-                                       "input")
-                    if related_keyword == None or related_keyword == "input":
-                        related_keyword = "input"
-                        if score > bestSimilarity:
-                            bestSimilarity = score
-                            bestMatchID = set()
-                            bestMatchID.add(relatedSamples[relatedSample].id)
-                        elif score == bestSimilarity:
-                            bestMatchID.add(relatedSamples[relatedSample].id)
-                    elif related_keyword == "wce":
-                        if score > bestSimilarity:
-                            bestSimilarity = score
-                            bestMatchID = set()
-                            bestMatchID.add(relatedSamples[relatedSample].id)
-                            related_keyword = "input"
-                        elif score == bestSimilarity:
-                            bestMatchID.add(relatedSamples[relatedSample].id)
-                    else:
-                        related_keyword = "input"
-                        bestSimilarity = score
-                        bestMatchID = set()
-                        bestMatchID.add(relatedSamples[relatedSample].id)
+                boo, word = isInput(relatedSamples[relatedSample])
+                if boo \
+                        and sample.cellLine == relatedSamples[relatedSample].cellLine \
+                        and sample.cellType == relatedSamples[relatedSample].cellType \
+                        and sample.tissue == relatedSamples[relatedSample].tissue:
 
-                elif (relatedSamples[relatedSample].title.lower().find("wce") != -1
-                      or has_antibody(relatedSamples[relatedSample], "wce")) \
-                        and sample.cellLine == relatedSamples[relatedSample].cellLine:
                     score = Similarity(sample.title, feature_key_word, relatedSamples[relatedSample].title,
-                                       "wce")
-                    if related_keyword == None or related_keyword == "wce":
-                        related_keyword = "wce"
-                        if score > bestSimilarity:
-                            bestSimilarity = score
-                            bestMatchID = set()
-                            bestMatchID.add(relatedSamples[relatedSample].id)
-                        elif score == bestSimilarity:
-                            bestMatchID.add(relatedSamples[relatedSample].id)
-                    elif related_keyword == "input":
-                        if score > bestSimilarity:
-                            bestSimilarity = score
-                            bestMatchID = set()
-                            bestMatchID.add(relatedSamples[relatedSample].id)
-                            related_keyword = "wce"
-                        elif score == bestSimilarity:
-                            bestMatchID.add(relatedSamples[relatedSample].id)
-                    elif related_keyword == "IgG" or related_keyword == "control":
-                        related_keyword = "wce"
+                                       word)
+                    if score > bestSimilarity:
                         bestSimilarity = score
                         bestMatchID = set()
                         bestMatchID.add(relatedSamples[relatedSample].id)
-
-                elif (relatedSamples[relatedSample].title.lower().find("IgG") != -1
-                      or has_antibody(relatedSamples[relatedSample], "IgG")) \
-                        and sample.cellLine == relatedSamples[relatedSample].cellLine:
-                    score = Similarity(sample.title, feature_key_word, relatedSamples[relatedSample].title,
-                                       "IgG")
-                    if related_keyword == None or related_keyword == "IgG":
-                        related_keyword = "IgG"
-                        if score > bestSimilarity:
-                            bestSimilarity = score
-                            bestMatchID = set()
-                            bestMatchID.add(relatedSamples[relatedSample].id)
-                        elif score == bestSimilarity:
-                            bestMatchID.add(relatedSamples[relatedSample].id)
-                    elif related_keyword == "control":
-                        related_keyword = "IgG"
-                        bestSimilarity = score
-                        bestMatchID = set()
+                    elif score == bestSimilarity:
                         bestMatchID.add(relatedSamples[relatedSample].id)
-                elif (relatedSamples[relatedSample].title.lower().find("control") != -1
-                      and (equal_antibody(relatedSamples[relatedSample], "H3")
-                           or equal_antibody(relatedSamples[relatedSample], "none"))) \
-                        and sample.cellLine == relatedSamples[relatedSample].cellLine:
-                    score = Similarity(sample.title, feature_key_word, relatedSamples[relatedSample].title,
-                                       "control")
-                    if related_keyword == None or related_keyword == "control":
-                        related_keyword = "control"
-                        if score > bestSimilarity:
-                            bestSimilarity = score
-                            bestMatchID = set()
-                            bestMatchID.add(relatedSamples[relatedSample].id)
-                        elif score == bestSimilarity:
-                            bestMatchID.add(relatedSamples[relatedSample].id)
 
         if bestMatchID:
             FirstSampleToInput[sample.id] = FirstSampleToInput[sample.id].union(bestMatchID)
