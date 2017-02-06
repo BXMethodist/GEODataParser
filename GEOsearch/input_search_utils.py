@@ -266,7 +266,7 @@ def spliterFinder(title, keyword):
 
 
 def Similarity(title1, keyword1, title2, keyword2):
-    score = SequenceMatcher(None, title1, title2).ratio()
+    # score = SequenceMatcher(None, title1, title2).ratio()
 
     title1 = title1.replace(keyword1, "").lower().replace("chip-seq", "")
     title2 = title2.replace(keyword2, "").lower().replace("chip-seq", "")
@@ -276,7 +276,8 @@ def Similarity(title1, keyword1, title2, keyword2):
 
     score_replace = SequenceMatcher(None, title1, title2).ratio()
 
-    return max(score, score_replace)
+    #max(score, score_replace)
+    return score_replace
 
 def keyword(message, features, features_begin, ignorecase):
     if ignorecase:
@@ -351,22 +352,28 @@ def equal_antibody(sample, keyword):
     return False
 
 
-def isInput(sample):
-    capital_keywords = ['input','wce']
-    none_capital_keywords = ['IgG', '_H3_']
+def isInput(sample, feature_key_word):
+    non_capital_keywords = ['input','wce']
 
-    for c in capital_keywords:
+    if feature_key_word.find("H3K") != -1:
+        capital_keywords = ['IgG']
+    else:
+        capital_keywords = ['IgG', '_H3_', " H3"]
+
+    for c in non_capital_keywords:
         if sample.title.lower().find(c) != -1:
             return True, c
         if has_antibody(sample, c):
             return True, c
 
-    for n in none_capital_keywords:
-        if sample.title.find(n) != -1:
+    for n in capital_keywords:
+        if n ==' H3' and sample.title.endswith(n):
+            return True, 'H3'
+        elif n.find('H3') ==-1 and sample.title.find(n) != -1:
             return True, n
-        if n == '_H3_' and equal_antibody(sample, 'H3'):
-            return True, n
-        elif has_antibody(sample, n):
+        elif n.find('H3') != -1 and equal_antibody(sample, 'H3'):
+            return True, 'H3'
+        elif n.find('H3') ==-1 and has_antibody(sample, n):
             return True, n
     return False, ""
 
@@ -409,11 +416,12 @@ def input_finder(output_surffix, output_path, HumanSamples, groupByGSE, encodeGS
 
         bestMatchID = set()
         bestSimilarity = float("-inf")
+        input_keyword = ""
 
         for gse in targetGSEs:
             for relatedSample in groupByGSE[gse]:
                 score = None
-                boo, word = isInput(relatedSamples[relatedSample])
+                boo, word = isInput(relatedSamples[relatedSample], feature_key_word)
                 if boo \
                         and sample.cellLine == relatedSamples[relatedSample].cellLine \
                         and sample.cellType == relatedSamples[relatedSample].cellType \
@@ -425,8 +433,16 @@ def input_finder(output_surffix, output_path, HumanSamples, groupByGSE, encodeGS
                         bestSimilarity = score
                         bestMatchID = set()
                         bestMatchID.add(relatedSamples[relatedSample].id)
+                        input_keyword = word
                     elif score == bestSimilarity:
-                        bestMatchID.add(relatedSamples[relatedSample].id)
+                        if input_keyword == 'H3' and word != 'H3':
+                            bestMatchID = set()
+                            bestMatchID.add(relatedSamples[relatedSample].id)
+                            input_keyword = word
+                        elif input_keyword != 'H3' and word == 'H3':
+                            pass
+                        else:
+                            bestMatchID.add(relatedSamples[relatedSample].id)
 
         if bestMatchID:
             FirstSampleToInput[sample.id] = FirstSampleToInput[sample.id].union(bestMatchID)

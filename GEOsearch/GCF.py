@@ -325,7 +325,7 @@ def GCF_query():
         output_path = args.output_path
 
         if output_path is None:
-            output_path = os.getcwd()+"./GEO_query.txt"
+            output_path = os.getcwd()+"/GEO_query.txt"
 
         GEO_ids = args.GEO_IDs
         if os.path.exists(GEO_ids) and os.path.isfile(GEO_ids):
