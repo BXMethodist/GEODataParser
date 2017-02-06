@@ -284,7 +284,10 @@ def Similarity(title1, keyword1, title2, keyword2, ignorecase):
 
     score_replace = SequenceMatcher(None, title1, title2).ratio()
 
-    return max(score, score_replace)
+    if score > score_replace:
+        return score, score_replace
+    else:
+        return score_replace, score
     #return score_replace
 
 def keyword(message, features, features_begin, ignorecase):
@@ -375,9 +378,9 @@ def isInput(sample, feature_key_word):
             return True, c
 
     for n in capital_keywords:
-        if n ==' H3' and sample.title.endswith(n):
+        if n ==' H3' and sample.title[-3:] == ' H3':
             return True, 'H3'
-        elif sample.title.find(n) != -1:
+        elif sample.title.find(n) != -1 and n !=' H3':
             if n == "_H3_":
                 return True, 'H3'
             return True, n
@@ -422,6 +425,7 @@ def input_finder(output_surffix, output_path, HumanSamples, groupByGSE, encodeGS
 
         bestMatchID = set()
         bestSimilarity = float("-inf")
+        bestSimilarity2 = float("-inf")
         input_keyword = ""
 
         for gse in targetGSEs:
@@ -434,22 +438,29 @@ def input_finder(output_surffix, output_path, HumanSamples, groupByGSE, encodeGS
                         and sample.cellType == relatedSamples[relatedSample].cellType \
                         and sample.tissue == relatedSamples[relatedSample].tissue:
 
-                    score = Similarity(sample.title, feature_key_word, relatedSamples[relatedSample].title,
+                    score1, score2 = Similarity(sample.title, feature_key_word, relatedSamples[relatedSample].title,
                                        word, ignorecase)
-                    if score > bestSimilarity:
-                        bestSimilarity = score
+
+                    if score1 > bestSimilarity:
+                        bestSimilarity = score1
+                        bestSimilarity2 = score2
                         bestMatchID = set()
                         bestMatchID.add(relatedSamples[relatedSample].id)
                         input_keyword = word
-                    elif score == bestSimilarity:
+                    elif score1 == bestSimilarity:
                         if input_keyword == 'H3' and word != 'H3':
                             bestMatchID = set()
                             bestMatchID.add(relatedSamples[relatedSample].id)
                             input_keyword = word
+                            bestSimilarity = score1
+                            bestSimilarity2 = score2
                         elif input_keyword != 'H3' and word == 'H3':
                             pass
                         else:
-                            bestMatchID.add(relatedSamples[relatedSample].id)
+                            if score2 > bestSimilarity2:
+                                bestSimilarity2 = score2
+                                bestMatchID = set()
+                                bestMatchID.add(relatedSamples[relatedSample].id)
 
         if bestMatchID:
             FirstSampleToInput[sample.id] = FirstSampleToInput[sample.id].union(bestMatchID)
