@@ -265,19 +265,26 @@ def spliterFinder(title, keyword):
     return spliter, index
 
 
-def Similarity(title1, keyword1, title2, keyword2):
-    # score = SequenceMatcher(None, title1, title2).ratio()
+def Similarity(title1, keyword1, title2, keyword2, ignorecase):
+    score = SequenceMatcher(None, title1, title2).ratio()
 
-    title1 = title1.replace(keyword1, "").lower().replace("chip-seq", "")
-    title2 = title2.replace(keyword2, "").lower().replace("chip-seq", "")
+    if ignorecase:
+        title1 = title1.lower().replace(keyword1.lower(), "").replace("chip-seq", "")
+        title2 = title2.lower().replace(keyword2.lower(), "").replace("chip-seq", "")
 
-    title1 = re.sub(r'rep[0-9]*', '', title1)
-    title2 = re.sub(r'rep[0-9]*', '', title2)
+        title1 = re.sub(r'rep[0-9]*', '', title1)
+        title2 = re.sub(r'rep[0-9]*', '', title2)
+    else:
+        title1 = title1.replace(keyword1, "").lower().replace("chip-seq", "")
+        title2 = title2.replace(keyword2, "").lower().replace("chip-seq", "")
+
+        title1 = re.sub(r'rep[0-9]*', '', title1)
+        title2 = re.sub(r'rep[0-9]*', '', title2)
 
     score_replace = SequenceMatcher(None, title1, title2).ratio()
 
-    #max(score, score_replace)
-    return score_replace
+    return max(score, score_replace)
+    #return score_replace
 
 def keyword(message, features, features_begin, ignorecase):
     if ignorecase:
@@ -369,11 +376,9 @@ def isInput(sample, feature_key_word):
     for n in capital_keywords:
         if n ==' H3' and sample.title.endswith(n):
             return True, 'H3'
-        elif n.find('H3') ==-1 and sample.title.find(n) != -1:
-            return True, n
-        elif n.find('H3') != -1 and equal_antibody(sample, 'H3'):
-            return True, 'H3'
-        elif n.find('H3') ==-1 and has_antibody(sample, n):
+        elif sample.title.find(n) != -1:
+            if n == "_H3_":
+                return True, 'H3'
             return True, n
     return False, ""
 
@@ -428,7 +433,7 @@ def input_finder(output_surffix, output_path, HumanSamples, groupByGSE, encodeGS
                         and sample.tissue == relatedSamples[relatedSample].tissue:
 
                     score = Similarity(sample.title, feature_key_word, relatedSamples[relatedSample].title,
-                                       word)
+                                       word, ignorecase)
                     if score > bestSimilarity:
                         bestSimilarity = score
                         bestMatchID = set()
