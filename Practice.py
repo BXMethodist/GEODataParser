@@ -1,31 +1,32 @@
 from difflib import SequenceMatcher
 import re
 
+def isInput(title, feature_key_word):
+    non_capital_keywords = ['input','wce']
 
-def Similarity(title1, keyword1, title2, keyword2):
-    score = SequenceMatcher(None, title1, title2).ratio()
+    if feature_key_word.find("H3K") != -1:
+        capital_keywords = ['IgG']
+    else:
+        capital_keywords = ['IgG', '_H3_', " H3"]
 
-    title1 = title1.lower().replace(keyword1.lower(), "").replace("chip-seq", "")
-    title2 = title2.lower().replace(keyword2.lower(), "").replace("chip-seq", "")
+    for c in non_capital_keywords:
+        if title.lower().find(c) != -1:
+            return True, c
 
-    title1 = re.sub(r'rep[0-9]*', '', title1)
-    title2 = re.sub(r'rep[0-9]*', '', title2)
-
-    print title1, title2
-
-    score_replace = SequenceMatcher(None, title1, title2).ratio()
-
-    print score_replace
-
-    return max(score, score_replace)
+    for n in capital_keywords:
+        if n ==' H3' and title.endswith(n):
+            return True, 'H3'
+        elif title.find(n) != -1:
+            if n == "_H3_":
+                return True, 'H3'
+            return True, n
+    return False, ""
 
 
-a = 'MCF10A_H3K4ME3_REP1'
-b = 'MCF10A_H3K4ME3_REP2'
-c = 'MCF10A_input_REP1'
-d = 'MCF10A_input_REP2'
+def has_antibody(sample, keyword):
+    for v in sample.antibody.values():
+        if v.find(keyword) != -1:
+            return True
+    return False
 
-print Similarity(a, 'H3K4me3', c, 'input')
-print Similarity(a, 'H3K4me3', d, 'input')
-
-print Similarity(a, 'H3K4me3', c, 'input') == Similarity(a, 'H3K4me3', d, 'input')
+print isInput('Exp015-2_H3K4me3_500c_Ad_BC01_300u', 'H3K4me3')

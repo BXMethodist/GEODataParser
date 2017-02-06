@@ -74,7 +74,7 @@ def SOFTQuickRelated(featured_samples, output_type, type_seq, GSEGSM_map, encode
     processes = []
     for i in range(process):
         cur_relatedGSMs = allrelatedGSMs[i * chunksize:(i + 1) * chunksize]
-        p = Process(target=related_sample_info, args=(cur_relatedGSMs, queue, output_type, type_seq, cwd))
+        p = Process(target=related_sample_info, args=(cur_relatedGSMs, queue, output_type, type_seq, cwd, featured_samples))
         processes.append(p)
         p.start()
 
@@ -91,7 +91,7 @@ def SOFTQuickRelated(featured_samples, output_type, type_seq, GSEGSM_map, encode
     return groupByGSE, encodeGSE, relatedSamples
 
 
-def related_sample_info(cur_relatedGSMs, queue, output_type, type_seq, cwd):
+def related_sample_info(cur_relatedGSMs, queue, output_type, type_seq, cwd, featured_samples):
     # print "Process id is ", os.getpid()
 
     relatedSamples = {}
@@ -190,7 +190,7 @@ def related_sample_info(cur_relatedGSMs, queue, output_type, type_seq, cwd):
                                "histone modification", "antibody antibodydescription", "chip antibody (epitope/name)",
                                "factor", "chip antibody/mbd affinity column", "chip/dip antibody", "antibody epiptope",
                                "antibody source", 'modification', "antibody (vendor': ' catalog#, or reference)",
-                               "experiment", "purification antibody", "antibody/details", "antibody epiptope",
+                                "purification antibody", "antibody/details", "antibody epiptope",
                                "antibody information", "chip antibody / digestive enzyme", "chip antiboy",
                                "ip antibody", "chip antibody target", "modification", "histone", "enrichment procedure",
                                "antibody (vendor': ' catalog#, or reference)", "developmental stage/condition/extract protocol",
@@ -222,7 +222,8 @@ def related_sample_info(cur_relatedGSMs, queue, output_type, type_seq, cwd):
             sample.title_ab = True
 
         if (sample.organism == output_type or output_type is None) and (sample.SRA != None or sample.SRA.strip() != "") and \
-                sample.InstrumentID.startswith('Illu') and (sample.libraryStrategy.lower() == type_seq or type_seq is None):
+                sample.InstrumentID.startswith('Illu') and (sample.libraryStrategy.lower() == type_seq or type_seq is None)\
+                and sample.id not in featured_samples:
             relatedSamples[sample.id] = sample
             for gse in sample.series:
                 groupByGSE[gse].add(sample.id)
@@ -362,7 +363,7 @@ def equal_antibody(sample, keyword):
 def isInput(sample, feature_key_word):
     non_capital_keywords = ['input','wce']
 
-    if feature_key_word.find("H3K") != -1:
+    if feature_key_word.find("H3K") == -1:
         capital_keywords = ['IgG']
     else:
         capital_keywords = ['IgG', '_H3_', " H3"]
@@ -427,6 +428,7 @@ def input_finder(output_surffix, output_path, HumanSamples, groupByGSE, encodeGS
             for relatedSample in groupByGSE[gse]:
                 score = None
                 boo, word = isInput(relatedSamples[relatedSample], feature_key_word)
+                # print relatedSamples[relatedSample].title, boo, word
                 if boo \
                         and sample.cellLine == relatedSamples[relatedSample].cellLine \
                         and sample.cellType == relatedSamples[relatedSample].cellType \
