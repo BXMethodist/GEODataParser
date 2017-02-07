@@ -23,6 +23,7 @@ def setup():
     os.system("wget -P "+cwd+"/pkl/ http://cigwiki.houstonmethodist.org/trackhub/boxia/GCF/pkl/GSMGSE_map.pkl")
     os.system("wget -P "+cwd+"/pkl/ http://cigwiki.houstonmethodist.org/trackhub/boxia/GCF/pkl/ENCODE_gse.pkl")
     os.system("wget -P "+cwd+"/pkl/ http://cigwiki.houstonmethodist.org/trackhub/boxia/GCF/pkl/Roadmap_gse.pkl")
+    os.system("wget -P "+cwd+"/pkl/ http://cigwiki.houstonmethodist.org/trackhub/boxia/GCF/pkl/GGR_gse.pkl")
     os.system("wget -P "+cwd+"/pkl/ http://cigwiki.houstonmethodist.org/trackhub/boxia/GCF/pkl/GSMSRR_map.pkl")
     os.system("wget -P "+cwd+"/pkl/ http://cigwiki.houstonmethodist.org/trackhub/boxia/GCF/pkl/geoMetaData.db")
 
@@ -30,6 +31,7 @@ def setup():
     settings.write("GSMGSE_pkl_path"+"\t"+cwd+"/pkl/GSMGSE_map.pkl"+"\n")
     settings.write("Encode" + "\t" +cwd+"/pkl/ENCODE_gse.pkl" + "\n")
     settings.write("Roadmap" + "\t" +cwd+"/pkl/Roadmap_gse.pkl" + "\n")
+    settings.write("GGR" + "\t" + cwd + "/pkl/GGR_gse.pkl" + "\n")
     settings.write("GSMtoSRRpkl" + "\t" +cwd+"/pkl/GSMSRR_map.pkl" + "\n")
     settings.write("email" + "\t" + "bxia@houstonmethodist.org" + "\n")
     settings.write("MetaData" + "\t" + cwd+"/pkl/geoMetaData.db")

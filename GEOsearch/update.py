@@ -16,7 +16,7 @@ def connectToGEO(user='anonymous', ftpAddress='ftp.ncbi.nlm.nih.gov'):
     return ftp
 
 
-def updateGSMGSE_Encode_Roadmap(GSMGSE_map, Encode_map, Roadmap_map, MetaData_path):
+def updateGSMGSE_Encode_Roadmap(GSMGSE_map, Encode_map, Roadmap_map, GGR_map, MetaData_path):
     # looking for new GSE, if not in local, update the pkl
     local_GSEs = set()
     local_GSMs = set()
@@ -50,12 +50,14 @@ def updateGSMGSE_Encode_Roadmap(GSMGSE_map, Encode_map, Roadmap_map, MetaData_pa
 
     for id in seriesID:
         if id not in local_GSEs:
-            newGSMs, encode, roadmap = GSE_info(id)
+            newGSMs, encode, roadmap, ggr = GSE_info(id)
 
             if encode:
                 Encode_map.add(id)
             if roadmap:
                 Roadmap_map.add(id)
+            if ggr:
+                GGR_map.add(id)
             GSMGSE_map[id] = newGSMs
             for gsm in newGSMs:
                 related_GSEs = GSM_info(gsm)
@@ -74,7 +76,7 @@ def updateGSMGSE_Encode_Roadmap(GSMGSE_map, Encode_map, Roadmap_map, MetaData_pa
                         db.execute("insert into GSM values(?, ?)", (gsm, metadata))
     db.commit()
     db.close()
-    return GSMGSE_map, Encode_map, Roadmap_map, GSM_need_update
+    return GSMGSE_map, Encode_map, Roadmap_map, GGR_map, GSM_need_update
 
 
 def updateGSMSRR(GSMSRR_map, GSMs):
@@ -99,6 +101,7 @@ def GSE_info(id):
     url = "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=" + id + "&targ=self&form=text&view=quick"
     encode = False
     roadmap = False
+    ggr = False
     gsms = set()
 
     web = urllib2.urlopen(url)
@@ -111,10 +114,12 @@ def GSE_info(id):
                 roadmap = True
             if line.find("ENCODE") != -1:
                 encode = True
+            if line.find("GGR") != -1:
+                ggr = True
         if line.startswith("!Series_sample_id"):
             gsm = line.split("=")[1].strip()
             gsms.add(gsm)
-    return gsms, encode, roadmap
+    return gsms, encode, roadmap, ggr
 
 
 def GSM_info(id):
@@ -152,19 +157,22 @@ def update():
     GSMSRR_map = load_obj(parameters['GSMtoSRRpkl'])
     Encode_map = load_obj(parameters['Encode'])
     Roadmap_map = load_obj(parameters['Roadmap'])
+    GGR_map = load_obj(parameters['GGR'])
 
     MetaData_path = parameters["MetaData"]
 
     if MetaData_path == "None":
         MetaData_path = None
 
-    GSMGSE_map, Encode_map, Roadmap_map, GSM_need_update = updateGSMGSE_Encode_Roadmap(GSMGSE_map, Encode_map, Roadmap_map, MetaData_path)
+    GSMGSE_map, Encode_map, Roadmap_map, GGR_map, GSM_need_update = \
+        updateGSMGSE_Encode_Roadmap(GSMGSE_map, Encode_map, Roadmap_map, GGR_map, MetaData_path)
 
     GSMSRR_map = updateGSMSRR(GSMSRR_map, GSM_need_update)
 
     save_obj(GSMGSE_map, parameters['GSMGSE_pkl_path'][:-4])
     save_obj(Encode_map, parameters['Encode'][:-4])
     save_obj(Roadmap_map, parameters['Roadmap'][:-4])
+    save_obj(GGR_map, parameters['GGR'][:-4])
     save_obj(GSMSRR_map, parameters['GSMtoSRRpkl'][:-4])
 
 
