@@ -112,7 +112,9 @@ def Related_Sample_Search(output_surfix1, output_surfix2, output_path, first_fea
                     related_feature_key_word = keyword(related_sample.title, first_features, first_features_begin, first_ignorecase)
 
                     if sample.cellType == related_sample.cellType:
-                        score = Similarity(sample.title, feature_key_word, related_sample.title, related_feature_key_word)
+                        boo = (first_ignorecase or second_ignorecase)
+                        score = Similarity(sample.title, feature_key_word, related_sample.title, related_feature_key_word,
+                                           boo)
 
                     if score > best_score:
                         best_score = score
