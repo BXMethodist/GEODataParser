@@ -515,7 +515,7 @@ def input_finder(output_surffix, output_path, HumanSamples, groupByGSE, encodeGS
         table.append(row)
 
     df = pd.DataFrame(table, columns=None)
-    df.to_csv(output1, sep=',', encoding='utf-8')
+    # df.to_csv(output1, sep=',', encoding='utf-8')
 
     table = []
 
@@ -525,7 +525,7 @@ def input_finder(output_surffix, output_path, HumanSamples, groupByGSE, encodeGS
             row += [id] + [relatedSamples[id].antibody]
         table.append(row)
     df = pd.DataFrame(table, columns=None)
-    df.to_csv(output3, sep=',', encoding='utf-8')
+    # df.to_csv(output3, sep=',', encoding='utf-8')
 
     return FirstSampleToInput, ThirdSampleToInput
 

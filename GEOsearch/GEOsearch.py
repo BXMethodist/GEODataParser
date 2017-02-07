@@ -4,6 +4,7 @@ from GSM import GSM, search_term_to_GSM
 from input_search_utils import SOFTQuickRelated, input_finder, has_features, get_MetaInfo, get_WebInfo
 from pickleUtils import load_obj
 from multiprocessing import Process, Queue
+from encode import encode_search
 
 
 def SOFTQuickParser(output_surfix, output_path, features, features_begin,
@@ -69,8 +70,9 @@ def SOFTQuickParser(output_surfix, output_path, features, features_begin,
         Human_Samples.update(cur_Human_Samples)
     for p in processes:
         p.join()
-
     # print "total ", output_type, " sample found", len(Human_Samples)
+
+    # looking for input
     if type_seq == 'chip-seq':
         groupByGSE, encodeGSE, relatedSamples = SOFTQuickRelated(Human_Samples, output_type, type_seq,
                                                                  GSEGSM_map, encode_remove, encodeGSE, cwd, process)
@@ -79,39 +81,64 @@ def SOFTQuickParser(output_surfix, output_path, features, features_begin,
                                                       features, features_begin, ignorecase, output_type)
     else:
         first_category, third_category = defaultdict(set), defaultdict(set)
+    #
 
-    #### output results to csv
+    # search data in encode database
+    samples_encode, human_encode = encode_search(output_surfix, features, keywords_begin=features_begin,
+                                                  type_seq=type_seq, ignorecase=ignorecase, output_type=output_type)
+    #
+
+    # output results to csv
     output_type = output_type.replace(" ", "_")
 
     if not output_path.endswith("/"):
-        output_path+="/"
-    outputHuman = output_path+"GEOsearch"+ output_type +"With" + output_surfix + ".csv"
-    outputSample = output_path+"GEOsearch"+"sampleWith" + output_surfix + ".csv"
-
+        output_path += "/"
+    outputHuman = output_path+"GEOsearch" + output_type + "With" + output_surfix + ".csv"
+    outputSample = output_path+"GEOsearch" + "sampleWith" + output_surfix + ".csv"
 
     table = []
-    headers = ['Sample_ID', "Series_ID", output_surfix + "_description", "Organism", "Title", "GPL_ID",
-                  "Instrument Model", "SRA_ID", "Library Strategy", "Tissue", "Cell Line", "Cell Type",
-                  "Disease", "Treatment", "Genotype", "Antibody", "Feature in Title", "Feature in Ab",
-                  "Feature in Title or Ab"]
+    headers = ['Sample_ID', "Experiment_ID", output_surfix.capitalize() + "_Description", "Title",
+               "Instrument_Model", "SRA_ID", "Type_Seq", "Organism", "Cell Line", "Cell Type",
+               "Experiment target/antibody", 'Confidence']
 
     for sample in samples.values():
-        row = [sample.id, sample.series, sample.features, sample.organism, sample.title, sample.platForm, sample.InstrumentID,
-             sample.SRA, sample.libraryStrategy, sample.tissue, sample.cellLine, sample.cellType,
-             sample.disease, sample.treatment, sample.genotype, sample.antibody, sample.title_found, sample.ab_found,
-             sample.title_ab]
+        if sample.title_ab:
+            confidence = 'Very Confident'
+        elif sample.title_found:
+            confidence = 'Confident'
+        elif sample.ab_found:
+            confidence = 'Not Very Confident'
+        else:
+            confidence = 'Not Sure'
+        row = [sample.id, sample.series, sample.features, sample.title,
+               sample.InstrumentID, sample.SRA, sample.libraryStrategy, sample.organism, sample.cellLine, sample.cellType,
+               sample.antibody, confidence]
         table.append(row)
 
     df = pd.DataFrame(table, columns=headers)
+    df = df.set_index(['Sample_ID'])
+    try:
+        df.append(samples_encode)
+    except:
+        pass
     df.to_csv(outputSample, sep=',', encoding='utf-8')
 
-
     table = []
-    headers = ['Sample_ID', "Series_ID", output_surfix + "_description", "Input_ID", "Input_Description", "Organism",
-               "Title", "GPL_ID", "Instrument Model", "SRA_ID", "Library Strategy", "Tissue", "Cell Line", "Cell Type",
-               "Disease", "Treatment", "Genotype", "Antibody", "Feature in Title", "Feature in Ab", "Feature in Title or Ab"]
+    headers = ['Sample_ID', "Experiment_ID", output_surfix.capitalize() + "_Description", "Title",
+               "Input", "Input_Description", "Instrument_Model", "SRA_ID", "Type_Seq",
+               "Organism", "Cell Line", "Cell Type",
+               "Experiment target/antibody", 'Confidence']
 
     for sample in Human_Samples.values():
+        if sample.title_ab:
+            confidence = 'Very Confident'
+        elif sample.title_found:
+            confidence = 'Confident'
+        elif sample.ab_found:
+            confidence = 'Not Very Confident'
+        else:
+            confidence = 'Not Sure'
+
         potential_input_id = ""
         potential_input_title = ""
         if len(first_category[sample.id]) != 0:
@@ -129,13 +156,18 @@ def SOFTQuickParser(output_surfix, output_path, features, features_begin,
             potential_input_id = potential_input_id[:-1]
             potential_input_title = potential_input_title[:-1]
 
-        row = [sample.id, sample.series, sample.features, potential_input_id, potential_input_title, sample.organism, sample.title,
-             sample.platForm, sample.InstrumentID, sample.SRA, sample.libraryStrategy, sample.tissue,
-             sample.cellLine, sample.cellType, sample.disease, sample.treatment, sample.genotype, sample.antibody,
-             sample.title_found, sample.ab_found, sample.title_ab]
+        row = [sample.id, sample.series, sample.features, sample.title,
+               potential_input_id, potential_input_title, sample.InstrumentID, sample.SRA, sample.libraryStrategy,
+               sample.organism, sample.cellLine, sample.cellType,
+               sample.antibody, confidence]
         table.append(row)
 
     df = pd.DataFrame(table, columns=headers)
+    df = df.set_index(['Sample_ID'])
+    try:
+        df.append(human_encode)
+    except:
+        pass
     df.to_csv(outputHuman, sep=',', encoding='utf-8')
 
     return Human_Samples
