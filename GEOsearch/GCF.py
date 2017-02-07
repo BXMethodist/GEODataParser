@@ -47,10 +47,6 @@ def GCF_search():
     parser.add_argument('-s','--species', dest='species', default='Homo sapiens', metavar='',
                         help="specify the samples' species. Default is Homo sapiens. Please use the species official name. For example, human is Homo sapiens."
                              "If the species name contains space, surround the name with double quotes, for example \"Homo sapiens\"")
-    parser.add_argument('-e', '--encode', dest='encode_remove', default=1, type=int, metavar='',
-                        help="specify whether need to remove Encode data. Default is 1. Set to 0 to keep Encode data in search.")
-    parser.add_argument('-r', '--roadmap', dest='roadmap_remove', default=1, type=int, metavar='',
-                        help="specify whether need to remove Roadmap data. Default is 1. Set to 0 to keep Roadmap data in search.")
     parser.add_argument('-m', '--metadata', dest='MetaData', default=None, metavar='',
                         help="specify the GSMs metadata files path")
     parser.add_argument('-p', '--process', dest='process', default=20, type=int, metavar='',
@@ -103,8 +99,8 @@ def GCF_search():
         geo_file = args.geo_file
 
         species = args.species
-        encode_remove = args.encode_remove
-        roadmap_remove = args.roadmap_remove
+        encode_remove = 1
+        roadmap_remove = 1
 
         cwd = args.MetaData
         process = args.process
@@ -181,10 +177,6 @@ def GCF_match():
     parser.add_argument('-s','--species', dest='species', default='Homo sapiens', metavar='',
                         help="specify the samples' species. Default is Homo sapiens. Please use the species official name. For example, human is Homo sapiens."
                              "If the species name contains space, surround the name with double quotes, for example \"Homo sapiens\"")
-    parser.add_argument('-e', '--encode', dest='encode_remove', default=1, type=int, metavar='',
-                        help="specify whether need to remove Encode data. Default is 1. Set to 0 to keep Encode data in search.")
-    parser.add_argument('-r', '--roadmap', dest='roadmap_remove', default=1, type=int, metavar='',
-                        help="specify whether need to remove Roadmap data. Default is 1. Set to 0 to keep Roadmap data in search.")
     parser.add_argument('-m', '--metadata', dest='MetaData', default=None, metavar='',
                         help="specify the GSMs metadata files path")
     parser.add_argument('-p', '--process', dest='process', default=20, type=int, metavar='',
@@ -256,8 +248,8 @@ def GCF_match():
 
         species = args.species
 
-        encode_remove = args.encode_remove
-        roadmap_remove = args.roadmap_remove
+        encode_remove = 1
+        roadmap_remove = 1
 
         cwd = args.MetaData
         process = args.process
