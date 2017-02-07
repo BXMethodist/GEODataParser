@@ -276,11 +276,11 @@ def feature_filter(geoGSMs, queue, features, features_begin, excludedGSM,
                 disease = value
 
             if key.lower() in ["background strain", "strain", "strain number", "mouse strain", "strain background",
-                               "cell line background", "genetic background", "genotype", "genotype/variation",
+                               "genetic background", "genotype", "genotype/variation",
                                "strain/background", "variation"]:
                 genoType[key] = value
 
-            if key.lower() in ["cell line", "cell", "cells pointed by barcodes",
+            if key.lower() in ["cell line", "cell", "cells pointed by barcodes", "cell line background",
                                "chicken line", "line"]:
                 cellLine += value
 

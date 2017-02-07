@@ -201,7 +201,7 @@ def related_sample_info(cur_relatedGSMs, queue, output_type, type_seq, cwd, feat
                 else:
                     antibody[key] = value
 
-            if key.lower() in ["cell line",  "cell", "cells pointed by barcodes",
+            if key.lower() in ["cell line",  "cell", "cells pointed by barcodes", "cell line background",
                            "chicken line", "line"]:
                 cellLine += value
 
