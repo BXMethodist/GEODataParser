@@ -74,6 +74,7 @@ def GCF_search():
         settings = get_settings()
         encode_pkl = settings['Encode']
         roadmap_pkl = settings['Roadmap']
+        GGRmap_pkl = settings['GGR']
         GSMGSE_pkl = settings['GSMGSE_pkl_path']
 
         keywords = args.feature_key_words.split(",")
@@ -113,9 +114,10 @@ def GCF_search():
             encode_remove = True
             roadmap_remove = True
 
-        SOFTQuickParser(output_prefix, output_path, keywords, keywords_begin, type_seq=type_seq, ignorecase=ignorcase,
-                        geo=geo, geofile=geo_file, output_type=species, encode_remove=encode_remove,
-                        roadmap_remove=roadmap_remove, encode_pkl=encode_pkl, roadmap_pkl=roadmap_pkl,
+        SOFTQuickParser(output_prefix, output_path, keywords, keywords_begin,
+                        type_seq=type_seq, ignorecase=ignorcase, geo=geo, geofile=geo_file, output_type=species,
+                        encode_remove=encode_remove, roadmap_remove=roadmap_remove,
+                        encode_pkl=encode_pkl, roadmap_pkl=roadmap_pkl, GGRmap_pkl=GGRmap_pkl,
                         GSMGSE_pkl=GSMGSE_pkl, cwd=cwd, process=process)
         return
 
@@ -206,6 +208,7 @@ def GCF_match():
         settings = get_settings()
         encode_pkl = settings['Encode']
         roadmap_pkl = settings['Roadmap']
+        GGRmap_pkl = settings['GGR']
         GSMGSE_pkl = settings['GSMGSE_pkl_path']
 
         keywords1 = args.first_feature_key_words.split(",")
@@ -262,15 +265,14 @@ def GCF_match():
             encode_remove = True
             roadmap_remove = True
 
-
-        Related_Sample_Search(output_prefix1, output_prefix2, output_path, keywords1, keywords_begin1, keywords2,
-                              keywords_begin2,
+        Related_Sample_Search(output_prefix1, output_prefix2, output_path,
+                              keywords1, keywords_begin1, keywords2, keywords_begin2,
                               first_type_seq=type_seq1, second_type_seq=type_seq2,
                               first_ignorecase=ignorcase1, second_ignorecase=ignorcase2,
                               first_geo=geo1, first_geofile=geo_file1, second_geo=geo2, second_geofile=geo_file2,
                               output_type=species, encode_remove=encode_remove, roadmap_remove=roadmap_remove,
-                              encode_pkl=encode_pkl, roadmap_pkl=roadmap_pkl, GSMGSE_pkl=GSMGSE_pkl, cwd=cwd,
-                              process=process)
+                              encode_pkl=encode_pkl, roadmap_pkl=roadmap_pkl, GGRmap_pkl=GGRmap_pkl,
+                              GSMGSE_pkl=GSMGSE_pkl, cwd=cwd, process=process)
         return
 
     return 1

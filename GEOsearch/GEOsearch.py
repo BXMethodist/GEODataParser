@@ -9,18 +9,20 @@ from encode import encode_search
 
 def SOFTQuickParser(output_surfix, output_path, features, features_begin,
                     type_seq="chip-seq", ignorecase=True, geo=False, geofile=None, output_type="Homo sapiens",
-                    encode_remove=True, roadmap_remove=True, encode_pkl=None, roadmap_pkl=None, GSMGSE_pkl=None,
-                    cwd=None, process=20):
+                    encode_remove=True, roadmap_remove=True, encode_pkl=None, roadmap_pkl=None, GGRmap_pkl=None,
+                    GSMGSE_pkl=None, cwd=None, process=20):
 
     encodeGSE = load_obj(encode_pkl)
 
     roadmapGSE = load_obj(roadmap_pkl)
 
+    GGRmapGSE = load_obj(GGRmap_pkl)
+
     excludedGSE = set()
     if encode_remove:
         excludedGSE = excludedGSE.union(encodeGSE)
-    if roadmap_remove:
         excludedGSE = excludedGSE.union(roadmapGSE)
+        excludedGSE = excludedGSE.union(GGRmapGSE)
 
     GSEGSM_map = load_obj(GSMGSE_pkl)
 
@@ -74,10 +76,10 @@ def SOFTQuickParser(output_surfix, output_path, features, features_begin,
 
     # looking for input
     if type_seq == 'chip-seq':
-        groupByGSE, encodeGSE, relatedSamples = SOFTQuickRelated(Human_Samples, output_type, type_seq,
-                                                                 GSEGSM_map, encode_remove, encodeGSE, cwd, process)
+        groupByGSE, excludedGSE, relatedSamples = SOFTQuickRelated(Human_Samples, output_type, type_seq,
+                                                                 GSEGSM_map, encode_remove, excludedGSE, cwd, process)
 
-        first_category, third_category = input_finder(output_surfix, output_path, Human_Samples, groupByGSE, encodeGSE, relatedSamples,
+        first_category, third_category = input_finder(output_surfix, output_path, Human_Samples, groupByGSE, excludedGSE, relatedSamples,
                                                       features, features_begin, ignorecase, output_type)
     else:
         first_category, third_category = defaultdict(set), defaultdict(set)
@@ -98,7 +100,7 @@ def SOFTQuickParser(output_surfix, output_path, features, features_begin,
 
     table = []
     headers = ['Sample_ID', "Experiment_ID", output_surfix.capitalize() + "_Description", "Title",
-               "Instrument_Model", "SRA_ID", "Type_Seq", "Organism", "Cell Line", "Cell Type",
+               "Instrument_Model", "Raw Data", "Type_Seq", "Organism", "Cell Line", "Cell Type",
                "Experiment target/antibody", 'Confidence']
 
     for sample in samples.values():
@@ -118,14 +120,14 @@ def SOFTQuickParser(output_surfix, output_path, features, features_begin,
     df = pd.DataFrame(table, columns=headers)
     df = df.set_index(['Sample_ID'])
     try:
-        df.append(samples_encode)
+        df = df.append(samples_encode)
     except:
         pass
     df.to_csv(outputSample, sep=',', encoding='utf-8')
 
     table = []
     headers = ['Sample_ID', "Experiment_ID", output_surfix.capitalize() + "_Description", "Title",
-               "Input", "Input_Description", "Instrument_Model", "SRA_ID", "Type_Seq",
+               "Input", "Input_Description", "Instrument_Model", "Raw Data", "Type_Seq",
                "Organism", "Cell Line", "Cell Type",
                "Experiment target/antibody", 'Confidence']
 
@@ -164,8 +166,9 @@ def SOFTQuickParser(output_surfix, output_path, features, features_begin,
 
     df = pd.DataFrame(table, columns=headers)
     df = df.set_index(['Sample_ID'])
+
     try:
-        df.append(human_encode)
+        df = df.append(human_encode)
     except:
         pass
     df.to_csv(outputHuman, sep=',', encoding='utf-8')
