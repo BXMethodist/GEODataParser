@@ -7,6 +7,29 @@ def load_obj(name):
         return pickle.load(f)
 
 
+def encode_metadata(id):
+    try:
+        url = 'https://www.encodeproject.org/metadata/type=Experiment&files.accession='+id+'/metadata.tsv'
+        df = pd.read_csv(url, index_col=0)
+        df = df[['File accession', 'Experiment accession', 'Read length', 'Run type', 'Paired with', 'File download URL']]
+        df = df.ix[id, :]
+        df.columns = ['Run_ID', 'Experiment_ID', 'Read length', 'Run type', 'Paired with', 'File download URL']
+        return df
+    except:
+        return None
+
+
+def geo_metadata(id):
+    try:
+        url = "http://trace.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?save=efetch&db=sra&rettype=runinfo&term=" + id
+        df = pd.read_csv(url, index_col=0)
+        df = df[['Run', 'avgLength', 'LibraryLayout', 'download_path']]
+        df.columns = ['Run_ID', "Read length", "Run type", 'File download URL']
+        return df
+    except:
+        return None
+
+
 def GEO_query(names, output_name, GSM_GSE_pkl, GSM_SRR_pkl):
     # names could be a list
 
@@ -27,21 +50,27 @@ def GEO_query(names, output_name, GSM_GSE_pkl, GSM_SRR_pkl):
     failed = []
 
     for id in query_ids:
-        try:
-            id = id.strip()
-            print id
-            df = pd.read_csv("http://trace.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?save=efetch&db=sra&rettype=runinfo&term=" + id,
-                             index_col=0)
-            if table is None:
-                table = df
-            else:
-                table = table.append(df)
-        except:
+        id = id.strip()
+        if id.startswith('ENC'):
+            df = encode_metadata(id)
+            if df is not None and len(df.index) > 0:
+                if table is None:
+                    table = df
+                else:
+                    table = table.append(df)
+        else:
+            df = geo_metadata(id)
+            if df is not None and len(df.index) > 0:
+                if table is None:
+                    table = df
+                else:
+                    table = table.append(df)
+        if df is None or len(df.index) == 0:
             print id, " might not have SRA related information"
             failed.append(id)
 
-    result_srr_gsm ={}
-    result_srr_gse={}
+    result_srr_gsm = {}
+    result_srr_gse = {}
 
     if table is not None:
         for srr in table.index.values:
