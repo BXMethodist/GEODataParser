@@ -10,10 +10,11 @@ def load_obj(name):
 def encode_metadata(id):
     try:
         url = 'https://www.encodeproject.org/metadata/type=Experiment&files.accession='+id+'/metadata.tsv'
-        df = pd.read_csv(url, index_col=0)
+        df = pd.read_csv(url, sep='\t')
         df = df[['File accession', 'Experiment accession', 'Read length', 'Run type', 'Paired with', 'File download URL']]
-        df = df.ix[id, :]
         df.columns = ['Run_ID', 'Experiment_ID', 'Read length', 'Run type', 'Paired with', 'File download URL']
+        df = df[df['Run_ID'] == id]
+        df = df.set_index(['Run_ID'])
         return df
     except:
         return None
@@ -22,9 +23,10 @@ def encode_metadata(id):
 def geo_metadata(id):
     try:
         url = "http://trace.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?save=efetch&db=sra&rettype=runinfo&term=" + id
-        df = pd.read_csv(url, index_col=0)
+        df = pd.read_csv(url)
         df = df[['Run', 'avgLength', 'LibraryLayout', 'download_path']]
         df.columns = ['Run_ID', "Read length", "Run type", 'File download URL']
+        df = df.set_index(['Run_ID'])
         return df
     except:
         return None
@@ -76,7 +78,7 @@ def GEO_query(names, output_name, GSM_GSE_pkl, GSM_SRR_pkl):
         for srr in table.index.values:
             if srr in GSM_SRR_map:
                 result_srr_gsm[srr] = GSM_SRR_map[srr]
-                result_srr_gse[srr] = GSM_GSE_map[result_srr_gsm[srr]]
+                result_srr_gse[srr] = ','.join(list(GSM_GSE_map[result_srr_gsm[srr]]))
             else:
                 print srr, " need to be updated"
 
@@ -90,7 +92,6 @@ def GEO_query(names, output_name, GSM_GSE_pkl, GSM_SRR_pkl):
     for id in failed:
         failed_file.write(id+"\n")
     failed_file.close()
-
 
 
 
