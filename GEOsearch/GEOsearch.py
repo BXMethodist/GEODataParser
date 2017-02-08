@@ -86,8 +86,10 @@ def SOFTQuickParser(output_surfix, output_path, features, features_begin,
     #
 
     # search data in encode database
-    samples_encode, human_encode = encode_search(output_surfix, features, keywords_begin=features_begin,
-                                                  type_seq=type_seq, ignorecase=ignorecase, output_type=output_type)
+    samples_encode, human_encode, human_encode_map = encode_search(output_surfix, features,
+                                                                   keywords_begin=features_begin,
+                                                                   type_seq=type_seq, ignorecase=ignorecase,
+                                                                   output_type=output_type)
     #
 
     # output results to csv
@@ -173,6 +175,7 @@ def SOFTQuickParser(output_surfix, output_path, features, features_begin,
         pass
     df.to_csv(outputHuman, sep=',', encoding='utf-8')
 
+    Human_Samples = Human_Samples.update(human_encode_map)
     return Human_Samples
 
 

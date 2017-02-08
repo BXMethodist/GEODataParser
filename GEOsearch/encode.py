@@ -1,4 +1,5 @@
 import pandas as pd
+from GSM import GSM
 
 def encode_search(output_prefix, keywords, keywords_begin=(), type_seq='chip-seq', ignorecase=True, output_type='Homo sapiens'):
     seq_types = ['RNA-PET', 'ATAC-seq', 'genotyping by high throughput sequencing assay', 'HiC', 'RNA-seq',
@@ -18,34 +19,64 @@ def encode_search(output_prefix, keywords, keywords_begin=(), type_seq='chip-seq
     else:
         url = 'https://www.encodeproject.org/metadata/type=Experiment&files.file_type=fastq/metadata.tsv'
 
+    human_encode_map = {}
+
     df = pd.read_csv(url, sep='\t')
-    df = df[['File accession', 'Experiment accession', 'Controlled by', 'Assay', 'Biosample term name',
-             'Biosample type', 'Biosample organism', 'File download URL', 'Platform', 'Experiment target', ]]
-
-    df.columns = ['Sample_ID', 'Experiment_ID', 'Input', 'Type_Seq', 'Cell Line', 'Cell Type', 'Organism',
-                  'Raw Data','Instrument_Model', 'Experiment target/antibody']
-
     case = False if ignorecase else True
 
     features = "|".join(keywords)
-    df = df[df['Experiment target/antibody'].str.contains(features, case=case, na=False)]
+    df = df[df['Experiment target'].str.contains(features, case=case, na=False)]
     if ignorecase:
         features_begin = "|".join(keywords_begin).lower()
-        df = df[df['Experiment target/antibody'].str.lower().str.startswith(features_begin, na=False)]
+        df = df[df['Experiment target'].str.lower().str.startswith(features_begin, na=False)]
     else:
         features_begin = "|".join(keywords_begin)
-        df = df[df['Experiment target/antibody'].str.startswith(features_begin, na=False)]
+        df = df[df['Experiment target'].str.startswith(features_begin, na=False)]
 
     df['Confidence'] = ['Very Confidence'] * len(df.index)
     df['Input_Description'] = ['indicated by encode'] * len(df.index)
     df[output_prefix.capitalize() + "_Description"] = df['Experiment target/antibody']
 
     samples_df = df.copy()
+    samples_df = samples_df[['File accession', 'Experiment accession', 'Assay', 'Biosample term name',
+                             'Biosample type', 'Biosample organism', 'File download URL', 'Platform',
+                             'Experiment target', output_prefix.capitalize() + "_Description",
+                             'Confidence']]
+    samples_df.columns = ['Sample_ID', 'Experiment_ID', 'Type_Seq', 'Cell Line', 'Cell Type', 'Organism',
+                          'Raw Data', 'Instrument_Model', 'Experiment target/antibody',
+                          output_prefix.capitalize() + "_Description", 'Confidence']
     samples_df = samples_df.set_index(['Sample_ID'])
 
-    df = df[df['Organism'].str.contains(output_type, case=case, na=False)]
-    df = df[df['Type_Seq'].str.contains(type_seq, case=case, na=False)]
+    df = df[df['Biosample organism'].str.contains(output_type, case=case, na=False)]
+    df = df[df['Assay'].str.contains(type_seq, case=case, na=False)]
 
+    for i in df.index:
+        sample = GSM(df.ix[i, 'File accession'])
+        sample.series = df.ix[i, 'Experiment accession']
+        sample.libraryStrategy = df.ix[i, 'Assay']
+        sample.cellLine = df.ix[i, 'Biosample term name']
+        sample.cellType = df.ix[i, 'Biosample type']
+        sample.organism = df.ix[i, 'Biosample organism']
+        char = {}
+        char['Biosample term name'] = df.ix[i, 'Biosample term name']
+        char['Biosample type'] = df.ix[i, 'Biosample type']
+        char['Biosample life stage'] = df.ix[i, 'Biosample life stage']
+        char['Biosample treatments'] = df.ix[i, 'Biosample treatments']
+        char['Biosample subcellular fraction term name'] = df.ix[i, 'Biosample subcellular fraction term name']
+        char['Biosample sex'] = df.ix[i, 'Biosample sex']
+        char['Biosample Age'] = df.ix[i, 'Biosample Age']
+        sample.characteristics = char
+        human_encode_map[sample.id] = sample
+
+    df = df[['File accession', 'Experiment accession', output_prefix.capitalize() + "_Description",
+             'Controlled by', 'Input_Description',
+             'Assay', 'Biosample term name', 'Biosample type', 'Biosample organism',
+             'File download URL', 'Platform', 'Experiment target', ]]
+
+    df.columns = ['Sample_ID', 'Experiment_ID', output_prefix.capitalize() + "_Description",
+                  'Input', 'Input_Description',
+                  'Type_Seq', 'Cell Line', 'Cell Type', 'Organism',
+                  'Raw Data', 'Instrument_Model', 'Experiment target/antibody']
     df = df.set_index(['Sample_ID'])
 
-    return samples_df, df
+    return samples_df, df, human_encode_map
