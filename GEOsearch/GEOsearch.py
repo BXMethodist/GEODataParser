@@ -35,10 +35,14 @@ def SOFTQuickParser(output_surfix, output_path, features, features_begin,
     # print len(map)
 
     geoGSMs = set()
+    encode_candidates = set()
     if geofile is not None:
         file_obj = open(geofile, "r")
         for line in file_obj.readlines():
-            geoGSMs.add(line.strip())
+            if line.startswith('ENC'):
+                encode_candidates.add(line.strip())
+            else:
+                geoGSMs.add(line.strip())
         file_obj.close()
     else:
         geoGSMs = search_term_to_GSM(features+features_begin)
@@ -88,7 +92,9 @@ def SOFTQuickParser(output_surfix, output_path, features, features_begin,
     # search data in encode database
     samples_encode, human_encode, human_encode_map = encode_search(output_surfix, features,
                                                                    keywords_begin=features_begin,
-                                                                   type_seq=type_seq, ignorecase=ignorecase,
+                                                                   type_seq=type_seq,
+                                                                   candidates=encode_candidates,
+                                                                   ignorecase=ignorecase,
                                                                    output_type=output_type)
     #
 

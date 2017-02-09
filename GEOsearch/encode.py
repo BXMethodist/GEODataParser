@@ -1,7 +1,9 @@
 import pandas as pd
 from GSM import GSM
 
-def encode_search(output_prefix, keywords, keywords_begin=(), type_seq='chip-seq', ignorecase=True, output_type='Homo sapiens'):
+def encode_search(output_prefix, keywords, keywords_begin=(), type_seq='chip-seq',
+                  candidates=(), ignorecase=True, output_type='Homo sapiens'):
+
     seq_types = ['RNA-PET', 'ATAC-seq', 'genotyping by high throughput sequencing assay', 'HiC', 'RNA-seq',
                  'genetic modification followed by DNase-seq', 'ChIP-seq', '5C', 'siRNA knockdown followed by RNA-seq',
                  'eCLIP', 'TAB-seq', 'CRISPR genome editing followed by RNA-seq', 'RRBS', 'RIP-seq',
@@ -35,10 +37,10 @@ def encode_search(output_prefix, keywords, keywords_begin=(), type_seq='chip-seq
 
     df['Confidence'] = ['Very Confidence'] * len(df.index)
     df['Input_Description'] = ['indicated by encode'] * len(df.index)
-    df[output_prefix.capitalize() + "_Description"] = df['Experiment target/antibody']
+    df[output_prefix.capitalize() + "_Description"] = df['Experiment target']
 
     samples_df = df.copy()
-    samples_df = samples_df[['File accession', 'Experiment accession', 'Assay', 'Biosample term name',
+    samples_df = samples_df[['File accession', 'Biosample term id', 'Assay', 'Biosample term name',
                              'Biosample type', 'Biosample organism', 'File download URL', 'Platform',
                              'Experiment target', output_prefix.capitalize() + "_Description",
                              'Confidence']]
@@ -50,9 +52,12 @@ def encode_search(output_prefix, keywords, keywords_begin=(), type_seq='chip-seq
     df = df[df['Biosample organism'].str.contains(output_type, case=case, na=False)]
     df = df[df['Assay'].str.contains(type_seq, case=case, na=False)]
 
+    if len(candidates) > 0:
+        df = df.ix[candidates, ]
+
     for i in df.index:
         sample = GSM(df.ix[i, 'File accession'])
-        sample.series = df.ix[i, 'Experiment accession']
+        sample.series = df.ix[i, 'Biosample term id']
         sample.libraryStrategy = df.ix[i, 'Assay']
         sample.cellLine = df.ix[i, 'Biosample term name']
         sample.cellType = df.ix[i, 'Biosample type']
@@ -68,7 +73,7 @@ def encode_search(output_prefix, keywords, keywords_begin=(), type_seq='chip-seq
         sample.characteristics = char
         human_encode_map[sample.id] = sample
 
-    df = df[['File accession', 'Experiment accession', output_prefix.capitalize() + "_Description",
+    df = df[['File accession', 'Biosample term id', output_prefix.capitalize() + "_Description",
              'Controlled by', 'Input_Description',
              'Assay', 'Biosample term name', 'Biosample type', 'Biosample organism',
              'File download URL', 'Platform', 'Experiment target', ]]
