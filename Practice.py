@@ -31,3 +31,6 @@ def has_antibody(sample, keyword):
 
 # print isInput('Exp015-2_H3K4me3_500c_Ad_BC01_300u', 'H3K4me3')
 print 'aaA1'.capitalize()
+
+
+print 'aaa'.find("")

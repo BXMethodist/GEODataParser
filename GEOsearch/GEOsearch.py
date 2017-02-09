@@ -367,6 +367,7 @@ def feature_filter(geoGSMs, queue, features, features_begin, excludedGSM,
         # elif sample.id not in excludedGSM:
         #     print sample.id, sample.title
 
+    # samples = {}
     queue.put((samples, Human_Samples))
     if db is not None:
         db.close()
