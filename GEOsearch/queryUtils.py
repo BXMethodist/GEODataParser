@@ -1,6 +1,6 @@
 import pandas as pd
 import pickle
-
+import numpy as np
 
 def load_obj(name):
     with open(name, 'rb') as f:
@@ -24,8 +24,9 @@ def geo_metadata(id):
     try:
         url = "http://trace.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?save=efetch&db=sra&rettype=runinfo&term=" + id
         df = pd.read_csv(url)
-        df = df[['Run', 'avgLength', 'LibraryLayout', 'download_path']]
-        df.columns = ['Run_ID', "Read length", "Run type", 'File download URL']
+
+        df = df[['Run', 'avgLength', 'LibraryLayout', 'download_path', 'SampleName']]
+        df.columns = ['Run_ID', "Read length", "Run type", 'File download URL', 'SampleName']
         df = df.set_index(['Run_ID'])
         return df
     except:

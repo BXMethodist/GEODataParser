@@ -23,7 +23,7 @@ def encode_search(output_prefix, keywords, keywords_begin=(), type_seq='chip-seq
 
     human_encode_map = {}
 
-    df = pd.read_csv(url, sep='\t')
+    df = pd.read_csv(url, sep='\t', dtype=str)
     case = False if ignorecase else True
 
     features = "|".join(keywords)

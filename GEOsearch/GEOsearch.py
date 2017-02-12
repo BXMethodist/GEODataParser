@@ -358,6 +358,8 @@ def feature_filter(geoGSMs, queue, features, features_begin, excludedGSM,
                         and sample.title.lower().find("wce") == -1 \
                         and sample.title.find("IgG") == -1:
                     Human_Samples[sample.id] = sample
+                elif type_seq.lower() != 'chip-seq':
+                    Human_Samples[sample.id] = sample
                 else:
                     print sample.title, "title has input or wce or IgG!"
                     continue
