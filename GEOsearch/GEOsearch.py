@@ -56,6 +56,10 @@ def SOFTQuickParser(output_surfix, output_path, features, features_begin,
     geoGSMs = list(geoGSMs)
 
     # print "total ", len(geoGSMs), " candidate found in search", features
+    ## test only
+    geoGSMs = []
+
+    ####
 
     queue = Queue()
     chucksize = len(geoGSMs)/(process-1) if process > 1 else len(geoGSMs)
@@ -181,7 +185,7 @@ def SOFTQuickParser(output_surfix, output_path, features, features_begin,
         pass
     df.to_csv(outputHuman, sep=',', encoding='utf-8')
 
-    Human_Samples = Human_Samples.update(human_encode_map)
+    Human_Samples.update(human_encode_map)
     return Human_Samples
 
 

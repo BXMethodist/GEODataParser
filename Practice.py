@@ -1,4 +1,13 @@
 from difflib import SequenceMatcher
 import re
 import numpy as np
-print type(np.isnan(np.nan))
+
+
+a = {}
+
+b = {1:2, 3:4}
+
+c = a.update(b)
+
+print a
+print c
