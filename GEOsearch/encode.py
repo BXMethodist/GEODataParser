@@ -62,6 +62,8 @@ def encode_search(output_prefix, keywords, keywords_begin=(), type_seq='chip-seq
         sample.cellLine = df.ix[i, 'Biosample term name'] if not pd.isnull(df.ix[i, 'Biosample term name']) else ""
         sample.cellType = df.ix[i, 'Biosample type'] if not pd.isnull(df.ix[i, 'Biosample type']) else ""
         sample.organism = df.ix[i, 'Biosample organism'] if not pd.isnull(df.ix[i, 'Biosample organism']) else ""
+        sample.antibody = df.ix[i, 'Experiment target']
+        sample.features = df.ix[i, 'Experiment target']
         char = {}
         char['Biosample term name'] = df.ix[i, 'Biosample term name'] \
             if not pd.isnull(df.ix[i, 'Biosample term name']) else ""
@@ -92,3 +94,5 @@ def encode_search(output_prefix, keywords, keywords_begin=(), type_seq='chip-seq
     df = df.set_index(['Sample_ID'])
 
     return samples_df, df, human_encode_map
+
+
