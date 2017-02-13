@@ -162,6 +162,11 @@ def SOFTQuickParser(output_surfix, output_path, features, features_begin,
         else:
             confidence = 'Not Sure'
 
+        features = str(sample.features)[1:-1].replace("u'", "")
+        features = features.replace("'", '')
+        antibody = str(sample.antibody)[1:-1].replace("u'", "")
+        antibody = antibody.replace("'", '')
+
         potential_input_id = ""
         potential_input_title = ""
         if len(first_category[sample.id]) != 0:
