@@ -43,30 +43,30 @@ class GSM:
     def __init__(self, GSM_id):
         self.id = GSM_id
         self.series = []
-        self.platForm = None
+        self.platForm = ""
         self.characteristics = {}
         self.supplementaryData = {}
         self.relations = {}
-        self.libraryStrategy = None
-        self.SRA = None
-        self.type = None
-        self.features = None
-        self.title = None
-        self.InstrumentID = None
-        self.organism = None
+        self.libraryStrategy = ""
+        self.SRA = ""
+        self.type = ""
+        self.features = ""
+        self.title = ""
+        self.InstrumentID = ""
+        self.organism = ""
         self.url = "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc="+GSM_id+"&targ=self&form=text&view=quick"
 
     # potential attributes
         self.antibody = {}
         self.treatment = {}
-        self.tissue = None
-        self.disease = None
-        self.cellLine = None
-        self.cellType = None
+        self.tissue = ""
+        self.disease = ""
+        self.cellLine = ""
+        self.cellType = ""
         self.genotype = {}
         self.title_found = False
         self.ab_found = False
         self.title_ab = False
-        self.input = None
-        self.encode = None
-        self.roadmap = None
+        self.input = ""
+        self.encode = ""
+        self.roadmap = ""
