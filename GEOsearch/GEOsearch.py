@@ -57,7 +57,7 @@ def SOFTQuickParser(output_surfix, output_path, features, features_begin,
 
     # print "total ", len(geoGSMs), " candidate found in search", features
     ## test only
-    geoGSMs = []
+    # geoGSMs = []
 
     ####
 

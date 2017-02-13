@@ -57,19 +57,26 @@ def encode_search(output_prefix, keywords, keywords_begin=(), type_seq='chip-seq
 
     for i in df.index:
         sample = GSM(df.ix[i, 'File accession'])
-        sample.series = df.ix[i, 'Biosample term id']
-        sample.libraryStrategy = df.ix[i, 'Assay']
-        sample.cellLine = df.ix[i, 'Biosample term name']
-        sample.cellType = df.ix[i, 'Biosample type']
-        sample.organism = df.ix[i, 'Biosample organism']
+        sample.series = df.ix[i, 'Biosample term id'] if not pd.isnull(df.ix[i, 'Biosample term id']) else ""
+        sample.libraryStrategy = df.ix[i, 'Assay'] if not pd.isnull(df.ix[i, 'Assay']) else ""
+        sample.cellLine = df.ix[i, 'Biosample term name'] if not pd.isnull(df.ix[i, 'Biosample term name']) else ""
+        sample.cellType = df.ix[i, 'Biosample type'] if not pd.isnull(df.ix[i, 'Biosample type']) else ""
+        sample.organism = df.ix[i, 'Biosample organism'] if not pd.isnull(df.ix[i, 'Biosample organism']) else ""
         char = {}
-        char['Biosample term name'] = df.ix[i, 'Biosample term name']
-        char['Biosample type'] = df.ix[i, 'Biosample type']
-        char['Biosample life stage'] = df.ix[i, 'Biosample life stage']
-        char['Biosample treatments'] = df.ix[i, 'Biosample treatments']
-        char['Biosample subcellular fraction term name'] = df.ix[i, 'Biosample subcellular fraction term name']
-        char['Biosample sex'] = df.ix[i, 'Biosample sex']
-        char['Biosample Age'] = df.ix[i, 'Biosample Age']
+        char['Biosample term name'] = df.ix[i, 'Biosample term name'] \
+            if not pd.isnull(df.ix[i, 'Biosample term name']) else ""
+        char['Biosample type'] = df.ix[i, 'Biosample type'] \
+            if not pd.isnull(df.ix[i, 'Biosample type']) else ""
+        char['Biosample life stage'] = df.ix[i, 'Biosample life stage'] \
+            if not pd.isnull(df.ix[i, 'Biosample life stage']) else ""
+        char['Biosample treatments'] = df.ix[i, 'Biosample treatments'] \
+            if not pd.isnull(df.ix[i, 'Biosample treatments']) else ""
+        char['Biosample subcellular fraction term name'] = df.ix[i, 'Biosample subcellular fraction term name'] \
+            if not pd.isnull(df.ix[i, 'Biosample subcellular fraction term name']) else ""
+        char['Biosample sex'] = df.ix[i, 'Biosample sex'] \
+            if not pd.isnull(df.ix[i, 'Biosample sex']) else ""
+        char['Biosample Age'] = df.ix[i, 'Biosample Age'] \
+            if not pd.isnull(df.ix[i, 'Biosample Age']) else ""
         sample.characteristics = char
         human_encode_map[sample.id] = sample
 
