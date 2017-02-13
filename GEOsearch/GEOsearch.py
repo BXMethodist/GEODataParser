@@ -124,7 +124,7 @@ def SOFTQuickParser(output_surfix, output_path, features, features_begin,
             confidence = 'Not Very Confident'
         else:
             confidence = 'Not Sure'
-        row = [sample.id, ",".join(list(sample.series)), sample.features, sample.title,
+        row = [sample.id, ",".join(list(sample.series)), str(sample.features)[1:-1], sample.title,
                sample.InstrumentID, sample.SRA, sample.libraryStrategy, sample.organism, sample.cellLine, sample.cellType,
                str(sample.antibody)[1:-1], confidence]
         table.append(row)
@@ -170,7 +170,7 @@ def SOFTQuickParser(output_surfix, output_path, features, features_begin,
             potential_input_id = potential_input_id[:-1]
             potential_input_title = potential_input_title[:-1]
 
-        row = [sample.id, ",".join(list(sample.series)), sample.features, sample.title,
+        row = [sample.id, ",".join(list(sample.series)), str(sample.features)[1:-1], sample.title,
                potential_input_id, potential_input_title, sample.InstrumentID, sample.SRA, sample.libraryStrategy,
                sample.organism, sample.cellLine, sample.cellType,
                str(sample.antibody)[1:-1], confidence]
