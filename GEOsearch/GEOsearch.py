@@ -5,6 +5,7 @@ from input_search_utils import SOFTQuickRelated, input_finder, has_features, get
 from pickleUtils import load_obj
 from multiprocessing import Process, Queue
 from encode import encode_search
+import re
 
 
 def SOFTQuickParser(output_surfix, output_path, features, features_begin,
@@ -124,9 +125,17 @@ def SOFTQuickParser(output_surfix, output_path, features, features_begin,
             confidence = 'Not Very Confident'
         else:
             confidence = 'Not Sure'
-        row = [sample.id, ",".join(list(sample.series)), str(sample.features)[1:-1], sample.title,
+
+        features = str(sample.features)[1:-1].replace("u'", "")
+        features = features.replace("'", '')
+        antibody = str(sample.antibody)[1:-1].replace("u'", "")
+        antibody = antibody.replace("'", '')
+
+        row = [sample.id, ",".join(list(sample.series)),
+               features,
+               sample.title,
                sample.InstrumentID, sample.SRA, sample.libraryStrategy, sample.organism, sample.cellLine, sample.cellType,
-               str(sample.antibody)[1:-1], confidence]
+               antibody, confidence]
         table.append(row)
 
     df = pd.DataFrame(table, columns=headers)
@@ -170,10 +179,12 @@ def SOFTQuickParser(output_surfix, output_path, features, features_begin,
             potential_input_id = potential_input_id[:-1]
             potential_input_title = potential_input_title[:-1]
 
-        row = [sample.id, ",".join(list(sample.series)), str(sample.features)[1:-1], sample.title,
+        row = [sample.id, ",".join(list(sample.series)),
+               features,
+               sample.title,
                potential_input_id, potential_input_title, sample.InstrumentID, sample.SRA, sample.libraryStrategy,
                sample.organism, sample.cellLine, sample.cellType,
-               str(sample.antibody)[1:-1], confidence]
+               antibody, confidence]
         table.append(row)
 
     df = pd.DataFrame(table, columns=headers)

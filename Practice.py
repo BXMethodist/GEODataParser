@@ -5,9 +5,10 @@ import numpy as np
 
 a = {}
 
-b = {1:2, 3:4}
+b = {u'1':'2', u'23':'4'}
 
-c = a.update(b)
+b = str(b)[1:-1]
 
-print a
-print c
+b = b.replace("u'", "")
+
+print b
