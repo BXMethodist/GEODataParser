@@ -35,7 +35,7 @@ def encode_search(output_prefix, keywords, keywords_begin=(), type_seq='chip-seq
         features_begin = "|".join(keywords_begin)
         df = df[df['Experiment target'].str.startswith(features_begin, na=False)]
 
-    df['Confidence'] = ['Very Confidence'] * len(df.index)
+    df['Confidence'] = ['Very Confident'] * len(df.index)
     df['Input_Description'] = ['indicated by encode'] * len(df.index)
     df[output_prefix.capitalize() + "_Description"] = df['Experiment target']
 
