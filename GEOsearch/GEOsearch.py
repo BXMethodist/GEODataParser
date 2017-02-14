@@ -153,7 +153,7 @@ def SOFTQuickParser(output_surfix, output_path, features, features_begin,
                "Experiment target/antibody", 'Confidence']
 
     for sample in Human_Samples.values():
-        if sample.title_ab:
+        if sample.title_found and sample.ab_found:
             confidence = 'Very Confident'
         elif sample.title_found:
             confidence = 'Confident'
