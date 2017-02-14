@@ -290,6 +290,8 @@ def feature_filter(geoGSMs, queue, features, features_begin, excludedGSM,
                 sampleSeriesID.add(line[line.find("=") + 1:].strip())
             if line.startswith("!Sample_instrument_model"):
                 sampleInstrumentID = line[line.find("=") + 1:].strip()
+            if line.startswith("!Sample_contact_institute = ENCODE DCC"):
+                sample.encode = True
 
         sample.characteristics = characteristics
         sample.supplementaryData = supplementaryData
@@ -372,7 +374,7 @@ def feature_filter(geoGSMs, queue, features, features_begin, excludedGSM,
                 sample.SRA != None and sample.SRA.strip() != "") and \
                 sample.InstrumentID.startswith('Illu') and (
                 sample.libraryStrategy.lower() == type_seq or type_seq is None) \
-                and sample.id not in excludedGSM:
+                and sample.id not in excludedGSM and not sample.encode:
             if sample.title_ab:
                 if sample.title.lower().find("input") == -1 \
                         and sample.title.lower().find("wce") == -1 \
