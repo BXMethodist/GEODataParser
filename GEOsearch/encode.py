@@ -54,6 +54,8 @@ def encode_search(output_prefix, keywords, keywords_begin=(), type_seq='chip-seq
 
     if len(candidates) > 0:
         df = df.ix[candidates, ]
+    elif candidates is None:
+        return None, None, None
 
     for i in df.index:
         sample = GSM(df.ix[i, 'File accession'])

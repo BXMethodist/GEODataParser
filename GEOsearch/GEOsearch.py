@@ -95,13 +95,27 @@ def SOFTQuickParser(output_surfix, output_path, features, features_begin,
     #
 
     # search data in encode database
-    samples_encode, human_encode, human_encode_map = encode_search(output_surfix, features,
-                                                                   keywords_begin=features_begin,
-                                                                   type_seq=type_seq,
-                                                                   candidates=encode_candidates,
-                                                                   ignorecase=ignorecase,
-                                                                   output_type=output_type)
-    #
+    if geofile is not None and len(encode_candidates) != 0:
+        samples_encode, human_encode, human_encode_map = encode_search(output_surfix, features,
+                                                                       keywords_begin=features_begin,
+                                                                       type_seq=type_seq,
+                                                                       candidates=encode_candidates,
+                                                                       ignorecase=ignorecase,
+                                                                       output_type=output_type)
+    elif geofile is not None and len(encode_candidates) == 0:
+        samples_encode, human_encode, human_encode_map = encode_search(output_surfix, features,
+                                                                       keywords_begin=features_begin,
+                                                                       type_seq=type_seq,
+                                                                       candidates=None,
+                                                                       ignorecase=ignorecase,
+                                                                       output_type=output_type)
+    elif geofile is None:
+        samples_encode, human_encode, human_encode_map = encode_search(output_surfix, features,
+                                                                       keywords_begin=features_begin,
+                                                                       type_seq=type_seq,
+                                                                       candidates=encode_candidates,
+                                                                       ignorecase=ignorecase,
+                                                                       output_type=output_type)
 
     # output results to csv
     output_type = output_type.replace(" ", "_")
@@ -140,10 +154,8 @@ def SOFTQuickParser(output_surfix, output_path, features, features_begin,
 
     df = pd.DataFrame(table, columns=headers)
     df = df.set_index(['Sample_ID'])
-    try:
+    if samples_encode is not None:
         df = df.append(samples_encode)
-    except:
-        pass
     df.to_csv(outputSample, sep=',', encoding='utf-8')
 
     table = []
@@ -195,13 +207,11 @@ def SOFTQuickParser(output_surfix, output_path, features, features_begin,
     df = pd.DataFrame(table, columns=headers)
     df = df.set_index(['Sample_ID'])
 
-    try:
+    if human_encode is not None:
         df = df.append(human_encode)
-    except:
-        pass
     df.to_csv(outputHuman, sep=',', encoding='utf-8')
-
-    Human_Samples.update(human_encode_map)
+    if human_encode_map is not None:
+        Human_Samples.update(human_encode_map)
     return Human_Samples
 
 
