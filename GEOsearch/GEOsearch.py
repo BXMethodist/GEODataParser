@@ -122,8 +122,8 @@ def SOFTQuickParser(output_surfix, output_path, features, features_begin,
 
     if not output_path.endswith("/"):
         output_path += "/"
-    outputHuman = output_path+"GEOsearch" + output_type + "With" + output_surfix + ".csv"
-    outputSample = output_path+"GEOsearch" + "sampleWith" + output_surfix + ".csv"
+    outputHuman = output_path+"Search_Result" + output_type + "With" + output_surfix + ".csv"
+    outputSample = output_path+"Search_Result" + "sampleWith" + output_surfix + ".csv"
 
     table = []
     headers = ['Sample_ID', "Experiment_ID", output_surfix.capitalize() + "_Description", "Title",
