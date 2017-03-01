@@ -3,5 +3,8 @@ import re
 import numpy as np
 
 
-if "yes":
-    print 'lalala'
+for i in range(10):
+    if i == 1:
+        continue
+    print i
+

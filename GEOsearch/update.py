@@ -50,7 +50,10 @@ def updateGSMGSE_Encode_Roadmap(GSMGSE_map, Encode_map, Roadmap_map, GGR_map, Me
 
     for id in seriesID:
         if id not in local_GSEs:
-            newGSMs, encode, roadmap, ggr = GSE_info(id)
+            result = GSE_info(id)
+            if result is None:
+                continue
+            newGSMs, encode, roadmap, ggr = result
 
             if encode:
                 Encode_map.add(id)
@@ -58,7 +61,8 @@ def updateGSMGSE_Encode_Roadmap(GSMGSE_map, Encode_map, Roadmap_map, GGR_map, Me
                 Roadmap_map.add(id)
             if ggr:
                 GGR_map.add(id)
-            GSMGSE_map[id] = newGSMs
+
+            newGSMs_info = []
             for gsm in newGSMs:
                 related_GSEs = GSM_info(gsm)
                 GSMGSE_map[gsm] = related_GSEs
@@ -73,8 +77,16 @@ def updateGSMGSE_Encode_Roadmap(GSMGSE_map, Encode_map, Roadmap_map, GGR_map, Me
                             for i in info:
                                 new_info.append(unicode(i, errors='ignore'))
                             metadata = json.dumps(new_info)
-                        db.execute("insert into GSM values(?, ?)", (gsm, metadata))
-                        print "update ", gsm
+                        newGSMs_info.append((gsm, metadata))
+
+            if len(newGSMs_info) != len(newGSMs):
+                print id, ", try to update, but failed to get all gsms"
+            else:
+                GSMGSE_map[id] = newGSMs
+                for data in newGSMs_info:
+                    gsm, metadata = data
+                    db.execute("insert into GSM values(?, ?)", (gsm, metadata))
+                    print "update ", gsm
     db.commit()
     db.close()
     return GSMGSE_map, Encode_map, Roadmap_map, GGR_map, GSM_need_update
@@ -99,28 +111,31 @@ def updateGSMSRR(GSMSRR_map, GSMs):
 
 
 def GSE_info(id):
-    url = "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=" + id + "&targ=self&form=text&view=quick"
-    encode = False
-    roadmap = False
-    ggr = False
-    gsms = set()
+    try:
+        url = "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=" + id + "&targ=self&form=text&view=quick"
+        encode = False
+        roadmap = False
+        ggr = False
+        gsms = set()
 
-    web = urllib2.urlopen(url)
-    info = web.readlines()
-    web.close()
+        web = urllib2.urlopen(url)
+        info = web.readlines()
+        web.close()
 
-    for line in info:
-        if line.startswith("!Series_project"):
-            if line.find("Roadmap Epigenomics") != -1:
-                roadmap = True
-            if line.find("ENCODE") != -1:
-                encode = True
-            if line.find("GGR") != -1:
-                ggr = True
-        if line.startswith("!Series_sample_id"):
-            gsm = line.split("=")[1].strip()
-            gsms.add(gsm)
-    return gsms, encode, roadmap, ggr
+        for line in info:
+            if line.startswith("!Series_project"):
+                if line.find("Roadmap Epigenomics") != -1:
+                    roadmap = True
+                if line.find("ENCODE") != -1:
+                    encode = True
+                if line.find("GGR") != -1:
+                    ggr = True
+            if line.startswith("!Series_sample_id"):
+                gsm = line.split("=")[1].strip()
+                gsms.add(gsm)
+        return gsms, encode, roadmap, ggr
+    except:
+        return None
 
 
 def GSM_info(id):
@@ -135,6 +150,7 @@ def GSM_info(id):
         if line.startswith("!Sample_series_id"):
             gses.add(line[line.find("=")+1:].strip())
     return gses
+
 
 def downloadGSM(gsmID):
     ## download GSM meta data from NCBI
