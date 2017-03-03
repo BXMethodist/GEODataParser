@@ -55,34 +55,37 @@ def updateGSMGSE_Encode_Roadmap(GSMGSE_map, Encode_map, Roadmap_map, GGR_map, Me
                 continue
             newGSMs, encode, roadmap, ggr = result
 
-            if encode:
-                Encode_map.add(id)
-            if roadmap:
-                Roadmap_map.add(id)
-            if ggr:
-                GGR_map.add(id)
-
             newGSMs_info = []
+            curGSMGSE_map = {}
             for gsm in newGSMs:
                 related_GSEs = GSM_info(gsm)
-                GSMGSE_map[gsm] = related_GSEs
-                GSM_need_update.add(gsm)
-                if db is not None:
-                    info = downloadGSM(gsm)
-                    if info is not None:
-                        try:
-                            metadata = json.dumps(info)
-                        except:
-                            new_info = []
-                            for i in info:
-                                new_info.append(unicode(i, errors='ignore'))
-                            metadata = json.dumps(new_info)
-                        newGSMs_info.append((gsm, metadata))
+                if related_GSEs is not None:
+                    curGSMGSE_map[gsm] = related_GSEs
+                    if db is not None:
+                        info = downloadGSM(gsm)
+                        if info is not None:
+                            try:
+                                metadata = json.dumps(info)
+                            except:
+                                new_info = []
+                                for i in info:
+                                    new_info.append(unicode(i, errors='ignore'))
+                                metadata = json.dumps(new_info)
+                            newGSMs_info.append((gsm, metadata))
 
             if len(newGSMs_info) != len(newGSMs):
                 print id, ", try to update, but failed to get all gsms"
             else:
                 GSMGSE_map[id] = newGSMs
+                if encode:
+                    Encode_map.add(id)
+                if roadmap:
+                    Roadmap_map.add(id)
+                if ggr:
+                    GGR_map.add(id)
+                for gsm in newGSMs:
+                    GSM_need_update.add(gsm)
+                    GSMGSE_map[gsm] = curGSMGSE_map[gsm]
                 for data in newGSMs_info:
                     gsm, metadata = data
                     db.execute("insert into GSM values(?, ?)", (gsm, metadata))
@@ -135,38 +138,47 @@ def GSE_info(id):
                 gsms.add(gsm)
         return gsms, encode, roadmap, ggr
     except:
+        print 'failed to get metadata for GSE', ' ', id
         return None
 
 
 def GSM_info(id):
-    url = "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=" + id + "&targ=self&form=text&view=quick"
+    try:
+        url = "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=" + id + "&targ=self&form=text&view=quick"
 
-    web = urllib2.urlopen(url)
-    info = web.readlines()
-    web.close()
+        web = urllib2.urlopen(url)
+        info = web.readlines()
+        web.close()
 
-    gses = set()
-    for line in info:
-        if line.startswith("!Sample_series_id"):
-            gses.add(line[line.find("=")+1:].strip())
-    return gses
+        gses = set()
+        for line in info:
+            if line.startswith("!Sample_series_id"):
+                gses.add(line[line.find("=")+1:].strip())
+        return gses
+    except:
+        print 'failed to get GSE id for ', id
+        return None
 
 
 def downloadGSM(gsmID):
     ## download GSM meta data from NCBI
-    url = "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=" + gsmID + "&targ=self&form=text&view=quick"
-    response = requests.get(url)
-    content_type = response.headers['content-type']
-    extension = mimetypes.guess_extension(content_type)
-    if content_type == "geo/text" and extension != ".html":
-        web = urllib2.urlopen(url)
-        info = web.readlines()
-        web.close()
-        del web
-        gc.collect()
-    else:
-        info = None
-    return info
+    try:
+        url = "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=" + gsmID + "&targ=self&form=text&view=quick"
+        response = requests.get(url)
+        content_type = response.headers['content-type']
+        extension = mimetypes.guess_extension(content_type)
+        if content_type == "geo/text" and extension != ".html":
+            web = urllib2.urlopen(url)
+            info = web.readlines()
+            web.close()
+            del web
+            gc.collect()
+        else:
+            info = None
+        return info
+    except:
+        print 'failed to download metadata of ', gsmID
+        return None
 
 def update():
     parameters = get_settings()
