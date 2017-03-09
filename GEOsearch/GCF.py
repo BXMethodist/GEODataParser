@@ -85,9 +85,9 @@ def GCF_search():
 
         output_path = args.output_path
         if output_path is None:
-            output_path = './GEOsearch_output/'
+            output_path = './search_output/'
             if not os.path.isdir(output_path):
-                os.system("mkdir GEOsearch_output")
+                os.system("mkdir search_output")
 
         if args.keywords_begin == '':
             keywords_begin = []
@@ -224,9 +224,9 @@ def GCF_match():
 
         output_path = args.output_path
         if output_path is None:
-            output_path = './GEOsearch_output/'
+            output_path = './search_output/'
             if not os.path.isdir(output_path):
-                os.system("mkdir GEOsearch_output")
+                os.system("mkdir search_output")
 
         if args.keywords_begin1 == '':
             keywords_begin1 = []
