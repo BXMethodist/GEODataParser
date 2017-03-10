@@ -4,7 +4,7 @@ from collections import defaultdict
 
 import pandas as pd
 
-from GEOsearch.GSM import GSM
+from GEOsearch.sample import GSM
 
 
 def sheetToObjects(path):

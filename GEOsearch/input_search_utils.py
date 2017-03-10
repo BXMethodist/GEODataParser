@@ -4,7 +4,7 @@ from collections import defaultdict
 from difflib import SequenceMatcher
 from update import GSE_info
 from multiprocessing import Queue, Process
-from GSM import GSM
+from sample import GSM
 
 
 def get_WebInfo(url, count):

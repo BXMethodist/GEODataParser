@@ -1,4 +1,4 @@
-from GEOsearch import SOFTQuickParser
+from search import SOFTQuickParser
 from collections import defaultdict
 from input_search_utils import keyword, Similarity, Character_Similarity
 import pandas as pd

@@ -1,18 +1,18 @@
 import argparse, sys, os
 from queryUtils import GEO_query
-from GEOsearch import SOFTQuickParser
+from search import SOFTQuickParser
 from Related_Sample_Search import Related_Sample_Search
 from setup import get_settings, setup
 from update import update
 
 
 def Help():
-    print "\nGEO Chip Finder"
-    print "A list of functions for GEO Chip Seq Sample Finder, please try:\npython GCF.py -h"
+    print "\nChiP-Seq Match"
+    print "A list of functions for ChiP-Seq Match, please try:\npython GCF.py -h"
     print "\nFuctions:"
-    print "\tsearch:\n\tsearch chip-seq samples and corresponding input from GEO based on the key words."
-    print "\tmatch:\n\tmatch different types of samples from GEO based, for example, looking for the corresponding H3K27me3 samples for each H3K4me3 samples."
-    print "\tquery:\n\tget SRR sequencing information by several common identifiers from GEO such as GSE, GSM, SRR, SRX, SRP, etc"
+    print "\tsearch:\n\tsearch chip-seq samples and corresponding input based on the key words."
+    print "\tmatch:\n\tmatch different types of samples, for example, looking for the corresponding H3K27me3 samples for each H3K4me3 samples."
+    print "\tquery:\n\tget NGS sequencing information by several common identifiers such as ENC, GSE, GSM, SRR, SRX, SRP, etc"
 
 
 def GCF_search():
@@ -59,7 +59,7 @@ def GCF_search():
     args = None
 
     if '-h' in sys.argv or '--help' in sys.argv:  # print help information once required by user
-        print "\GEO chip seq finder\n"
+        print "\ChiP-Seq Match\n"
         parser.print_help()
         print "\n"
         return 0
@@ -193,7 +193,7 @@ def GCF_match():
     args = None
 
     if '-h' in sys.argv or '--help' in sys.argv:  # print help information once required by user
-        print "\GEO chip seq finder\n"
+        print "\ChiP-Seq Match\n"
         parser.print_help()
         print "\n"
         return 0
@@ -292,7 +292,7 @@ def GCF_query():
                                      description='',epilog="Chen lab, Houston Methodist")
     parser.add_argument('command', default=None, help="set as 'query' to looking for samples' NGS sequencing information")
 
-    parser.add_argument('GEO_IDs', default=None,
+    parser.add_argument('IDs', default=None,
                         help="list of IDs need to used to looking for the NGS sequencing information, "
                              "it could be a list of IDs separated by ',', or a file containing a list of IDs,"
                              " accepted IDs: GSM, GSE, SRR, SRP, SRX, SAMN, SRP, ",
@@ -304,7 +304,7 @@ def GCF_query():
     args = None
 
     if '-h' in sys.argv or '--help' in sys.argv:  # print help information once required by user
-        print "\GEO chip seq finder\n"
+        print "\ChiP-Seq Match\n"
         parser.print_help()
         print "\n"
         return 0
@@ -319,9 +319,9 @@ def GCF_query():
         output_path = args.output_path
 
         if output_path is None:
-            output_path = os.getcwd()+"/GEO_query.txt"
+            output_path = os.getcwd()+"/query.txt"
 
-        GEO_ids = args.GEO_IDs
+        GEO_ids = args.IDs
         if os.path.exists(GEO_ids) and os.path.isfile(GEO_ids):
             list_names_obj = open(GEO_ids, "r")
             list_names = []
@@ -360,10 +360,10 @@ if len(sys.argv) > 1:
     else:
         Help()
 else:
-    print "\nGEO Chip Finder"
-    print "A list of functions for GEO Chip Seq Sample Finder, please try:\npython GCF.py -h"
+    print "\nChiP-Seq Match"
+    print "A list of functions for ChiP-Seq Sample Match, please try:\npython GCF.py -h"
     print "\nFuctions:"
-    print "\tsearch:\n\tsearch chip-seq samples and corresponding input from GEO based on the key words."
-    print "\tmatch:\n\tmatch different types of samples from GEO based, for example, looking for the corresponding H3K27me3 samples for each H3K4me3 samples."
-    print "\tquery:\n\tget SRR sequencing information by several common identifiers from GEO such as GSE, GSM, SRR, SRX, SRP, etc"
+    print "\tsearch:\n\tsearch chip-seq samples and corresponding input based on the key words."
+    print "\tmatch:\n\tmatch different types of samples, for example, looking for the corresponding H3K27me3 samples for each H3K4me3 samples."
+    print "\tquery:\n\tget NGS sequencing information by several common identifiers such as ENC, GSE, GSM, SRR, SRX, SRP, etc"
     print ""

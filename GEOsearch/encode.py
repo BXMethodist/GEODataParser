@@ -1,5 +1,5 @@
 import pandas as pd
-from GSM import GSM
+from sample import GSM
 
 def encode_search(output_prefix, keywords, keywords_begin=(), type_seq='chip-seq',
                   candidates=(), ignorecase=True, output_type='Homo sapiens'):

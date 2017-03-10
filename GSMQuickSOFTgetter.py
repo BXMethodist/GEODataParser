@@ -3,7 +3,7 @@ import os
 import re
 from collections import defaultdict
 
-from GEOsearch.GSM import GSM
+from GEOsearch.sample import GSM
 
 
 def SOFTQuickParser(GSMs, requestedFeature=None, cwd="/home/tmhbxx3/scratch/XMLhttp/QuickXMLs"):
