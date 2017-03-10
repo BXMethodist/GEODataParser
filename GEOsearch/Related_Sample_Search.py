@@ -216,7 +216,7 @@ def Related_Sample_Search(output_surfix1, output_surfix2, output_path,
             print key
 
     df = pd.DataFrame(table, columns=headers)
-    df.to_csv(output, sep=',', encoding='utf-8')
+    df.to_csv(output, sep=',', encoding='utf-8', index=False)
 
     return pairs
 

@@ -156,7 +156,7 @@ def SOFTQuickParser(output_surfix, output_path, features, features_begin,
     df = df.set_index(['Sample_ID'])
     if samples_encode is not None:
         df = df.append(samples_encode)
-    df.to_csv(outputSample, sep=',', encoding='utf-8')
+    df.to_csv(outputSample, sep=',', encoding='utf-8', index=False)
 
     table = []
     headers = ['Sample_ID', "Experiment_ID", output_surfix.capitalize() + "_Description", "Title",
@@ -209,7 +209,7 @@ def SOFTQuickParser(output_surfix, output_path, features, features_begin,
 
     if human_encode is not None:
         df = df.append(human_encode)
-    df.to_csv(outputHuman, sep=',', encoding='utf-8')
+    df.to_csv(outputHuman, sep=',', encoding='utf-8', index=False)
     if human_encode_map is not None:
         Human_Samples.update(human_encode_map)
     return Human_Samples
