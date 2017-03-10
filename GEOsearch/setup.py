@@ -27,7 +27,7 @@ def setup():
     os.system("wget -P "+cwd+"/pkl/ http://cigwiki.houstonmethodist.org/trackhub/boxia/AIMS/pkl/GSMSRR_map.pkl")
     os.system("wget -P "+cwd+"/pkl/ http://cigwiki.houstonmethodist.org/trackhub/boxia/AIMS/pkl/geoMetaData.db")
 
-    settings = open(cwd + "/GCF_settings.txt", "w")
+    settings = open(cwd + "/GCF_settings", "w")
     settings.write("GSMGSE_pkl_path"+"\t"+cwd+"/pkl/GSMGSE_map.pkl"+"\n")
     settings.write("Encode" + "\t" +cwd+"/pkl/ENCODE_gse.pkl" + "\n")
     settings.write("Roadmap" + "\t" +cwd+"/pkl/Roadmap_gse.pkl" + "\n")
