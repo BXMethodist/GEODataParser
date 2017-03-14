@@ -47,7 +47,8 @@ def Related_Sample_Search(output_surfix1, output_surfix2, output_path,
         for gse in sample.series:
             second_groupbygse[gse].add(sample.id)
 
-    pairs = defaultdict(set)
+    first_pairs = defaultdict(set)
+    second_pairs = defaultdict(set)
 
     for sample in first_samples.values():
         targetGSMs = set()
@@ -81,7 +82,7 @@ def Related_Sample_Search(output_surfix1, output_surfix2, output_path,
                     continue
 
             if best_id:
-                pairs[sample.id] = pairs[sample.id].union(best_id)
+                first_pairs[sample.id] = first_pairs[sample.id].union(best_id)
 
         else:
             # TODO none-title sample
@@ -101,7 +102,7 @@ def Related_Sample_Search(output_surfix1, output_surfix2, output_path,
                 elif score == best_score:
                     best_id.add(related_sample.id)
             if best_id:
-                pairs[sample.id] = pairs[sample.id].union(best_id)
+                first_pairs[sample.id] = first_pairs[sample.id].union(best_id)
 
     for sample in second_samples.values():
         targetGSMs = set()
@@ -135,7 +136,7 @@ def Related_Sample_Search(output_surfix1, output_surfix2, output_path,
                     continue
 
             if best_id:
-                pairs[sample.id] = pairs[sample.id].union(best_id)
+                second_pairs[sample.id] = second_pairs[sample.id].union(best_id)
 
         else:
             # TODO none-title sample
@@ -155,17 +156,17 @@ def Related_Sample_Search(output_surfix1, output_surfix2, output_path,
                 elif score == best_score:
                     best_id.add(related_sample.id)
             if best_id:
-                pairs[sample.id] = pairs[sample.id].union(best_id)
+                second_pairs[sample.id] = second_pairs[sample.id].union(best_id)
 
 
     wrong_pairs = set()
     new_pairs = set()
     ### cross validation
-    for key, values in pairs.items():
+    for key, values in first_pairs.items():
         for value in values:
-            if key not in pairs[value]:
+            if key not in second_pairs[value]:
                 wrong_pairs.add((key, value))
-            elif (key, value) not in new_pairs and (value, key) not in new_pairs:
+            elif (key, value) not in new_pairs:
                 new_pairs.add((key, value))
 
     #### save file
@@ -182,42 +183,40 @@ def Related_Sample_Search(output_surfix1, output_surfix2, output_path,
 
     for pair in new_pairs:
         key, value = pair
-        if key in first_samples:
-            try:
-                table.append([key, first_samples[key].title,
-                              first_samples[key].features, first_samples[key].series,
-                              first_samples[key].cellLine, first_samples[key].cellType, first_samples[key].tissue,
-                              value, second_samples[value].title,
-                              second_samples[value].features, second_samples[value].series,
-                              second_samples[value].cellLine, second_samples[value].cellType, second_samples[value].tissue])
-            except:
-                table.append([value, first_samples[value].title,
-                              first_samples[value].features, first_samples[value].series,
-                              first_samples[value].cellLine, first_samples[value].cellType, first_samples[value].tissue,
-                              key, second_samples[key].title,
-                              second_samples[key].features, second_samples[key].series,
-                              second_samples[key].cellLine, second_samples[key].cellType, second_samples[key].tissue])
-        elif key in second_samples:
-            try:
-                table.append([value, first_samples[value].title,
-                              first_samples[value].features, first_samples[value].series,
-                              first_samples[value].cellLine, first_samples[value].cellType, first_samples[value].tissue,
-                              key, second_samples[key].title, second_samples[key].features, second_samples[key].series,
-                              second_samples[key].cellLine, second_samples[key].cellType, second_samples[key].tissue
-                     ])
-            except:
-                table.append([key, first_samples[key].title,
-                              first_samples[key].features, first_samples[key].series,
-                              first_samples[key].cellLine, first_samples[key].cellType, first_samples[key].tissue,
-                              value, second_samples[value].title,
-                              second_samples[value].features, second_samples[value].series,
-                              second_samples[value].cellLine, second_samples[value].cellType, second_samples[value].tissue])
-        else:
-            print key
+        table.append([key, first_samples[key].title,
+                      first_samples[key].features, first_samples[key].series,
+                      first_samples[key].cellLine, first_samples[key].cellType, first_samples[key].tissue,
+                      value, second_samples[value].title,
+                      second_samples[value].features, second_samples[value].series,
+                      second_samples[value].cellLine, second_samples[value].cellType, second_samples[value].tissue])
+        #     except:
+        #         table.append([value, first_samples[value].title,
+        #                       first_samples[value].features, first_samples[value].series,
+        #                       first_samples[value].cellLine, first_samples[value].cellType, first_samples[value].tissue,
+        #                       key, second_samples[key].title,
+        #                       second_samples[key].features, second_samples[key].series,
+        #                       second_samples[key].cellLine, second_samples[key].cellType, second_samples[key].tissue])
+        # elif key in second_samples:
+        #     try:
+        #         table.append([value, first_samples[value].title,
+        #                       first_samples[value].features, first_samples[value].series,
+        #                       first_samples[value].cellLine, first_samples[value].cellType, first_samples[value].tissue,
+        #                       key, second_samples[key].title, second_samples[key].features, second_samples[key].series,
+        #                       second_samples[key].cellLine, second_samples[key].cellType, second_samples[key].tissue
+        #              ])
+        #     except:
+        #         table.append([key, first_samples[key].title,
+        #                       first_samples[key].features, first_samples[key].series,
+        #                       first_samples[key].cellLine, first_samples[key].cellType, first_samples[key].tissue,
+        #                       value, second_samples[value].title,
+        #                       second_samples[value].features, second_samples[value].series,
+        #                       second_samples[value].cellLine, second_samples[value].cellType, second_samples[value].tissue])
+        # else:
+        #     print key
 
     df = pd.DataFrame(table, columns=headers)
     df.to_csv(output, sep=',', encoding='utf-8', index=False)
 
-    return pairs
+    return new_pairs
 
 
