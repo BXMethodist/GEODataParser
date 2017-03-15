@@ -396,7 +396,16 @@ def feature_filter(geoGSMs, queue, features, features_begin, excludedGSM,
                     print sample.title, "title has input or wce or IgG!"
                     continue
 
-        if len(target_feature) != 0 and sample.id not in excludedGSM:
+        if sample.title_ab:
+            if sample.title.lower().find("input") != -1 \
+                    or sample.title.lower().find("wce") != -1 \
+                    or sample.title.find("IgG") != -1:
+
+                sample.title_found = False
+                sample.ab_found = False
+                sample.title_ab = False
+
+        if sample.title_ab and sample.id not in excludedGSM:
             samples[sampleName] = sample
         # elif sample.id not in excludedGSM:
         #     print sample.id, sample.title
