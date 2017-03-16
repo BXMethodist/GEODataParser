@@ -405,7 +405,7 @@ def feature_filter(geoGSMs, queue, features, features_begin, excludedGSM,
                 sample.ab_found = False
                 sample.title_ab = False
 
-        if sample.title_ab and sample.id not in excludedGSM:
+        if sample.title_ab and sample.id not in excludedGSM and not sample.encode:
             samples[sampleName] = sample
         # elif sample.id not in excludedGSM:
         #     print sample.id, sample.title
