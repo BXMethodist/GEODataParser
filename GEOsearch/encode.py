@@ -89,11 +89,11 @@ def encode_search(output_prefix, keywords, keywords_begin=(), type_seq='chip-seq
              'Assay', 'Biosample term name', 'Biosample type', 'Biosample organism',
              'File download URL', 'Platform', 'Experiment target', 'Confidence']]
 
-    df.columns = ['Sample_ID', 'Experiment_ID', output_prefix.capitalize() + "_Description",
+    df.columns = ['Data_ID', 'Study_ID', "Data_Description",
                   'Input', 'Input_Description',
-                  'Type_Seq', 'Cell Line', 'Cell Type', 'Organism',
+                  'Sequencing_Protocol', 'Cell Line', 'Cell Type', 'Organism',
                   'Raw Data', 'Instrument_Model', 'Experiment target/antibody', 'Confidence']
-    df = df.set_index(['Sample_ID'])
+    df = df.set_index(['Data_ID'])
 
     return samples_df, df, human_encode_map
 

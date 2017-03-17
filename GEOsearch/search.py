@@ -126,8 +126,8 @@ def SOFTQuickParser(output_surfix, output_path, features, features_begin,
     outputSample = output_path+"Search_Result" + "sampleWith" + output_surfix + ".csv"
 
     table = []
-    headers = ['Sample_ID', "Experiment_ID", output_surfix.capitalize() + "_Description", "Title",
-               "Instrument_Model", "Raw Data", "Type_Seq", "Organism", "Cell Line", "Cell Type",
+    headers = ['Data_ID', "Study_ID", "Data_Description", "Title",
+               "Instrument_Model", "Raw Data", "Sequencing_Protocol", "Organism", "Cell Line", "Cell Type",
                "Experiment target/antibody", 'Confidence']
 
     for sample in samples.values():
@@ -159,8 +159,8 @@ def SOFTQuickParser(output_surfix, output_path, features, features_begin,
     df.to_csv(outputSample, sep=',', encoding='utf-8')
 
     table = []
-    headers = ['Sample_ID', "Experiment_ID", output_surfix.capitalize() + "_Description", "Title",
-               "Input", "Input_Description", "Instrument_Model", "Raw Data", "Type_Seq",
+    headers = ['Data_ID', "Study_ID", "Data_Description", "Title",
+               "Input", "Input_Description", "Instrument_Model", "Raw Data", "Sequencing_Protocol",
                "Organism", "Cell Line", "Cell Type",
                "Experiment target/antibody", 'Confidence']
 
