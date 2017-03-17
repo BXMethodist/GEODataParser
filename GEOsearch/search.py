@@ -138,7 +138,7 @@ def SOFTQuickParser(output_surfix, output_path, features, features_begin,
         elif sample.ab_found:
             confidence = 'Low Confident'
         else:
-            confidence = 'Not Sure'
+            confidence = 'No Confident'
 
         features = str(sample.features)[1:-1].replace("u'", "")
         features = features.replace("'", '')
@@ -166,13 +166,13 @@ def SOFTQuickParser(output_surfix, output_path, features, features_begin,
 
     for sample in Human_Samples.values():
         if sample.title_found and sample.ab_found:
-            confidence = 'Very Confident'
+            confidence = 'Hing Confident'
         elif sample.title_found:
-            confidence = 'Confident'
+            confidence = 'Medium Confident'
         elif sample.ab_found:
-            confidence = 'Not Very Confident'
+            confidence = 'Low Confident'
         else:
-            confidence = 'Not Sure'
+            confidence = 'No Confident'
 
         features = str(sample.features)[1:-1].replace("u'", "")
         features = features.replace("'", '')
