@@ -176,10 +176,10 @@ def Related_Sample_Search(output_surfix1, output_surfix2, output_path,
     output = open(output_path + output_surfix1 + "_vs_" + output_surfix2 + ".csv", "w")
 
     table = []
-    headers = ["sample1_id", "sample1_title", "sample1_descriptions", "sample1_series_id",
-               "sample1_CellLine", "sample1_CellType", "sample1_Tissue",
-               "sample2_id", "sample2_title", "sample2_descriptions", "sample2_series_id",
-               "sample2_CellLine", "sample2_CellType", "sample2_Tissue"]
+    headers = ["Data1_ID", "Data1_Title", "Data1_descriptions", "Data1_Study_ID",
+               "Data1_CellLine", "Data1_CellType", "Data1_Tissue",
+               "Data2_id", "Data2_Title", "Data2_descriptions", "Data2_Study_ID",
+               "Data2_CellLine", "Data2_CellType", "Data2_Tissue"]
 
     for pair in new_pairs:
         key, value = pair
