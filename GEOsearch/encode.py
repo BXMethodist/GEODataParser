@@ -44,10 +44,10 @@ def encode_search(output_prefix, keywords, keywords_begin=(), type_seq='chip-seq
                              'Biosample type', 'Biosample organism', 'File download URL', 'Platform',
                              'Experiment target', output_prefix.capitalize() + "_Description",
                              'Confidence']]
-    samples_df.columns = ['Sample_ID', 'Experiment_ID', 'Type_Seq', 'Cell Line', 'Cell Type', 'Organism',
+    samples_df.columns = ['Data_ID', 'Study_ID', 'Sequencing_Protocol', 'Cell Line', 'Cell Type', 'Organism',
                           'Raw Data', 'Instrument_Model', 'Experiment target/antibody',
                           output_prefix.capitalize() + "_Description", 'Confidence']
-    samples_df = samples_df.set_index(['Sample_ID'])
+    samples_df = samples_df.set_index(['Data_ID'])
 
     df = df[df['Biosample organism'].str.contains(output_type, case=case, na=False)]
     df = df[df['Assay'].str.contains(type_seq, case=case, na=False)]
