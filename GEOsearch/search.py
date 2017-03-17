@@ -153,7 +153,7 @@ def SOFTQuickParser(output_surfix, output_path, features, features_begin,
         table.append(row)
 
     df = pd.DataFrame(table, columns=headers)
-    df = df.set_index(['Sample_ID'])
+    df = df.set_index(['Data_ID'])
     if samples_encode is not None:
         df = df.append(samples_encode)
     df.to_csv(outputSample, sep=',', encoding='utf-8')
@@ -205,7 +205,7 @@ def SOFTQuickParser(output_surfix, output_path, features, features_begin,
         table.append(row)
 
     df = pd.DataFrame(table, columns=headers)
-    df = df.set_index(['Sample_ID'])
+    df = df.set_index(['Data_ID'])
 
     if human_encode is not None:
         df = df.append(human_encode)
