@@ -232,7 +232,21 @@ def SOFTQuickParser(output_surfix, output_path, features, features_begin,
     if human_encode is not None:
         df = df.append(human_encode)
 
+    high_human = output_path + "Search_Result" + output_type + "With" + output_surfix + '_High_Confidence'+ ".csv"
+    high_human_df = df[df['Confidence'] == 'High Confident']
+    medium_human = output_path + "Search_Result" + output_type + "With" + output_surfix + '_Medium_Confidence' + ".csv"
+    medium_human_df = df[df['Confidence'] == 'Medium Confident']
+    low_human = output_path + "Search_Result" + output_type + "With" + output_surfix + '_Low_Confidence' + ".csv"
+    low_human_df = df[df['Confidence'] == 'Low Confident']
+    no_human = output_path + "Search_Result" + output_type + "With" + output_surfix + '_No_Confidence' + ".csv"
+    no_human_df = df[df['Confidence'] == 'No Confident']
+
     df.to_csv(outputHuman, sep=',', encoding='utf-8')
+    high_human_df.to_csv(high_human, sep=',', encoding='utf-8')
+    medium_human_df.to_csv(medium_human, sep=',', encoding='utf-8')
+    low_human_df.to_csv(low_human, sep=',', encoding='utf-8')
+    no_human_df.to_csv(no_human, sep=',', encoding='utf-8')
+
     if human_encode_map is not None:
         Human_Samples.update(human_encode_map)
     return Human_Samples
