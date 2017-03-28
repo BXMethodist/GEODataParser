@@ -1,3 +1,25 @@
+"""
+Copyright (c) <2017> <Dr. Kaifu Chen lab, Research Institute, Houston Methodist Hospital >
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+"""
+
 import argparse, sys, os
 from queryUtils import GEO_query
 from search import SOFTQuickParser
@@ -7,8 +29,8 @@ from update import update
 
 
 def Help():
-    print "\nChiP-Seq Match"
-    print "A list of functions for ChiP-Seq Match, please try:\npython GCF.py -h"
+    print "\nChipseqpair"
+    print "A list of functions for Chipseqpair, please try:\npython CSP.py -h"
     print "\nFuctions:"
     print "\tsearch:\n\tsearch chip-seq samples and corresponding input based on the key words."
     print "\tmatch:\n\tmatch different types of samples, for example, looking for the corresponding H3K27me3 samples for each H3K4me3 samples."
@@ -22,11 +44,11 @@ def GCF_search():
     '''
     if (len(sys.argv) < 3) and ('-h' not in sys.argv) and ('--help' not in sys.argv):
         # at least one parameter need to be specified, will print help message if no parameter is specified
-        print "\nusage:\n\npython GCF.py search [optional arguments] <features> <output_prefix> <output_path>\n\nfor more help, please try: python GCF.py search -h\n"
+        print "\nusage:\n\npython CSP.py search [optional arguments] <features> <output_prefix> <output_path>\n\nfor more help, please try: python CSP.py search -h\n"
         return 1
 
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-                                     usage="\n\npython GCF.py search [optional arguments] <features> <output_prefix> <output_path>\n\n",
+                                     usage="\n\npython CSP.py search [optional arguments] <features> <output_prefix> <output_path>\n\n",
                                      description='',epilog="Chen lab, Houston Methodist")
     parser.add_argument('command', default=None, help="set as 'search' to looking for samples with key words")
 
@@ -59,7 +81,7 @@ def GCF_search():
     args = None
 
     if '-h' in sys.argv or '--help' in sys.argv:  # print help information once required by user
-        print "\ChiP-Seq Match\n"
+        print "\Chipseqpair\n"
         parser.print_help()
         print "\n"
         return 0
@@ -67,7 +89,7 @@ def GCF_search():
         try:
             args = parser.parse_args()
         except:
-            print "\nfor more help, please try: python GCF.py search -h\n"
+            print "\nfor more help, please try: python CSP.py search -h\n"
             return 1
 
     if args is not None:
@@ -131,11 +153,11 @@ def GCF_match():
     '''
     if (len(sys.argv) < 3) and ('-h' not in sys.argv) and ('--help' not in sys.argv):
         # at least one parameter need to be specified, will print help message if no parameter is specified
-        print "\nusage:\n\npython GCF.py match [optional arguments] <first features> <second features> <output_prefix1> <output_prefix2> <output_directory>\n\nfor more help, please try: python GCF.py match -h\n"
+        print "\nusage:\n\npython CSP.py match [optional arguments] <first features> <second features> <output_prefix1> <output_prefix2> <output_directory>\n\nfor more help, please try: python CSP.py match -h\n"
         return 1
 
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-                                     usage="\n\npython GCF.py match [optional arguments] <first features> <second features> <output_prefix1> <output_prefix2> <output_directory>\n\n",
+                                     usage="\n\npython CSP.py match [optional arguments] <first features> <second features> <output_prefix1> <output_prefix2> <output_directory>\n\n",
                                      description='',epilog="Chen lab, Houston Methodist")
     parser.add_argument('command', default=None, help="set as 'match' to match samples with different key words within same study")
 
@@ -193,7 +215,7 @@ def GCF_match():
     args = None
 
     if '-h' in sys.argv or '--help' in sys.argv:  # print help information once required by user
-        print "\ChiP-Seq Match\n"
+        print "\Chipseqpair\n"
         parser.print_help()
         print "\n"
         return 0
@@ -201,7 +223,7 @@ def GCF_match():
         try:
             args = parser.parse_args()
         except:
-            print "\nfor more help, please try: python GCF.py match -h\n"
+            print "\nfor more help, please try: python CSP.py match -h\n"
             return 1
 
     if args is not None:
@@ -284,11 +306,11 @@ def GCF_query():
     '''
     if (len(sys.argv) < 3) and ('-h' not in sys.argv) and ('--help' not in sys.argv):
         # at least one parameter need to be specified, will print help message if no parameter is specified
-        print "\nusage:\n\npython GCF.py query [optional arguments] <ID list> <outputpath>\n\nfor more help, please try: python GCF.py query -h\n"
+        print "\nusage:\n\npython CSP.py query [optional arguments] <ID list> <outputpath>\n\nfor more help, please try: python CSP.py query -h\n"
         return 1
 
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-                                     usage="\n\npython GCF.py query [optional arguments] <ID list> <outputpath>\n\n",
+                                     usage="\n\npython CSP.py query [optional arguments] <ID list> <outputpath>\n\n",
                                      description='',epilog="Chen lab, Houston Methodist")
     parser.add_argument('command', default=None, help="set as 'query' to looking for samples' NGS sequencing information")
 
@@ -304,7 +326,7 @@ def GCF_query():
     args = None
 
     if '-h' in sys.argv or '--help' in sys.argv:  # print help information once required by user
-        print "\ChiP-Seq Match\n"
+        print "\Chipseqpair\n"
         parser.print_help()
         print "\n"
         return 0
@@ -312,7 +334,7 @@ def GCF_query():
         try:
             args = parser.parse_args()
         except:
-            print "\nfor more help, please try: python GCF.py query -h\n"
+            print "\nfor more help, please try: python CSP.py query -h\n"
             return 1
 
     if args is not None:
@@ -360,8 +382,8 @@ if len(sys.argv) > 1:
     else:
         Help()
 else:
-    print "\nChiP-Seq Match"
-    print "A list of functions for ChiP-Seq Sample Match, please try:\npython GCF.py -h"
+    print "\nChipseqpair"
+    print "A list of functions for ChiP-Seq Sample Match, please try:\npython CSP.py -h"
     print "\nFuctions:"
     print "\tsearch:\n\tsearch chip-seq samples and corresponding input based on the key words."
     print "\tmatch:\n\tmatch different types of samples, for example, looking for the corresponding H3K27me3 samples for each H3K4me3 samples."
