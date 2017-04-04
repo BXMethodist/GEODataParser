@@ -66,7 +66,7 @@ def encode_search(output_prefix, keywords, keywords_begin=(), type_seq='chip-seq
                              'Biosample type', 'Biosample organism', 'File download URL', 'Platform',
                              'Experiment target', output_prefix.capitalize() + "_Description",
                              'Confidence']]
-    samples_df.columns = ['Data_ID', 'Study_ID', 'Sequencing_Protocol', 'Cell Line', 'Cell Type', 'Organism',
+    samples_df.columns = ['Data_ID', 'Study_ID', 'Sequencing_Protocol', 'Cell Line', 'Cell Type', 'Species',
                           'Raw Data', 'Instrument_Model', 'Experiment target/antibody',
                           output_prefix.capitalize() + "_Description", 'Confidence']
     samples_df = samples_df.set_index(['Data_ID'])
@@ -113,7 +113,7 @@ def encode_search(output_prefix, keywords, keywords_begin=(), type_seq='chip-seq
 
     df.columns = ['Data_ID', 'Study_ID', "Data_Description",
                   'Input', 'Input_Description',
-                  'Sequencing_Protocol', 'Cell Line', 'Cell Type', 'Organism',
+                  'Sequencing_Protocol', 'Cell Line', 'Cell Type', 'Species',
                   'Raw Data', 'Instrument_Model', 'Experiment target/antibody', 'Confidence']
     df = df.set_index(['Data_ID'])
 

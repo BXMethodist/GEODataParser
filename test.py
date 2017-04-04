@@ -1,4 +1,10 @@
-f = open('cmd', 'r')
-info = [x.strip() for x in f.readlines()]
+import pandas as pd
 
-print info
+
+a = [[1,2,3],[4,5,6]]
+b = [[1,2],[3,4]]
+
+dfa = pd.DataFrame(a, columns=['A','B','C'])
+dfb = pd.DataFrame(b, columns=['A', 'B'])
+
+print dfa.append(dfb)
