@@ -92,3 +92,4 @@ class GSM:
         self.input = ""
         self.encode = ""
         self.roadmap = ""
+        self.organ = ""

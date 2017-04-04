@@ -149,8 +149,8 @@ def SOFTQuickParser(output_surfix, output_path, features, features_begin,
 
     table = []
     headers = ['Data_ID', "Study_ID", "Data_Description", "Title",
-               "Instrument_Model", "Raw Data", "Sequencing_Protocol", "Organism", "Cell Line", "Cell Type",
-               "Experiment target/antibody", 'Confidence']
+               "Instrument_Model", "Raw Data", "Sequencing_Protocol", "Species", "Cell Line", "Cell Type",
+               "Experiment target/antibody", 'Confidence', 'Tissue', 'Organ']
 
     for sample in samples.values():
         if sample.title_found and sample.ab_found:
@@ -171,7 +171,7 @@ def SOFTQuickParser(output_surfix, output_path, features, features_begin,
                features,
                sample.title,
                sample.InstrumentID, sample.SRA, sample.libraryStrategy, sample.organism, sample.cellLine, sample.cellType,
-               antibody, confidence]
+               antibody, confidence, sample.tissue, sample.organ]
         table.append(row)
 
     df = pd.DataFrame(table, columns=headers)
@@ -183,8 +183,8 @@ def SOFTQuickParser(output_surfix, output_path, features, features_begin,
     table = []
     headers = ['Data_ID', "Study_ID", "Data_Description", "Title",
                "Input", "Input_Description", "Instrument_Model", "Raw Data", "Sequencing_Protocol",
-               "Organism", "Cell Line", "Cell Type",
-               "Experiment target/antibody", 'Confidence']
+               "Species", "Cell Line", "Cell Type",
+               "Experiment target/antibody", 'Confidence', 'Tissue', 'Organ']
 
     for sample in Human_Samples.values():
         if sample.title_found and sample.ab_found:
@@ -223,7 +223,7 @@ def SOFTQuickParser(output_surfix, output_path, features, features_begin,
                sample.title,
                potential_input_id, potential_input_title, sample.InstrumentID, sample.SRA, sample.libraryStrategy,
                sample.organism, sample.cellLine, sample.cellType,
-               antibody, confidence]
+               antibody, confidence, sample.tissue, sample.organ]
         table.append(row)
 
     df = pd.DataFrame(table, columns=headers)
@@ -399,6 +399,19 @@ def feature_filter(geoGSMs, queue, features, features_begin, excludedGSM,
 
             if key.lower() in ["cell_type", "cell-type", "cell type", "cell lineage"]:
                 cellType += value
+
+        organ_list = ['Bone', 'Cartilage', 'Fibrous joint', 'Cartilaginous joint', 'Synovial joint', 'Muscle', 'Tendon', 'Diaphragm', 'Heart', 'Bone marrow', 'Thymus', 'Spleen', 'Lymph node', 'CNS', 'Brain', 'Spinal cord', 'Ear', 'Eye', 'Integumentary system', 'Skin', 'Subcutaneous tissue', 'Breast,Mammary gland', 'Myeloid', 'Lymphoid', 'Nose', 'Nasopharynx', 'Larynx', 'Trachea', 'Bronchus', 'Lung', 'Mouth', 'Salivary', 'Tongue', 'Oropharynx', 'Laryngopharynx', 'Esophagus', 'Stomach', 'intestine', 'Appendix', 'Colon', 'Rectum', 'Anus', 'Liver', 'Biliary tract', 'Pancreas', 'Genitourinary', 'Kidney', 'Ureter', 'Bladder', 'Urethra', 'Uterus', 'Vagina', 'Vulva', 'Ovary', 'Placenta', 'Scrotum', 'Penis', 'Prostate', 'Testicle', 'Seminal vesicle', 'Pituitary', 'Pineal', 'Thyroid', 'Parathyroid', 'Adrenal', 'Islets of Langerhans']
+
+        for organ in organ_list:
+            if cellLine.lower().find(organ.lower()) != -1:
+                sample.organ = organ
+                break
+            if cellType.lower().find(organ.lower()) != -1:
+                sample.organ = organ
+                break
+            if tissue.lower().find(organ.lower()) != -1:
+                sample.organ = organ
+                break
 
         sample.antibody = antibody
         for value in sample.antibody.values():
