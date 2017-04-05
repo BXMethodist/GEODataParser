@@ -188,7 +188,7 @@ def SOFTQuickParser(output_surfix, output_path, features, features_begin,
 
     for sample in Human_Samples.values():
         if sample.title_found and sample.ab_found:
-            confidence = 'Hing Confident'
+            confidence = 'High Confident'
         elif sample.title_found:
             confidence = 'Medium Confident'
         elif sample.ab_found:
@@ -400,7 +400,7 @@ def feature_filter(geoGSMs, queue, features, features_begin, excludedGSM,
             if key.lower() in ["cell_type", "cell-type", "cell type", "cell lineage"]:
                 cellType += value
 
-        organ_list = ['Bone', 'Cartilage', 'Fibrous joint', 'Cartilaginous joint', 'Synovial joint', 'Muscle', 'Tendon', 'Diaphragm', 'Heart', 'Bone marrow', 'Thymus', 'Spleen', 'Lymph node', 'CNS', 'Brain', 'Spinal cord', 'Ear', 'Eye', 'Integumentary system', 'Skin', 'Subcutaneous tissue', 'Breast,Mammary gland', 'Myeloid', 'Lymphoid', 'Nose', 'Nasopharynx', 'Larynx', 'Trachea', 'Bronchus', 'Lung', 'Mouth', 'Salivary', 'Tongue', 'Oropharynx', 'Laryngopharynx', 'Esophagus', 'Stomach', 'intestine', 'Appendix', 'Colon', 'Rectum', 'Anus', 'Liver', 'Biliary tract', 'Pancreas', 'Genitourinary', 'Kidney', 'Ureter', 'Bladder', 'Urethra', 'Uterus', 'Vagina', 'Vulva', 'Ovary', 'Placenta', 'Scrotum', 'Penis', 'Prostate', 'Testicle', 'Seminal vesicle', 'Pituitary', 'Pineal', 'Thyroid', 'Parathyroid', 'Adrenal', 'Islets of Langerhans']
+        organ_list = ['Bone', 'Cartilage', 'Fibrous joint', 'Cartilaginous joint', 'Synovial joint', 'Muscle', 'Tendon', 'Diaphragm', 'Heart', 'Bone marrow', 'Thymus', 'Spleen', 'Lymph node', 'CNS', 'Brain', 'Spinal cord', 'Ear', 'Eye', 'Integumentary system', 'Skin', 'Subcutaneous tissue', 'Breast', 'Mammary gland', 'Myeloid', 'Lymphoid', 'Nose', 'Nasopharynx', 'Larynx', 'Trachea', 'Bronchus', 'Lung', 'Mouth', 'Salivary', 'Tongue', 'Oropharynx', 'Laryngopharynx', 'Esophagus', 'Stomach', 'intestine', 'Appendix', 'Colon', 'Rectum', 'Anus', 'Liver', 'Biliary tract', 'Pancreas', 'Genitourinary', 'Kidney', 'Ureter', 'Bladder', 'Urethra', 'Uterus', 'Vagina', 'Vulva', 'Ovary', 'Placenta', 'Scrotum', 'Penis', 'Prostate', 'Testicle', 'Seminal vesicle', 'Pituitary', 'Pineal', 'Thyroid', 'Parathyroid', 'Adrenal', 'Islets of Langerhans']
 
         for organ in organ_list:
             if cellLine.lower().find(organ.lower()) != -1:
