@@ -55,7 +55,7 @@ def geo_metadata(id):
         return None
 
 
-def GEO_query(names, output_name, GSM_GSE_pkl, GSM_SRR_pkl):
+def GEO_query(names, output_name, GSM_GSE_pkl, GSM_SRR_pkl, email=None):
     # names could be a list
 
     GSM_GSE_map = load_obj(GSM_GSE_pkl)

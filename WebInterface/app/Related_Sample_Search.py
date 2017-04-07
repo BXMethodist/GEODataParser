@@ -33,7 +33,7 @@ def Related_Sample_Search(output_surfix1, output_surfix2, output_path,
                           second_geo=False, second_geofile=None, output_type="Homo sapiens",
                           encode_remove=True, roadmap_remove=True,
                           encode_pkl=None, roadmap_pkl=None, GGRmap_pkl=None,
-                          GSMGSE_pkl=None, cwd=None, process=20):
+                          GSMGSE_pkl=None, cwd=None, process=20, email=None):
 
     first_samples = SOFTQuickParser(output_surfix1, output_path, first_features, first_features_begin,
                                     type_seq=first_type_seq, ignorecase=first_ignorecase,

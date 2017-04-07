@@ -33,7 +33,7 @@ import re
 def SOFTQuickParser(output_surfix, output_path, features, features_begin,
                     type_seq="chip-seq", ignorecase=True, geo=False, geofile=None, output_type="Homo sapiens",
                     encode_remove=True, roadmap_remove=True, encode_pkl=None, roadmap_pkl=None, GGRmap_pkl=None,
-                    GSMGSE_pkl=None, cwd=None, process=20):
+                    GSMGSE_pkl=None, cwd=None, process=20, email=None):
 
     encodeGSE = load_obj(encode_pkl)
 
