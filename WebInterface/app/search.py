@@ -20,7 +20,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-import re, sqlite3, pandas as pd
+import re, sqlite3, pandas as pd, os
 from collections import defaultdict
 from sample import GSM, search_term_to_GSM
 from input_search_utils import SOFTQuickRelated, input_finder, has_features, get_MetaInfo, get_WebInfo
@@ -254,7 +254,7 @@ def SOFTQuickParser(output_surfix, output_path, features, features_begin,
 
 def feature_filter(geoGSMs, queue, features, features_begin, excludedGSM,
                     type_seq, ignorecase, output_type, cwd):
-    # print "Process id is ", os.getpid()
+    print "Process id is ", os.getpid()
     samples = {}
     Human_Samples = {}
 
