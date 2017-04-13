@@ -1,16 +1,7 @@
-import os
-import pandas as pd
+import json
 
-old_df = pd.read_excel('./GEOsearch/search_output/paper/Table_S1_ChipSeqPair_H3K4me3_SearchResults.xlsx', index_col=0)
+a = {'a':1, "c":"d"}
 
-new_df = pd.read_csv('./GEOsearch/search_output/Search_ResultsampleWithH3K4me3.csv', index_col=0)
+b = json.dumps(a)
 
-old_df['Organ'] = new_df.ix[old_df.index, 'Organ']
-old_df['Tissue'] = new_df.ix[old_df.index, 'Tissue']
-
-old_df.to_excel('Table_S1_ChipSeqPair_H3K4me3_SearchResults.xlsx')
-
-
-
-
-
+print type(b)

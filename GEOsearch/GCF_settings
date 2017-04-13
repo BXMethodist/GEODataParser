@@ -1,0 +1,8 @@
+GSMGSE_pkl_path	/Users/boxia/Desktop/PycharmProjects/GEODataParser/GEOsearch/pkl/GSMGSE_map.pkl
+Encode	/Users/boxia/Desktop/PycharmProjects/GEODataParser/GEOsearch/pkl/ENCODE_gse.pkl
+Roadmap	/Users/boxia/Desktop/PycharmProjects/GEODataParser/GEOsearch/pkl/Roadmap_gse.pkl
+GGR	/Users/boxia/Desktop/PycharmProjects/GEODataParser/GEOsearch/pkl/GGR_gse.pkl
+GSMtoSRRpkl	/Users/boxia/Desktop/PycharmProjects/GEODataParser/GEOsearch/pkl/GSMSRR_map.pkl
+email	bxia@houstonmethodist.org
+MetaData    /Users/boxia/Desktop/PycharmProjects/GEODataParser/GEOsearch/pkl/geoMetaData.db
+Chipseq /Users/boxia/Desktop/PycharmProjects/GEODataParser/GEOsearch/pkl/chipseq.db
