@@ -23,6 +23,7 @@ SOFTWARE.
 import pandas as pd
 import pickle
 import numpy as np
+import urllib2
 
 def load_obj(name):
     with open(name, 'rb') as f:
@@ -91,8 +92,25 @@ def GEO_query(names, output_name, GSM_GSE_pkl, GSM_SRR_pkl, email=None):
                 else:
                     table = table.append(df)
         if df is None or len(df.index) == 0:
-            print id, " might not have SRA related information"
-            failed.append(id)
+            not_found = True
+            if id.startswith('GSM'):
+                url = "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc="+id+"&targ=self&form=text&view=quick"
+                web = urllib2.urlopen(url)
+                info = web.readlines()
+                web.close()
+                for line in info:
+                    if line.startswith('!Sample_relation') and line.find('SRX') != -1:
+                        SRX = line[line.find('SRX'):].strip()
+                        df = geo_metadata(SRX)
+                        if df is not None and len(df.index) > 0:
+                            not_found = False
+                            if table is None:
+                                table = df
+                            else:
+                                table = table.append(df)
+            if not_found:
+                print id, " might not have SRA related information"
+                failed.append(id)
 
     result_srr_gsm = {}
     result_srr_gse = {}
@@ -107,6 +125,8 @@ def GEO_query(names, output_name, GSM_GSE_pkl, GSM_SRR_pkl, email=None):
 
         table['GSM_ID'] = pd.Series(result_srr_gsm)
         table['GSE_ID'] = pd.Series(result_srr_gse)
+
+        table = table.drop_duplicates()
 
         table.to_csv(output_name, sep="\t")
 
