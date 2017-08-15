@@ -33,7 +33,28 @@ import re
 def SOFTQuickParser(output_surfix, output_path, features, features_begin,
                     type_seq="chip-seq", ignorecase=True, geo=False, geofile=None, output_type="Homo sapiens",
                     encode_remove=True, roadmap_remove=True, encode_pkl=None, roadmap_pkl=None, GGRmap_pkl=None,
-                    GSMGSE_pkl=None, cwd=None, process=20, email=None):
+                    GSMGSE_pkl=None, cwd=None, process=20, email=None, match=False):
+    if os.path.isdir('./aval'):
+        avals_lowers = [x.lower() for x in os.listdir('./aval')]
+        avals = ['./aval/' + x for x in os.listdir('./aval')]
+        keywords_with_species = [word.lower() + '_' + output_type.replace(' ', '').lower() + '.csv' for word in features]
+    else:
+        avals_lowers = []
+        avals = []
+        keywords_with_species = [word.lower() + '_' + output_type.replace(' ', '').lower() + '.csv' for word in
+                                 features]
+    avals_results = []
+
+    for i in range(len(avals_lowers)):
+        if avals_lowers[i] in keywords_with_species:
+            avals_results.append(i)
+
+    if len(avals_results) != 0:
+        curated_result_df = pd.read_csv(avals[avals_results[0]], index_col=0)
+        curated_index = curated_result_df.index
+    else:
+        curated_index = None
+
 
     encodeGSE = load_obj(encode_pkl)
 
@@ -231,24 +252,30 @@ def SOFTQuickParser(output_surfix, output_path, features, features_begin,
 
     if human_encode is not None:
         df = df.append(human_encode)
+    #
+    # high_human = output_path + "Search_Result" + output_type + "With" + output_surfix + '_High_Confidence'+ ".csv"
+    # high_human_df = df[df['Confidence'] == 'High Confident']
+    # medium_human = output_path + "Search_Result" + output_type + "With" + output_surfix + '_Medium_Confidence' + ".csv"
+    # medium_human_df = df[df['Confidence'] == 'Medium Confident']
+    # low_human = output_path + "Search_Result" + output_type + "With" + output_surfix + '_Low_Confidence' + ".csv"
+    # low_human_df = df[df['Confidence'] == 'Low Confident']
+    # no_human = output_path + "Search_Result" + output_type + "With" + output_surfix + '_No_Confidence' + ".csv"
+    # no_human_df = df[df['Confidence'] == 'No Confident']
 
-    high_human = output_path + "Search_Result" + output_type + "With" + output_surfix + '_High_Confidence'+ ".csv"
-    high_human_df = df[df['Confidence'] == 'High Confident']
-    medium_human = output_path + "Search_Result" + output_type + "With" + output_surfix + '_Medium_Confidence' + ".csv"
-    medium_human_df = df[df['Confidence'] == 'Medium Confident']
-    low_human = output_path + "Search_Result" + output_type + "With" + output_surfix + '_Low_Confidence' + ".csv"
-    low_human_df = df[df['Confidence'] == 'Low Confident']
-    no_human = output_path + "Search_Result" + output_type + "With" + output_surfix + '_No_Confidence' + ".csv"
-    no_human_df = df[df['Confidence'] == 'No Confident']
-
-    df.to_csv(outputHuman, sep=',', encoding='utf-8')
-    high_human_df.to_csv(high_human, sep=',', encoding='utf-8')
-    medium_human_df.to_csv(medium_human, sep=',', encoding='utf-8')
-    low_human_df.to_csv(low_human, sep=',', encoding='utf-8')
-    no_human_df.to_csv(no_human, sep=',', encoding='utf-8')
+    # high_human_df.to_csv(high_human, sep=',', encoding='utf-8')
+    # medium_human_df.to_csv(medium_human, sep=',', encoding='utf-8')
+    # low_human_df.to_csv(low_human, sep=',', encoding='utf-8')
+    # no_human_df.to_csv(no_human, sep=',', encoding='utf-8')
 
     if human_encode_map is not None:
         Human_Samples.update(human_encode_map)
+
+    if curated_index is not None:
+        df = df.ix[curated_index, :]
+        for sample_id in Human_Samples.keys():
+            if sample_id not in curated_index:
+                del Human_Samples[sample_id]
+    df.to_csv(outputHuman, sep=',', encoding='utf-8')
     return Human_Samples
 
 
